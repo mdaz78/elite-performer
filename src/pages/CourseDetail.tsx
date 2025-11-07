@@ -556,7 +556,7 @@ export const CourseDetail = () => {
                   type="date"
                   value={editedStartDate}
                   onChange={(e) => setEditedStartDate(e.target.value)}
-                  className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white text-gray-900 border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -565,7 +565,7 @@ export const CourseDetail = () => {
                   type="date"
                   value={editedTargetDate}
                   onChange={(e) => setEditedTargetDate(e.target.value)}
-                  className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-white text-gray-900 border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>

@@ -105,7 +105,7 @@ export const FitnessPage = () => {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
+                className="w-full px-3 py-2 bg-white text-gray-900 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 required
               />
             </div>
