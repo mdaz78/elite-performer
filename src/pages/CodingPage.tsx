@@ -91,13 +91,25 @@ export const CodingPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <Card key={course.id} className="hover:shadow-md transition-shadow">
-              <div className="mb-4">
+            <Card key={course.id} className="hover:shadow-lg transition-all cursor-pointer group relative">
+              <Link
+                to={`/coding/${course.id}`}
+                className="absolute inset-0 z-10"
+                aria-label={`View details for ${course.name}`}
+              />
+              <div className="mb-4 relative z-0">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900">{course.name}</h3>
+                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-career transition-colors">
+                    {course.name}
+                  </h3>
                   <button
-                    onClick={() => handleDeleteCourse(course.id!)}
-                    className="text-red-600 hover:text-red-800 text-sm"
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      handleDeleteCourse(course.id!);
+                    }}
+                    className="text-red-600 hover:text-red-800 text-sm relative z-20"
+                    aria-label={`Delete ${course.name}`}
                   >
                     Delete
                   </button>
@@ -113,12 +125,9 @@ export const CodingPage = () => {
               </div>
               <ProgressBar progress={course.progress} color="career" showPercentage={true} />
               <div className="mt-4 flex justify-between items-center">
-                <Link
-                  to={`/coding/${course.id}`}
-                  className="text-sm text-career hover:underline font-medium"
-                >
+                <span className="text-sm text-career font-medium group-hover:underline">
                   View Details →
-                </Link>
+                </span>
                 <span className="text-xs text-gray-500">{Math.round(course.progress)}%</span>
               </div>
             </Card>
