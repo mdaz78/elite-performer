@@ -1,9 +1,115 @@
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CsvImporter, ProgressBar } from '../components';
 import { db } from '../db';
 import type { CodingCourse, CourseModule } from '../types';
 import { formatDisplayDate } from '../utils/date';
+
+interface SortableModuleItemProps {
+  module: CourseModule;
+  onToggle: (moduleId: number, completed: boolean) => void;
+  onDelete: (moduleId: number) => void;
+}
+
+const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: module.id!,
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
+        module.completed
+          ? 'border-green-200 bg-green-50'
+          : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+      }`}
+    >
+      <div className="flex items-center flex-1 min-w-0">
+        <div
+          {...attributes}
+          {...listeners}
+          className="shrink-0 mr-3 cursor-grab active:cursor-grabbing touch-none"
+          title="Drag to reorder"
+        >
+          <svg
+            className="w-5 h-5 text-gray-400 hover:text-gray-600"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8h16M4 16h16"
+            />
+          </svg>
+        </div>
+        <div className="shrink-0 mr-4">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
+              module.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+            }`}
+          >
+            {module.order}
+          </div>
+        </div>
+        <input
+          type="checkbox"
+          checked={module.completed}
+          onChange={() => onToggle(module.id!, module.completed)}
+          className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+        />
+        <div className="flex-1 min-w-0">
+          <p
+            className={`font-medium text-lg ${
+              module.completed ? 'line-through text-gray-400' : 'text-gray-900'
+            }`}
+          >
+            {module.name}
+          </p>
+          {module.completedAt && (
+            <p className="text-xs text-gray-500 mt-1">
+              Completed on {formatDisplayDate(module.completedAt)}
+            </p>
+          )}
+        </div>
+      </div>
+      <button
+        onClick={() => onDelete(module.id!)}
+        className="ml-4 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded text-sm font-medium transition-colors"
+        title="Delete module"
+      >
+        Delete
+      </button>
+    </div>
+  );
+};
 
 export const CourseDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -19,6 +125,13 @@ export const CourseDetail = () => {
   const [editedDescription, setEditedDescription] = useState('');
   const [editedStartDate, setEditedStartDate] = useState('');
   const [editedTargetDate, setEditedTargetDate] = useState('');
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   const loadCourse = useCallback(
     async (courseId: number) => {
@@ -88,6 +201,41 @@ export const CourseDetail = () => {
     if (!confirm('Delete this module?')) return;
     await db.courseModules.delete(moduleId);
     loadCourse(parseInt(id!, 10));
+  };
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (!over || active.id === over.id || !id) {
+      return;
+    }
+
+    const oldIndex = modules.findIndex((m) => m.id === active.id);
+    const newIndex = modules.findIndex((m) => m.id === over.id);
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return;
+    }
+
+    const newModules = arrayMove(modules, oldIndex, newIndex);
+
+    // Update order values in database
+    const updates = newModules.map((module, index) => ({
+      id: module.id!,
+      order: index + 1,
+    }));
+
+    // Update all modules with new order values
+    await Promise.all(
+      updates.map((update) => db.courseModules.update(update.id, { order: update.order }))
+    );
+
+    // Update local state with new order (preserves scroll position)
+    const updatedModules = newModules.map((module, index) => ({
+      ...module,
+      order: index + 1,
+    }));
+    setModules(updatedModules);
   };
 
   const handleSaveCourseName = async () => {
@@ -530,57 +678,27 @@ export const CourseDetail = () => {
             </button>
           </div>
         ) : (
-          <div className="space-y-3">
-            {modules.map((module) => (
-              <div
-                key={module.id}
-                className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
-                  module.completed
-                    ? 'border-green-200 bg-green-50'
-                    : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center flex-1 min-w-0">
-                  <div className="shrink-0 mr-4">
-                    <div
-                      className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-                        module.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
-                      }`}
-                    >
-                      {module.order}
-                    </div>
-                  </div>
-                  <input
-                    type="checkbox"
-                    checked={module.completed}
-                    onChange={() => handleToggleModule(module.id!, module.completed)}
-                    className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={modules.map((m) => m.id!)}
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-3">
+                {modules.map((module) => (
+                  <SortableModuleItem
+                    key={module.id}
+                    module={module}
+                    onToggle={handleToggleModule}
+                    onDelete={handleDeleteModule}
                   />
-                  <div className="flex-1 min-w-0">
-                    <p
-                      className={`font-medium text-lg ${
-                        module.completed ? 'line-through text-gray-400' : 'text-gray-900'
-                      }`}
-                    >
-                      {module.name}
-                    </p>
-                    {module.completedAt && (
-                      <p className="text-xs text-gray-500 mt-1">
-                        Completed on {formatDisplayDate(module.completedAt)}
-                      </p>
-                    )}
-                  </div>
-                </div>
-                <button
-                  onClick={() => handleDeleteModule(module.id!)}
-                  className="ml-4 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded text-sm font-medium transition-colors"
-                  title="Delete module"
-                >
-                  Delete
-                </button>
+                ))}
               </div>
-            ))}
-          </div>
+            </SortableContext>
+          </DndContext>
         )}
       </Card>
     </div>
