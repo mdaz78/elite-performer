@@ -14,9 +14,9 @@ export const ProgressBar = ({
   className = '',
 }: ProgressBarProps) => {
   const colorClasses = {
-    career: 'bg-career',
-    trading: 'bg-trading',
-    fitness: 'bg-fitness',
+    career: 'bg-blue-500',
+    trading: 'bg-emerald-500',
+    fitness: 'bg-amber-500',
   };
 
   const clampedProgress = Math.min(100, Math.max(0, progress));

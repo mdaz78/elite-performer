@@ -69,7 +69,7 @@ export const CodingPage = () => {
         <div className="flex gap-3">
           <button
             onClick={handleAddCourse}
-            className="px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
             Add Course
           </button>
@@ -82,7 +82,7 @@ export const CodingPage = () => {
             <p className="text-gray-500 mb-4">No courses yet. Add your first course to get started!</p>
             <button
               onClick={handleAddCourse}
-              className="px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Course
             </button>
@@ -99,7 +99,7 @@ export const CodingPage = () => {
               />
               <div className="mb-4 relative z-0">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-career transition-colors">
+                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-500 transition-colors">
                     {course.name}
                   </h3>
                   <button
@@ -125,7 +125,7 @@ export const CodingPage = () => {
               </div>
               <ProgressBar progress={course.progress} color="career" showPercentage={true} />
               <div className="mt-4 flex justify-between items-center">
-                <span className="text-sm text-career font-medium group-hover:underline">
+                <span className="text-sm text-blue-500 font-medium group-hover:underline">
                   View Details →
                 </span>
                 <span className="text-xs text-gray-500">{Math.round(course.progress)}%</span>

@@ -93,11 +93,11 @@ export const SWEPage = () => {
                   <span className="text-sm text-gray-600">
                     {practicedCount} of {totalCount} topics practiced
                   </span>
-                  <span className="text-sm font-semibold text-career">{Math.round(progress)}%</span>
+                  <span className="text-sm font-semibold text-blue-500">{Math.round(progress)}%</span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
-                    className="bg-career h-2 rounded-full transition-all duration-300"
+                    className="bg-blue-500 h-2 rounded-full transition-all duration-300"
                     style={{ width: `${progress}%` }}
                   />
                 </div>
@@ -112,7 +112,7 @@ export const SWEPage = () => {
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="font-medium text-gray-900">{topic.topic}</h3>
                       {topic.practiceCount > 0 && (
-                        <span className="text-xs bg-career/10 text-career px-2 py-1 rounded">
+                        <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded">
                           {topic.practiceCount}x
                         </span>
                       )}
@@ -124,7 +124,7 @@ export const SWEPage = () => {
                     )}
                     <button
                       onClick={() => handlePractice(topic.id!)}
-                      className="w-full px-3 py-2 bg-career text-white text-sm rounded-md hover:bg-career-dark transition-colors"
+                      className="w-full px-3 py-2 bg-blue-500 text-white text-sm rounded-md hover:bg-blue-600 transition-colors"
                     >
                       Mark as Practiced
                     </button>

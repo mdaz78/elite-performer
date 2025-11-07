@@ -133,16 +133,16 @@ export const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Coding Progress</p>
-              <p className="text-2xl font-bold text-career mt-1">{Math.round(codingProgress)}%</p>
+              <p className="text-2xl font-bold text-blue-500 mt-1">{Math.round(codingProgress)}%</p>
             </div>
-            <div className="p-3 bg-career/10 rounded-lg">
-              <svg className="w-8 h-8 text-career" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-blue-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link to="/coding" className="text-sm text-career hover:underline">
+            <Link to="/coding" className="text-sm text-blue-500 hover:underline">
               View courses →
             </Link>
           </div>
@@ -152,16 +152,16 @@ export const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">SWE Prep</p>
-              <p className="text-2xl font-bold text-career mt-1">{Math.round(sweProgress)}%</p>
+              <p className="text-2xl font-bold text-blue-500 mt-1">{Math.round(sweProgress)}%</p>
             </div>
-            <div className="p-3 bg-career/10 rounded-lg">
-              <svg className="w-8 h-8 text-career" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-blue-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link to="/swe" className="text-sm text-career hover:underline">
+            <Link to="/swe" className="text-sm text-blue-500 hover:underline">
               Practice topics →
             </Link>
           </div>
@@ -171,18 +171,18 @@ export const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Fitness</p>
-              <p className="text-2xl font-bold text-fitness mt-1">
+              <p className="text-2xl font-bold text-amber-500 mt-1">
                 {latestWeight ? `${latestWeight} lbs` : 'No data'}
               </p>
             </div>
-            <div className="p-3 bg-fitness/10 rounded-lg">
-              <svg className="w-8 h-8 text-fitness" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-amber-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link to="/fitness" className="text-sm text-fitness hover:underline">
+            <Link to="/fitness" className="text-sm text-amber-500 hover:underline">
               View logs →
             </Link>
           </div>
@@ -192,21 +192,21 @@ export const Dashboard = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Trading</p>
-              <p className="text-2xl font-bold text-trading mt-1">
+              <p className="text-2xl font-bold text-emerald-500 mt-1">
                 ${tradingStats.totalPnl.toFixed(2)}
               </p>
               <p className="text-xs text-gray-500 mt-1">
                 {tradingStats.tradeCount} trades • {tradingStats.winRate.toFixed(1)}% win rate
               </p>
             </div>
-            <div className="p-3 bg-trading/10 rounded-lg">
-              <svg className="w-8 h-8 text-trading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link to="/trading" className="text-sm text-trading hover:underline">
+            <Link to="/trading" className="text-sm text-emerald-500 hover:underline">
               View journal →
             </Link>
           </div>
@@ -227,7 +227,7 @@ export const Dashboard = () => {
                       type="checkbox"
                       checked={task.completed}
                       readOnly
-                      className="mr-3 h-4 w-4 text-career focus:ring-career border-gray-300 rounded"
+                      className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
                     />
                     <span className={task.completed ? 'line-through text-gray-400' : 'text-gray-900'}>
                       {task.title}
@@ -239,7 +239,7 @@ export const Dashboard = () => {
             </ul>
           )}
           <div className="mt-4">
-            <Link to="/tasks" className="text-sm text-career hover:underline">
+            <Link to="/tasks" className="text-sm text-blue-500 hover:underline">
               View all tasks →
             </Link>
           </div>
@@ -249,7 +249,7 @@ export const Dashboard = () => {
           <div className="space-y-4">
             <div>
               <p className="text-sm text-gray-600 mb-2">Fitness Logs</p>
-              <p className="text-lg font-semibold text-fitness">{fitnessLogs.length} entries</p>
+              <p className="text-lg font-semibold text-amber-500">{fitnessLogs.length} entries</p>
             </div>
             <div>
               <p className="text-sm text-gray-600 mb-2">Week Range</p>
@@ -259,7 +259,7 @@ export const Dashboard = () => {
             </div>
           </div>
           <div className="mt-4">
-            <Link to="/review" className="text-sm text-career hover:underline">
+            <Link to="/review" className="text-sm text-blue-500 hover:underline">
               Weekly Review →
             </Link>
           </div>

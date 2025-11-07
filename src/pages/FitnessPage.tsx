@@ -105,7 +105,7 @@ export const FitnessPage = () => {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 required
               />
             </div>
@@ -117,7 +117,7 @@ export const FitnessPage = () => {
                 step="0.1"
                 value={formData.weight || ''}
                 onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 180.5"
               />
             </div>
@@ -129,7 +129,7 @@ export const FitnessPage = () => {
                 step="0.1"
                 value={formData.bodyFat || ''}
                 onChange={(e) => setFormData({ ...formData, bodyFat: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 15.5"
               />
             </div>
@@ -141,7 +141,7 @@ export const FitnessPage = () => {
                 step="0.1"
                 value={formData.waist || ''}
                 onChange={(e) => setFormData({ ...formData, waist: e.target.value ? parseFloat(e.target.value) : undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 32.5"
               />
             </div>
@@ -152,7 +152,7 @@ export const FitnessPage = () => {
                 type="number"
                 value={formData.calories || ''}
                 onChange={(e) => setFormData({ ...formData, calories: e.target.value ? parseInt(e.target.value, 10) : undefined })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 2500"
               />
             </div>
@@ -163,7 +163,7 @@ export const FitnessPage = () => {
                 type="text"
                 value={formData.workoutType}
                 onChange={(e) => setFormData({ ...formData, workoutType: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., Upper Body, Cardio"
               />
             </div>
@@ -174,14 +174,14 @@ export const FitnessPage = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-fitness focus:border-fitness"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="Additional notes..."
               />
             </div>
 
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-fitness text-white rounded-md hover:bg-fitness-dark transition-colors"
+              className="w-full px-4 py-2 bg-amber-500 text-white rounded-md hover:bg-amber-600 transition-colors"
             >
               Save Entry
             </button>

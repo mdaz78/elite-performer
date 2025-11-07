@@ -110,7 +110,7 @@ export const DailyTasksPage = () => {
           type="date"
           value={selectedDate}
           onChange={(e) => setSelectedDate(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
@@ -123,7 +123,7 @@ export const DailyTasksPage = () => {
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="e.g., Complete React module"
                 required
               />
@@ -134,7 +134,7 @@ export const DailyTasksPage = () => {
               <select
                 value={formData.type}
                 onChange={(e) => setFormData({ ...formData, type: e.target.value as TaskType })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 {taskTypes.map((type) => (
                   <option key={type} value={type}>
@@ -154,7 +154,7 @@ export const DailyTasksPage = () => {
                     projectId: e.target.value ? parseInt(e.target.value, 10) : undefined,
                   })
                 }
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="">None</option>
                 {projects
@@ -173,14 +173,14 @@ export const DailyTasksPage = () => {
                 type="date"
                 value={formData.scheduledDate}
                 onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
 
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+              className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Task
             </button>
@@ -211,7 +211,7 @@ export const DailyTasksPage = () => {
                                 type="checkbox"
                                 checked={task.completed}
                                 onChange={() => handleToggleComplete(task.id!, task.completed)}
-                                className="mr-3 h-4 w-4 text-career focus:ring-career border-gray-300 rounded"
+                                className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
                               />
                               <div className="flex-1">
                                 <p

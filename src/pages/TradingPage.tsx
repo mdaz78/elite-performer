@@ -124,12 +124,12 @@ export const TradingPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total P&L</p>
-              <p className={`text-2xl font-bold mt-1 ${stats.totalPnl >= 0 ? 'text-trading' : 'text-red-600'}`}>
+              <p className={`text-2xl font-bold mt-1 ${stats.totalPnl >= 0 ? 'text-emerald-500' : 'text-red-600'}`}>
                 ${stats.totalPnl.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-trading/10 rounded-lg">
-              <svg className="w-8 h-8 text-trading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
@@ -140,10 +140,10 @@ export const TradingPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Win Rate</p>
-              <p className="text-2xl font-bold text-trading mt-1">{stats.winRate.toFixed(1)}%</p>
+              <p className="text-2xl font-bold text-emerald-500 mt-1">{stats.winRate.toFixed(1)}%</p>
             </div>
-            <div className="p-3 bg-trading/10 rounded-lg">
-              <svg className="w-8 h-8 text-trading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </div>
@@ -154,10 +154,10 @@ export const TradingPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Trade Count</p>
-              <p className="text-2xl font-bold text-trading mt-1">{stats.tradeCount}</p>
+              <p className="text-2xl font-bold text-emerald-500 mt-1">{stats.tradeCount}</p>
             </div>
-            <div className="p-3 bg-trading/10 rounded-lg">
-              <svg className="w-8 h-8 text-trading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
             </div>
@@ -168,12 +168,12 @@ export const TradingPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Avg P&L</p>
-              <p className={`text-2xl font-bold mt-1 ${stats.averagePnl >= 0 ? 'text-trading' : 'text-red-600'}`}>
+              <p className={`text-2xl font-bold mt-1 ${stats.averagePnl >= 0 ? 'text-emerald-500' : 'text-red-600'}`}>
                 ${stats.averagePnl.toFixed(2)}
               </p>
             </div>
-            <div className="p-3 bg-trading/10 rounded-lg">
-              <svg className="w-8 h-8 text-trading" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-emerald-500/10 rounded-lg">
+              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
               </svg>
             </div>
@@ -190,7 +190,7 @@ export const TradingPage = () => {
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 required
               />
             </div>
@@ -201,7 +201,7 @@ export const TradingPage = () => {
                 type="text"
                 value={formData.symbol}
                 onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="e.g., AAPL"
                 required
               />
@@ -213,7 +213,7 @@ export const TradingPage = () => {
                 type="text"
                 value={formData.setup}
                 onChange={(e) => setFormData({ ...formData, setup: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="e.g., Breakout, Pullback"
                 required
               />
@@ -227,7 +227,7 @@ export const TradingPage = () => {
                   step="0.01"
                   value={formData.entry || ''}
                   onChange={(e) => setFormData({ ...formData, entry: e.target.value ? parseFloat(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                   required
                 />
               </div>
@@ -239,7 +239,7 @@ export const TradingPage = () => {
                   step="0.01"
                   value={formData.exit || ''}
                   onChange={(e) => setFormData({ ...formData, exit: e.target.value ? parseFloat(e.target.value) : 0 })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                   required
                 />
               </div>
@@ -251,7 +251,7 @@ export const TradingPage = () => {
                 type="number"
                 value={formData.quantity || ''}
                 onChange={(e) => setFormData({ ...formData, quantity: e.target.value ? parseInt(e.target.value, 10) : 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 required
               />
             </div>
@@ -262,7 +262,7 @@ export const TradingPage = () => {
                 <button
                   type="button"
                   onClick={handleCalculatePnl}
-                  className="ml-2 text-xs text-trading hover:underline"
+                  className="ml-2 text-xs text-emerald-500 hover:underline"
                 >
                   (Calculate)
                 </button>
@@ -272,7 +272,7 @@ export const TradingPage = () => {
                 step="0.01"
                 value={formData.pnl || ''}
                 onChange={(e) => setFormData({ ...formData, pnl: e.target.value ? parseFloat(e.target.value) : 0 })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 required
               />
             </div>
@@ -283,7 +283,7 @@ export const TradingPage = () => {
                 type="text"
                 value={formData.emotion}
                 onChange={(e) => setFormData({ ...formData, emotion: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="e.g., Confident, Nervous"
               />
             </div>
@@ -294,14 +294,14 @@ export const TradingPage = () => {
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-trading focus:border-trading"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Trade notes..."
               />
             </div>
 
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-trading text-white rounded-md hover:bg-trading-dark transition-colors"
+              className="w-full px-4 py-2 bg-emerald-500 text-white rounded-md hover:bg-emerald-600 transition-colors"
             >
               Save Trade
             </button>
@@ -348,7 +348,7 @@ export const TradingPage = () => {
                         {trade.quantity}
                       </td>
                       <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium ${
-                        trade.pnl >= 0 ? 'text-trading' : 'text-red-600'
+                        trade.pnl >= 0 ? 'text-emerald-500' : 'text-red-600'
                       }`}>
                         ${trade.pnl.toFixed(2)}
                       </td>

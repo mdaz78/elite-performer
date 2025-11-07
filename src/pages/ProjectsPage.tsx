@@ -122,7 +122,7 @@ export const ProjectsPage = () => {
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="e.g., Build Portfolio App"
                 required
               />
@@ -134,7 +134,7 @@ export const ProjectsPage = () => {
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="Project description..."
               />
             </div>
@@ -144,7 +144,7 @@ export const ProjectsPage = () => {
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value as Project['status'] })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="active">Active</option>
                 <option value="completed">Completed</option>
@@ -158,7 +158,7 @@ export const ProjectsPage = () => {
                 type="date"
                 value={formData.startDate}
                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
@@ -168,14 +168,14 @@ export const ProjectsPage = () => {
                 type="date"
                 value={formData.targetDate}
                 onChange={(e) => setFormData({ ...formData, targetDate: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               />
             </div>
 
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="flex-1 px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+                className="flex-1 px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
               >
                 {editingId ? 'Update' : 'Add'} Project
               </button>
@@ -210,8 +210,8 @@ export const ProjectsPage = () => {
                 const projectTasks = getProjectTasks(project.id!);
                 const progress = getProjectProgress(project);
                 const statusColors = {
-                  active: 'bg-career',
-                  completed: 'bg-trading',
+                  active: 'bg-blue-500',
+                  completed: 'bg-emerald-500',
                   paused: 'bg-gray-400',
                 };
 
@@ -242,7 +242,7 @@ export const ProjectsPage = () => {
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleEdit(project)}
-                          className="text-career hover:text-career-dark text-sm"
+                          className="text-blue-500 hover:text-blue-600 text-sm"
                         >
                           Edit
                         </button>
@@ -260,7 +260,7 @@ export const ProjectsPage = () => {
                         <span className="text-sm text-gray-600">
                           {projectTasks.filter((t) => t.completed).length} of {projectTasks.length} tasks completed
                         </span>
-                        <span className="text-sm font-semibold text-career">{Math.round(progress)}%</span>
+                        <span className="text-sm font-semibold text-blue-500">{Math.round(progress)}%</span>
                       </div>
                       <ProgressBar progress={progress} color="career" showPercentage={false} />
                     </div>

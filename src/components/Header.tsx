@@ -36,10 +36,9 @@ export const Header = () => {
                   to={link.path}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
-                      ? 'bg-career text-white hover:bg-career-dark'
+                      ? 'bg-blue-500 text-white hover:bg-blue-600'
                       : 'text-gray-700 hover:bg-gray-100'
                   }`}
-                  style={isActive ? { backgroundColor: '#3B82F6' } : undefined}
                 >
                   {link.label}
                 </Link>

@@ -26,7 +26,7 @@ export const ConfirmDialog = ({
   const confirmButtonClass =
     variant === 'danger'
       ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-      : 'bg-career hover:bg-career-dark focus:ring-career';
+      : 'bg-blue-500 hover:bg-blue-600 focus:ring-blue-500';
 
   return (
     <Fragment>

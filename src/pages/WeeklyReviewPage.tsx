@@ -154,7 +154,7 @@ export const WeeklyReviewPage = () => {
                     });
                   }
                 }}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 required
               />
             </div>
@@ -165,7 +165,7 @@ export const WeeklyReviewPage = () => {
                 value={formData.wins}
                 onChange={(e) => setFormData({ ...formData, wins: e.target.value })}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="What went well this week?"
                 required
               />
@@ -177,7 +177,7 @@ export const WeeklyReviewPage = () => {
                 value={formData.mistakes}
                 onChange={(e) => setFormData({ ...formData, mistakes: e.target.value })}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="What could be improved?"
                 required
               />
@@ -189,7 +189,7 @@ export const WeeklyReviewPage = () => {
                 value={formData.nextWeekGoals}
                 onChange={(e) => setFormData({ ...formData, nextWeekGoals: e.target.value })}
                 rows={4}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-career focus:border-career"
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 placeholder="What are your goals for next week?"
                 required
               />
@@ -197,7 +197,7 @@ export const WeeklyReviewPage = () => {
 
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+              className="w-full px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               {existingReview ? 'Update' : 'Save'} Review
             </button>

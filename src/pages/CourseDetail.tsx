@@ -194,7 +194,7 @@ export const CourseDetail = () => {
       <div className="mb-8">
         <button
           onClick={() => navigate('/coding')}
-          className="text-career hover:underline mb-4 text-sm font-medium"
+          className="text-blue-500 hover:underline mb-4 text-sm font-medium"
         >
           ← Back to Courses
         </button>
@@ -226,7 +226,7 @@ export const CourseDetail = () => {
                     type="text"
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
-                    className="text-3xl font-bold text-gray-900 border-2 border-career rounded px-3 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-career"
+                    className="text-3xl font-bold text-gray-900 border-2 border-blue-500 rounded px-3 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSaveCourseName();
@@ -293,7 +293,7 @@ export const CourseDetail = () => {
                 <textarea
                   value={editedDescription}
                   onChange={(e) => setEditedDescription(e.target.value)}
-                  className="text-gray-600 text-lg border-2 border-career rounded px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-career resize-none"
+                  className="text-gray-600 text-lg border-2 border-blue-500 rounded px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                   rows={3}
                   autoFocus
                   onKeyDown={(e) => {
@@ -365,7 +365,7 @@ export const CourseDetail = () => {
             <CsvImporter onImport={handleCSVImport} label="Import CSV" />
             <button
               onClick={handleAddModule}
-              className="px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Module
             </button>
@@ -389,7 +389,7 @@ export const CourseDetail = () => {
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-career mb-1">{Math.round(progress)}%</div>
+            <div className="text-3xl font-bold text-blue-500 mb-1">{Math.round(progress)}%</div>
             <div className="text-sm text-gray-600">Progress</div>
           </div>
         </Card>
@@ -427,7 +427,7 @@ export const CourseDetail = () => {
                   type="date"
                   value={editedStartDate}
                   onChange={(e) => setEditedStartDate(e.target.value)}
-                  className="w-full border-2 border-career rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-career"
+                  className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
               <div>
@@ -436,7 +436,7 @@ export const CourseDetail = () => {
                   type="date"
                   value={editedTargetDate}
                   onChange={(e) => setEditedTargetDate(e.target.value)}
-                  className="w-full border-2 border-career rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-career"
+                  className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
             </div>
@@ -543,7 +543,7 @@ export const CourseDetail = () => {
             </p>
             <button
               onClick={handleAddModule}
-              className="px-4 py-2 bg-career text-white rounded-md hover:bg-career-dark transition-colors"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Your First Module
             </button>
@@ -556,7 +556,7 @@ export const CourseDetail = () => {
                 className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
                   module.completed
                     ? 'border-green-200 bg-green-50'
-                    : 'border-gray-200 hover:border-career hover:bg-gray-50'
+                    : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
                 }`}
               >
                 <div className="flex items-center flex-1 min-w-0">
@@ -573,7 +573,7 @@ export const CourseDetail = () => {
                     type="checkbox"
                     checked={module.completed}
                     onChange={() => handleToggleModule(module.id!, module.completed)}
-                    className="mr-4 h-5 w-5 text-career focus:ring-career border-gray-300 rounded cursor-pointer"
+                    className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
                   />
                   <div className="flex-1 min-w-0">
                     <p
