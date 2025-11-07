@@ -8,12 +8,12 @@ import {
   getWeekEnd,
   getProgressPercentage,
   formatDisplayDate,
+  getDaysRemaining,
 } from '../utils/date';
 import type { CodingCourse, CourseModule, Task, Trade, FitnessLog, Settings } from '../types';
 
 export const Dashboard = () => {
   const [codingProgress, setCodingProgress] = useState(0);
-  const [sweProgress, setSweProgress] = useState(0);
   const [fitnessLogs, setFitnessLogs] = useState<FitnessLog[]>([]);
   const [tradingStats, setTradingStats] = useState({
     totalPnl: 0,
@@ -47,7 +47,9 @@ export const Dashboard = () => {
 
     if (end) {
       const progress = getProgressPercentage(start, end);
-      const remaining = Math.max(0, Math.ceil((new Date(end).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)));
+      // Calculate days remaining: if today is before start, use full period, otherwise calculate from today
+      const today = getToday();
+      const remaining = getDaysRemaining(end, today < start ? start : today);
       setTransformationProgress(progress);
       setDaysRemaining(remaining);
     }
@@ -67,12 +69,6 @@ export const Dashboard = () => {
 
     const codingProg = totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
     setCodingProgress(codingProg);
-
-    // Calculate SWE progress
-    const sweTopics = await db.sweCurriculum.toArray();
-    const practicedTopics = sweTopics.filter((t) => t.practiceCount > 0).length;
-    const sweProg = sweTopics.length > 0 ? (practicedTopics / sweTopics.length) * 100 : 0;
-    setSweProgress(sweProg);
 
     // Load recent fitness logs
     const recentLogs = await db.fitnessLogs
@@ -128,7 +124,7 @@ export const Dashboard = () => {
       )}
 
       {/* Overview Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <Card>
           <div className="flex items-center justify-between">
             <div>
@@ -144,25 +140,6 @@ export const Dashboard = () => {
           <div className="mt-4">
             <Link to="/coding" className="text-sm text-blue-500 hover:underline">
               View courses →
-            </Link>
-          </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-gray-600">SWE Prep</p>
-              <p className="text-2xl font-bold text-blue-500 mt-1">{Math.round(sweProgress)}%</p>
-            </div>
-            <div className="p-3 bg-blue-500/10 rounded-lg">
-              <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-          </div>
-          <div className="mt-4">
-            <Link to="/swe" className="text-sm text-blue-500 hover:underline">
-              Practice topics →
             </Link>
           </div>
         </Card>

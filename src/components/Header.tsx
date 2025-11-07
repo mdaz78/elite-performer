@@ -6,7 +6,6 @@ export const Header = () => {
   const navLinks = [
     { path: '/', label: 'Dashboard' },
     { path: '/coding', label: 'Coding' },
-    { path: '/swe', label: 'SWE Prep' },
     { path: '/fitness', label: 'Fitness' },
     { path: '/trading', label: 'Trading' },
     { path: '/tasks', label: 'Tasks' },

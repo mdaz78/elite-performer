@@ -22,7 +22,6 @@ export const DailyTasksPage = () => {
     'Gym',
     'Trading Practice',
     'Coding',
-    'SWE Prep',
     'Review',
     'Other',
   ];

@@ -16,16 +16,6 @@ export interface CourseModule {
   completedAt?: string;
 }
 
-export type SWECategory = 'Data Structures' | 'Algorithms' | 'System Design' | 'Behavioral';
-
-export interface SWETopic {
-  id?: number;
-  category: SWECategory;
-  topic: string;
-  lastReviewed?: string;
-  practiceCount: number;
-}
-
 export interface Project {
   id?: number;
   name: string;
@@ -41,7 +31,6 @@ export type TaskType =
   | 'Gym'
   | 'Trading Practice'
   | 'Coding'
-  | 'SWE Prep'
   | 'Review'
   | 'Other';
 

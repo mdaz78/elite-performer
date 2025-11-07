@@ -32,8 +32,8 @@ export const getWeekEnd = (date?: string | Date): string => {
 };
 
 export const getDaysRemaining = (targetDate: string, startDate?: string): number => {
-  const target = dayjs(targetDate);
-  const start = startDate ? dayjs(startDate) : dayjs();
+  const target = dayjs(targetDate).startOf('day');
+  const start = startDate ? dayjs(startDate).startOf('day') : dayjs().startOf('day');
   return Math.max(0, target.diff(start, 'day'));
 };
 

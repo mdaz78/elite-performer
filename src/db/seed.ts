@@ -1,31 +1,50 @@
+import type { CodingCourse, CourseModule } from '../types';
+import { addDays, getToday } from '../utils/date';
 import { db } from './index';
-import type { CodingCourse, CourseModule, SWETopic, Settings } from '../types';
-import { getToday, addDays } from '../utils/date';
 
-export const seedDatabase = async (): Promise<void> => {
-  // Check if already seeded
-  const existingCourses = await db.codingCourses.count();
-  if (existingCourses > 0) {
-    return; // Already seeded
+export const seedDatabase = async (forceReseed: boolean = false): Promise<void> => {
+  const today = getToday();
+  const transformationStartDate = '2025-11-10';
+  const targetDate = addDays(transformationStartDate, 180);
+
+  // Always update settings
+  const startDateSetting = await db.settings.where('key').equals('transformationStartDate').first();
+  const endDateSetting = await db.settings.where('key').equals('transformationEndDate').first();
+
+  if (startDateSetting) {
+    await db.settings.update(startDateSetting.id!, { value: transformationStartDate });
+  } else {
+    await db.settings.add({ key: 'transformationStartDate', value: transformationStartDate });
   }
 
-  const today = getToday();
-  const targetDate = addDays(today, 180);
+  if (endDateSetting) {
+    await db.settings.update(endDateSetting.id!, { value: targetDate });
+  } else {
+    await db.settings.add({ key: 'transformationEndDate', value: targetDate });
+  }
+
+  // Check if already seeded
+  const existingCourses = await db.codingCourses.count();
+  if (existingCourses > 0 && !forceReseed) {
+    return; // Already seeded
+  }
 
   // Seed App Academy courses
   const jsTrack: CodingCourse = {
     name: 'App Academy – JS Track',
-    description: 'Full-stack JavaScript curriculum covering React, Node.js, and modern web development',
+    description:
+      'Full-stack JavaScript curriculum covering React, Node.js, and modern web development',
     createdAt: today,
-    startDate: today,
+    startDate: transformationStartDate,
     targetDate,
   };
 
   const railsTrack: CodingCourse = {
     name: 'App Academy – Ruby on Rails Track',
-    description: 'Full-stack Ruby on Rails curriculum covering backend development and MVC architecture',
+    description:
+      'Full-stack Ruby on Rails curriculum covering backend development and MVC architecture',
     createdAt: today,
-    startDate: today,
+    startDate: transformationStartDate,
     targetDate,
   };
 
@@ -60,58 +79,4 @@ export const seedDatabase = async (): Promise<void> => {
   ];
 
   await db.courseModules.bulkAdd([...jsModules, ...railsModules]);
-
-  // Seed SWE Curriculum
-  const sweTopics: Omit<SWETopic, 'id'>[] = [
-    // Data Structures
-    { category: 'Data Structures', topic: 'Arrays & Strings', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Linked Lists', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Stacks & Queues', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Trees & Binary Trees', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Binary Search Trees', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Heaps', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Hash Tables', practiceCount: 0 },
-    { category: 'Data Structures', topic: 'Graphs', practiceCount: 0 },
-
-    // Algorithms
-    { category: 'Algorithms', topic: 'Sorting Algorithms', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Search Algorithms', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Recursion', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Dynamic Programming', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Greedy Algorithms', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Backtracking', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Two Pointers', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Sliding Window', practiceCount: 0 },
-    { category: 'Algorithms', topic: 'Bit Manipulation', practiceCount: 0 },
-
-    // System Design
-    { category: 'System Design', topic: 'Scalability Basics', practiceCount: 0 },
-    { category: 'System Design', topic: 'Load Balancing', practiceCount: 0 },
-    { category: 'System Design', topic: 'Caching Strategies', practiceCount: 0 },
-    { category: 'System Design', topic: 'Database Design', practiceCount: 0 },
-    { category: 'System Design', topic: 'API Design', practiceCount: 0 },
-    { category: 'System Design', topic: 'Microservices', practiceCount: 0 },
-    { category: 'System Design', topic: 'Distributed Systems', practiceCount: 0 },
-    { category: 'System Design', topic: 'Message Queues', practiceCount: 0 },
-
-    // Behavioral
-    { category: 'Behavioral', topic: 'STAR Method', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Leadership Examples', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Conflict Resolution', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Technical Challenges', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Team Collaboration', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Failure & Learning', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Career Goals', practiceCount: 0 },
-    { category: 'Behavioral', topic: 'Company Research', practiceCount: 0 },
-  ];
-
-  await db.sweCurriculum.bulkAdd(sweTopics);
-
-  // Seed default settings
-  const defaultSettings: Omit<Settings, 'id'>[] = [
-    { key: 'transformationStartDate', value: today },
-    { key: 'transformationEndDate', value: targetDate },
-  ];
-
-  await db.settings.bulkAdd(defaultSettings);
 };

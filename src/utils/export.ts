@@ -12,7 +12,6 @@ export const exportDatabaseAsJSON = async (): Promise<void> => {
   const data = {
     codingCourses: await db.codingCourses.toArray(),
     courseModules: await db.courseModules.toArray(),
-    sweCurriculum: await db.sweCurriculum.toArray(),
     projects: await db.projects.toArray(),
     tasks: await db.tasks.toArray(),
     fitnessLogs: await db.fitnessLogs.toArray(),
@@ -37,7 +36,6 @@ export const importDatabaseFromJSON = async (file: File): Promise<void> => {
         // Clear existing data
         await db.codingCourses.clear();
         await db.courseModules.clear();
-        await db.sweCurriculum.clear();
         await db.projects.clear();
         await db.tasks.clear();
         await db.fitnessLogs.clear();
@@ -48,7 +46,6 @@ export const importDatabaseFromJSON = async (file: File): Promise<void> => {
         // Import data
         if (data.codingCourses) await db.codingCourses.bulkAdd(data.codingCourses);
         if (data.courseModules) await db.courseModules.bulkAdd(data.courseModules);
-        if (data.sweCurriculum) await db.sweCurriculum.bulkAdd(data.sweCurriculum);
         if (data.projects) await db.projects.bulkAdd(data.projects);
         if (data.tasks) await db.tasks.bulkAdd(data.tasks);
         if (data.fitnessLogs) await db.fitnessLogs.bulkAdd(data.fitnessLogs);

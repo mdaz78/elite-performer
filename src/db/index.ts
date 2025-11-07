@@ -2,7 +2,6 @@ import Dexie from 'dexie';
 import type {
   CodingCourse,
   CourseModule,
-  SWETopic,
   Project,
   Task,
   FitnessLog,
@@ -14,7 +13,6 @@ import type {
 export class ElitePerformerDB extends Dexie {
   codingCourses!: Dexie.Table<CodingCourse, number>;
   courseModules!: Dexie.Table<CourseModule, number>;
-  sweCurriculum!: Dexie.Table<SWETopic, number>;
   projects!: Dexie.Table<Project, number>;
   tasks!: Dexie.Table<Task, number>;
   fitnessLogs!: Dexie.Table<FitnessLog, number>;
@@ -27,7 +25,6 @@ export class ElitePerformerDB extends Dexie {
     this.version(1).stores({
       codingCourses: '++id, name, createdAt, startDate, targetDate',
       courseModules: '++id, courseId, order, completed',
-      sweCurriculum: '++id, category, lastReviewed',
       projects: '++id, status, startDate, targetDate',
       tasks: '++id, type, projectId, completed, scheduledDate',
       fitnessLogs: '++id, date',

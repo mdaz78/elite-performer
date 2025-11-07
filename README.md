@@ -11,11 +11,6 @@ A comprehensive personal productivity and transformation tracking application de
 
 ### 💻 Coding & Learning
 - **Coding Courses**: Track your progress through coding courses with modules
-- **SWE Preparation**: Practice and review software engineering topics including:
-  - Data Structures
-  - Algorithms
-  - System Design
-  - Behavioral Interview Prep
 
 ### 💪 Fitness Tracking
 - Log your weight, body fat percentage, and measurements
@@ -31,7 +26,7 @@ A comprehensive personal productivity and transformation tracking application de
 
 ### ✅ Task Management
 - Daily task scheduling and tracking
-- Task types: Deep Work, Gym, Trading Practice, Coding, SWE Prep, Review, Other
+- Task types: Deep Work, Gym, Trading Practice, Coding, Review, Other
 - Link tasks to projects
 - Mark tasks as completed
 
@@ -127,7 +122,6 @@ elite-performer/
 │   │   ├── Dashboard.tsx
 │   │   ├── CodingPage.tsx
 │   │   ├── CourseDetail.tsx
-│   │   ├── SWEPage.tsx
 │   │   ├── FitnessPage.tsx
 │   │   ├── TradingPage.tsx
 │   │   ├── DailyTasksPage.tsx
