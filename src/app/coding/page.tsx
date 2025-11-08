@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
@@ -13,6 +13,11 @@ function CodingPageContent() {
   const router = useRouter()
   const utils = trpc.useUtils()
   const [showAddDialog, setShowAddDialog] = useState(false)
+  const isFirstMount = useRef(true)
+
+  useEffect(() => {
+    isFirstMount.current = false
+  }, [])
 
   const { data: courses = [], isLoading } = trpc.codingCourses.getAll.useQuery()
   const createMutation = trpc.codingCourses.create.useMutation({
@@ -90,7 +95,7 @@ function CodingPageContent() {
         <AnimatePresence mode="popLayout">
           <motion.div
             variants={staggerContainer}
-            initial="initial"
+            initial={isFirstMount.current ? false : "initial"}
             animate="animate"
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
           >
@@ -98,7 +103,7 @@ function CodingPageContent() {
               <motion.div
                 key={course.id}
                 variants={createVariants}
-                initial="initial"
+                initial={isFirstMount.current ? false : "initial"}
                 animate="animate"
                 exit="exit"
                 layout

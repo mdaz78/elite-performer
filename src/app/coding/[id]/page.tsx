@@ -17,7 +17,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, useParams } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
@@ -31,9 +31,10 @@ interface SortableModuleItemProps {
   onToggle: (moduleId: number, completed: boolean) => void
   onDelete: (moduleId: number) => void
   isAnimating?: boolean
+  isFirstMount?: boolean
 }
 
-const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false }: SortableModuleItemProps) => {
+const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false, isFirstMount = false }: SortableModuleItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
   })
@@ -49,7 +50,7 @@ const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false }:
       ref={setNodeRef}
       style={style}
       variants={createVariants}
-      initial="initial"
+      initial={isFirstMount ? false : "initial"}
       animate={isAnimating ? 'animate' : 'animate'}
       exit="exit"
       layout
@@ -136,6 +137,11 @@ function CourseDetailContent() {
   const [editedTargetDate, setEditedTargetDate] = useState('')
   const [showAddModuleDialog, setShowAddModuleDialog] = useState(false)
   const [animatingModuleId, setAnimatingModuleId] = useState<number | null>(null)
+  const isFirstMount = useRef(true)
+
+  useEffect(() => {
+    isFirstMount.current = false
+  }, [])
 
   const { data: course, isLoading: courseLoading } = trpc.codingCourses.getById.useQuery(
     { id: courseId! },
@@ -706,7 +712,7 @@ function CourseDetailContent() {
               <AnimatePresence mode="popLayout">
                 <motion.div
                   variants={staggerContainer}
-                  initial="initial"
+                  initial={isFirstMount.current ? false : "initial"}
                   animate="animate"
                   className="space-y-3"
                 >
@@ -720,6 +726,7 @@ function CourseDetailContent() {
                         onToggle={handleToggleModule}
                         onDelete={handleDeleteModule}
                         isAnimating={animatingModuleId === module.id}
+                        isFirstMount={isFirstMount.current}
                       />
                     </motion.div>
                   ))}
