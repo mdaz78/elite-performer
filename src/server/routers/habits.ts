@@ -626,13 +626,17 @@ export const habitsRouter = router({
       // Verify ownership
       const habit = await ctx.prisma.habit.findFirst({
         where: { id: input.habitId, userId },
+        include: {
+          subHabits: true,
+        },
       })
 
       if (!habit) {
         throw new Error('Habit not found')
       }
 
-      return await ctx.prisma.habitCompletion.upsert({
+      // Mark/unmark the parent habit
+      const habitCompletion = await ctx.prisma.habitCompletion.upsert({
         where: {
           userId_habitId_date: {
             userId,
@@ -652,5 +656,37 @@ export const habitsRouter = router({
           completedAt: input.completed ? new Date() : null,
         },
       })
+
+      // If marking as complete, also mark all sub-habits as complete
+      // If marking as incomplete, also unmark all sub-habits
+      if (habit.subHabits.length > 0) {
+        await Promise.all(
+          habit.subHabits.map((subHabit) =>
+            ctx.prisma.subHabitCompletion.upsert({
+              where: {
+                userId_subHabitId_date: {
+                  userId,
+                  subHabitId: subHabit.id,
+                  date,
+                },
+              },
+              create: {
+                subHabitId: subHabit.id,
+                habitId: input.habitId,
+                userId,
+                date,
+                completed: input.completed,
+                completedAt: input.completed ? new Date() : null,
+              },
+              update: {
+                completed: input.completed,
+                completedAt: input.completed ? new Date() : null,
+              },
+            })
+          )
+        )
+      }
+
+      return habitCompletion
     }),
 })

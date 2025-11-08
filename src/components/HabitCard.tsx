@@ -117,13 +117,14 @@ export function HabitCard({
       {/* Completion Checkbox - Top Right */}
       <button
         onClick={onToggleComplete}
-        className={`absolute top-6 right-6 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-[150ms] ${
+        className={`absolute top-6 right-6 w-10 h-10 rounded-full border-2 flex items-center justify-center transition-all duration-[150ms] shadow-sm hover:shadow-md z-10 ${
           isComplete
-            ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
-            : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
+            ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white hover:bg-primary-600 dark:hover:bg-primary-600'
+            : 'bg-white dark:bg-neutral-50 border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400 hover:bg-primary-50 dark:hover:bg-primary-50'
         }`}
+        title={isComplete ? 'Mark as incomplete' : 'Mark as complete'}
       >
-        {isComplete && <Check className="w-5 h-5" />}
+        {isComplete ? <Check className="w-5 h-5" /> : <Check className="w-5 h-5 text-neutral-400 dark:text-neutral-400 opacity-50" />}
       </button>
 
       {/* Icon - Top Left */}
