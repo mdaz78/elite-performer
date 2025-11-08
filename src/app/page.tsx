@@ -66,12 +66,27 @@ function DashboardContent() {
     },
   });
 
+  // Mutation to toggle habit completion
+  const markHabitCompleteMutation = trpc.habits.markHabitComplete.useMutation({
+    onSuccess: () => {
+      utils.habits.getToday.invalidate();
+    },
+  });
+
   // Mutation to toggle sub-habit completion
   const markSubHabitCompleteMutation = trpc.habits.markSubHabitComplete.useMutation({
     onSuccess: () => {
       utils.habits.getToday.invalidate();
     },
   });
+
+  const toggleHabit = async (habitId: number, completed: boolean) => {
+    await markHabitCompleteMutation.mutateAsync({
+      habitId,
+      date: new Date().toISOString(),
+      completed: !completed,
+    });
+  };
 
   const toggleSubHabit = async (subHabitId: number, completed: boolean) => {
     await markSubHabitCompleteMutation.mutateAsync({
@@ -532,11 +547,11 @@ function DashboardContent() {
                     : Heart;
 
                   return (
-                    <div className="w-10 h-10 bg-info-500 dark:bg-info-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 bg-info-500 dark:bg-info-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       {IconComponent ? (
-                        <IconComponent className="w-5 h-5 text-white" />
+                        <IconComponent className="w-4 h-4 text-white" />
                       ) : (
-                        <Heart className="w-5 h-5 text-white" />
+                        <Heart className="w-4 h-4 text-white" />
                       )}
                     </div>
                   );
@@ -547,11 +562,35 @@ function DashboardContent() {
                     key={habit.id}
                     className="p-4 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
                   >
-                    <div className="flex items-start justify-between">
-                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                        <button
+                          onClick={() =>
+                            toggleHabit(habit.id, habit.completion?.completed || false)
+                          }
+                          disabled={markHabitCompleteMutation.isPending}
+                          className={`w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
+                            habit.completion?.completed
+                              ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
+                              : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
+                          } ${markHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          {habit.completion?.completed && (
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="white"
+                              strokeWidth="3"
+                            >
+                              <polyline points="20 6 9 17 4 12" />
+                            </svg>
+                          )}
+                        </button>
                         {renderHabitIcon()}
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-[15px] font-semibold text-neutral-900 dark:text-neutral-900">
+                          <h4 className="text-[15px] font-medium text-neutral-900 dark:text-neutral-900">
                             {habit.name}
                           </h4>
                         </div>
@@ -600,7 +639,7 @@ function DashboardContent() {
                                       <button
                                         onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
                                         disabled={markSubHabitCompleteMutation.isPending}
-                                        className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all duration-[150ms] flex-shrink-0 ${
+                                        className={`w-[18px] h-[18px] rounded-sm border-2 flex items-center justify-center transition-all duration-[150ms] flex-shrink-0 ${
                                           isSubComplete
                                             ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
                                             : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
@@ -633,22 +672,6 @@ function DashboardContent() {
                                       >
                                         {subHabit.name}
                                       </span>
-                                      <button
-                                        onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
-                                        disabled={markSubHabitCompleteMutation.isPending}
-                                        className={`px-3 py-[6px] rounded-md text-[12px] font-semibold text-white transition-all duration-[150ms] hover:-translate-y-[1px] flex-shrink-0 ${
-                                          isSubComplete
-                                            ? 'bg-success-500 dark:bg-success-500'
-                                            : 'bg-primary-500 dark:bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600'
-                                        } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                        aria-label={
-                                          isSubComplete
-                                            ? `Mark ${subHabit.name} as incomplete`
-                                            : `Mark ${subHabit.name} as complete`
-                                        }
-                                      >
-                                        {isSubComplete ? 'Completed ✓' : 'Complete'}
-                                      </button>
                                     </div>
                                   );
                                 })}
