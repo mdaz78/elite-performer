@@ -575,24 +575,59 @@ function TasksPageContent() {
                             layout
                             className={`group p-4 border-2 rounded-xl transition-all duration-200 ${
                               task.completed
-                                ? 'bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 opacity-60'
-                                : 'bg-white dark:bg-surface-dark border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md'
+                                ? 'bg-gradient-to-br from-gray-50 to-gray-50/50 dark:from-gray-900/30 dark:to-gray-900/10 border-gray-300 dark:border-gray-700 opacity-60'
+                                : 'bg-gradient-to-br from-slate-50 to-slate-50/50 dark:from-slate-900/30 dark:to-slate-900/10 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:shadow-md'
                             }`}
                           >
-                            <motion.div
-                              animate={isAnimating ? updateVariants.animate : {}}
-                              className="flex items-start gap-3"
-                            >
-                              <input
-                                type="checkbox"
-                                checked={task.completed}
-                                onChange={() => handleToggleComplete(task.id, task.completed)}
-                                className="mt-1 h-5 w-5 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded cursor-pointer transition-colors duration-200"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <div className="flex items-start justify-between gap-2 mb-2">
+                            <div className="flex flex-col gap-3">
+                              <div className="flex items-center gap-2 justify-between">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                  <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-md">
+                                    {taskTypeDisplay}
+                                  </span>
+                                  {task.completed && (
+                                    <span className="text-xs font-medium px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
+                                      ✓ Done
+                                    </span>
+                                  )}
+                                </div>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+                                  <select
+                                    value={new Date(task.scheduledDate).toISOString().split('T')[0]}
+                                    onChange={(e) => handleAssignTask(task, e.target.value)}
+                                    className="text-xs border border-slate-300 dark:border-slate-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-slate-900/50 text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {weekDays.map((d, i) => (
+                                      <option key={d} value={d}>
+                                        {dayNames[i]}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <button
+                                    onClick={() => handleDelete(task.id)}
+                                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                    title="Delete task"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </div>
+                              <motion.div animate={isAnimating ? updateVariants.animate : {}}>
+                                {project && (
+                                  <p className="text-xs font-medium text-slate-900 dark:text-slate-100 mb-1 opacity-90">
+                                    {project.name}
+                                  </p>
+                                )}
+                                <div className="flex items-start gap-2">
+                                  <input
+                                    type="checkbox"
+                                    checked={task.completed}
+                                    onChange={() => handleToggleComplete(task.id, task.completed)}
+                                    className="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 border-slate-300 dark:border-slate-600 rounded cursor-pointer transition-colors duration-200 flex-shrink-0"
+                                  />
                                   <p
-                                    className={`text-sm font-medium leading-snug ${
+                                    className={`text-sm font-semibold leading-tight ${
                                       task.completed
                                         ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
                                         : 'text-text-primary dark:text-text-primary-dark'
@@ -600,38 +635,9 @@ function TasksPageContent() {
                                   >
                                     {task.title}
                                   </p>
-                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                                    <select
-                                      value={new Date(task.scheduledDate).toISOString().split('T')[0]}
-                                      onChange={(e) => handleAssignTask(task, e.target.value)}
-                                      className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-gray-800 text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors duration-200"
-                                      onClick={(e) => e.stopPropagation()}
-                                    >
-                                      {weekDays.map((d, i) => (
-                                        <option key={d} value={d}>
-                                          {dayNames[i]}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    <button
-                                      onClick={() => handleDelete(task.id)}
-                                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                      title="Delete task"
-                                    >
-                                      ×
-                                    </button>
-                                  </div>
                                 </div>
-                                <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-gray-800 text-text-secondary dark:text-text-secondary-dark rounded-md">
-                                    {taskTypeDisplay}
-                                  </span>
-                                  {project && (
-                                    <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark">• {project.name}</span>
-                                  )}
-                                </div>
-                              </div>
-                            </motion.div>
+                              </motion.div>
+                            </div>
                           </motion.div>
                         )
                       })}
