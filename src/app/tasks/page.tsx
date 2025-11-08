@@ -453,207 +453,195 @@ function TasksPageContent() {
         </Card>
       )}
 
-      {/* Week View - Day Columns */}
-      <div className="mb-8 overflow-x-auto">
-        <div className="flex gap-4 min-w-max pb-4">
-          {weekDays.map((date, idx) => {
-            const dayTasks = getTasksForDay(date)
-            const dayModules = getScheduledModulesForDay(date)
-            const isToday = isSameDay(date, today)
-            const isSunday = idx === 0
+      {/* Week View - Horizontal Date Sections */}
+      <div className="mb-8 space-y-6">
+        {weekDays.map((date, idx) => {
+          const dayTasks = getTasksForDay(date)
+          const dayModules = getScheduledModulesForDay(date)
+          const isToday = isSameDay(date, today)
+          const isSunday = idx === 0
+          const hasItems = dayTasks.length > 0 || dayModules.length > 0
 
-            return (
-              <div
-                key={date}
-                className={`bg-surface dark:bg-surface-dark rounded-xl shadow-md border-2 transition-all duration-200 hover:shadow-lg w-80 flex-shrink-0 ${
-                  isToday
-                    ? 'border-blue-500 dark:border-blue-400 shadow-lg ring-2 ring-blue-200 dark:ring-blue-800 ring-opacity-50'
-                    : isSunday
-                    ? 'border-blue-200 dark:border-blue-800 bg-gradient-to-br from-blue-50/80 to-blue-50/40 dark:from-blue-900/30 dark:to-blue-900/10'
-                    : 'border-border dark:border-border-dark hover:border-accent-blue/30 dark:hover:border-accent-blue-dark/30'
-                }`}
-              >
-                <div className={`px-5 py-4 border-b-2 rounded-t-xl ${
-                  isToday
-                    ? 'border-blue-200 dark:border-blue-700 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/20 dark:to-transparent'
-                    : isSunday
-                    ? 'border-blue-200 dark:border-blue-700 bg-gradient-to-r from-blue-100/50 to-transparent dark:from-blue-800/30 dark:to-transparent'
-                    : 'border-border dark:border-border-dark'
+          return (
+            <motion.div
+              key={date}
+              variants={createVariants}
+              initial="initial"
+              animate="animate"
+              className={`p-5 rounded-xl border-2 transition-all duration-200 ${
+                isToday
+                  ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-r from-blue-50/30 to-transparent dark:from-blue-900/20 dark:to-transparent shadow-md'
+                  : isSunday
+                  ? 'border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/30 dark:to-transparent shadow-sm'
+                  : 'border-border dark:border-border-dark bg-surface/30 dark:bg-surface-dark/30 shadow-sm hover:shadow-md'
+              }`}
+            >
+              {/* Date Header */}
+              <div className="flex items-center gap-4 mb-4">
+                <div className={`flex items-baseline gap-2 ${
+                  isToday ? 'text-blue-600 dark:text-blue-400' : 'text-text-primary dark:text-text-primary-dark'
                 }`}>
-                  <div className="flex items-center justify-between">
-                    <div className="flex flex-col">
-                      <div className={`text-xs font-bold text-text-tertiary dark:text-text-tertiary-dark uppercase tracking-wider mb-1 ${
-                        isToday ? 'text-blue-600 dark:text-blue-400' : ''
-                      }`}>
-                        {dayNames[idx]}
-                      </div>
-                      <div
-                        className={`text-2xl font-extrabold leading-none ${
-                          isToday
-                            ? 'text-blue-600 dark:text-blue-400'
-                            : isSunday
-                            ? 'text-blue-700 dark:text-blue-300'
-                            : 'text-text-primary dark:text-text-primary-dark'
-                        }`}
-                      >
-                        {dayjs(date).format('D')}
-                      </div>
-                    </div>
-                    {isSunday && (
-                      <span className="text-xs font-bold bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-3 py-1.5 rounded-full shadow-md">
-                        Planning
-                      </span>
-                    )}
-                  </div>
+                  <span className="text-2xl font-bold">{dayjs(date).format('D')}</span>
+                  <span className="text-sm font-semibold uppercase tracking-wide">{dayNames[idx]}</span>
                 </div>
-                <div className="p-4 min-h-[500px] max-h-[70vh] overflow-y-auto custom-scrollbar">
-                  <AnimatePresence mode="popLayout">
-                    {dayTasks.length === 0 && dayModules.length === 0 ? (
-                      <div className="flex items-center justify-center h-full min-h-[450px]">
-                        <p className="text-sm text-text-tertiary dark:text-text-tertiary-dark font-medium opacity-60">No tasks</p>
-                      </div>
-                    ) : (
-                      <motion.div
-                        variants={staggerContainer}
-                        initial="initial"
-                        animate="animate"
-                        className="space-y-2"
-                      >
-                        {dayModules.map((module) => (
+                {isSunday && (
+                  <span className="text-xs font-bold bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-3 py-1 rounded-full shadow-sm">
+                    Planning
+                  </span>
+                )}
+                {isToday && (
+                  <span className="text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded-full shadow-sm">
+                    Today
+                  </span>
+                )}
+              </div>
+
+              {/* Cards Container */}
+              {!hasItems ? (
+                <div className="py-4">
+                  <p className="text-sm text-text-tertiary dark:text-text-tertiary-dark">No tasks</p>
+                </div>
+              ) : (
+                <div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                    <AnimatePresence mode="popLayout">
+                      {/* Scheduled Modules */}
+                      {dayModules.map((module) => (
+                        <motion.div
+                          key={`module-${module.id}`}
+                          variants={createVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                          layout
+                          className="group p-4 border-2 border-purple-300 dark:border-purple-600 rounded-xl transition-all duration-200 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/30 dark:to-purple-900/10 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md cursor-pointer"
+                          onClick={() => handleNavigateToCourse(module)}
+                        >
+                          <div className="flex flex-col gap-3">
+                            <div className="flex items-center gap-2 justify-between">
+                              <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-semibold px-2 py-1 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-md">
+                                  {module.courseType === 'coding' ? '💻 Coding' : '📈 Trading'}
+                                </span>
+                                {module.completed && (
+                                  <span className="text-xs font-medium px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
+                                    ✓ Done
+                                  </span>
+                                )}
+                              </div>
+                              <select
+                                value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
+                                onChange={(e) => handleRescheduleModule(module, e.target.value)}
+                                className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                {weekDays.map((d, i) => (
+                                  <option key={d} value={d}>
+                                    {dayNames[i]}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <div>
+                              <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1 opacity-90">
+                                {module.courseName}
+                              </p>
+                              <p
+                                className={`text-sm font-semibold leading-tight ${
+                                  module.completed
+                                    ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
+                                    : 'text-text-primary dark:text-text-primary-dark'
+                                }`}
+                              >
+                                {module.name}
+                              </p>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+
+                      {/* Regular Tasks */}
+                      {dayTasks.map((task) => {
+                        const project = projects.find((p) => p.id === task.projectId)
+                        const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
+                        const isAnimating = animatingTaskId === task.id
+                        return (
                           <motion.div
-                            key={`module-${module.id}`}
+                            key={task.id}
                             variants={createVariants}
                             initial="initial"
                             animate="animate"
                             exit="exit"
                             layout
-                            className="group p-3 border-2 border-purple-300 dark:border-purple-600 rounded-lg transition-all duration-200 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/30 dark:to-purple-900/10 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-sm cursor-pointer"
-                            onClick={() => handleNavigateToCourse(module)}
+                            className={`group p-4 border-2 rounded-xl transition-all duration-200 ${
+                              task.completed
+                                ? 'bg-gray-50 dark:bg-gray-900/30 border-gray-200 dark:border-gray-700 opacity-60'
+                                : 'bg-white dark:bg-surface-dark border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-md'
+                            }`}
                           >
-                            <div className="flex flex-col gap-2">
-                              <div className="flex items-center gap-2 justify-between">
+                            <motion.div
+                              animate={isAnimating ? updateVariants.animate : {}}
+                              className="flex items-start gap-3"
+                            >
+                              <input
+                                type="checkbox"
+                                checked={task.completed}
+                                onChange={() => handleToggleComplete(task.id, task.completed)}
+                                className="mt-1 h-5 w-5 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 border-gray-300 dark:border-gray-600 rounded cursor-pointer transition-colors duration-200"
+                              />
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-start justify-between gap-2 mb-2">
+                                  <p
+                                    className={`text-sm font-medium leading-snug ${
+                                      task.completed
+                                        ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
+                                        : 'text-text-primary dark:text-text-primary-dark'
+                                    }`}
+                                  >
+                                    {task.title}
+                                  </p>
+                                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+                                    <select
+                                      value={new Date(task.scheduledDate).toISOString().split('T')[0]}
+                                      onChange={(e) => handleAssignTask(task, e.target.value)}
+                                      className="text-xs border border-gray-300 dark:border-gray-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-gray-800 text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors duration-200"
+                                      onClick={(e) => e.stopPropagation()}
+                                    >
+                                      {weekDays.map((d, i) => (
+                                        <option key={d} value={d}>
+                                          {dayNames[i]}
+                                        </option>
+                                      ))}
+                                    </select>
+                                    <button
+                                      onClick={() => handleDelete(task.id)}
+                                      className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                      title="Delete task"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                </div>
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-semibold px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-md">
-                                    {module.courseType === 'coding' ? 'Coding' : 'Trading'}
+                                  <span className="text-xs font-medium px-2 py-1 bg-gray-100 dark:bg-gray-800 text-text-secondary dark:text-text-secondary-dark rounded-md">
+                                    {taskTypeDisplay}
                                   </span>
-                                  {module.completed && (
-                                    <span className="text-xs font-medium px-2 py-0.5 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
-                                      ✓ Done
-                                    </span>
+                                  {project && (
+                                    <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark">• {project.name}</span>
                                   )}
                                 </div>
-                                <select
-                                  value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
-                                  onChange={(e) => handleRescheduleModule(module, e.target.value)}
-                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {weekDays.map((d, i) => (
-                                    <option key={d} value={d}>
-                                      {dayNames[i]}
-                                    </option>
-                                  ))}
-                                </select>
                               </div>
-                              <div>
-                                <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-0.5 opacity-90">
-                                  {module.courseName}
-                                </p>
-                                <p
-                                  className={`text-sm font-medium leading-tight ${
-                                    module.completed
-                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
-                                      : 'text-text-primary dark:text-text-primary-dark'
-                                  }`}
-                                >
-                                  {module.name}
-                                </p>
-                              </div>
-                            </div>
-                          </motion.div>
-                        ))}
-                        {dayTasks.map((task) => {
-                          const project = projects.find((p) => p.id === task.projectId)
-                          const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
-                          const isAnimating = animatingTaskId === task.id
-                          return (
-                            <motion.div
-                              key={task.id}
-                              variants={createVariants}
-                              initial="initial"
-                              animate="animate"
-                              exit="exit"
-                              layout
-                              className={`group p-3 border rounded-lg transition-all duration-200 ${
-                                task.completed
-                                  ? 'bg-background dark:bg-background-dark border-border dark:border-border-dark opacity-60'
-                                  : 'bg-white dark:bg-surface-dark border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark hover:shadow-sm'
-                              }`}
-                            >
-                              <motion.div
-                                animate={isAnimating ? updateVariants.animate : {}}
-                                className="flex items-start gap-2"
-                              >
-                                <input
-                                  type="checkbox"
-                                  checked={task.completed}
-                                  onChange={() => handleToggleComplete(task.id, task.completed)}
-                                  className="mt-0.5 h-4 w-4 text-accent-blue dark:text-accent-blue-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark border-border dark:border-border-dark rounded cursor-pointer transition-colors duration-200"
-                                />
-                                <div className="flex-1 min-w-0">
-                                  <div className="flex items-start justify-between gap-2">
-                                    <p
-                                      className={`text-sm font-medium leading-tight ${
-                                        task.completed
-                                          ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
-                                          : 'text-text-primary dark:text-text-primary-dark'
-                                      }`}
-                                    >
-                                      {task.title}
-                                    </p>
-                                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
-                                      <select
-                                        value={new Date(task.scheduledDate).toISOString().split('T')[0]}
-                                        onChange={(e) => handleAssignTask(task, e.target.value)}
-                                        className="text-xs border border-border dark:border-border-dark rounded-md px-1.5 py-0.5 bg-white dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-accent-blue focus:border-accent-blue cursor-pointer transition-colors duration-200"
-                                        onClick={(e) => e.stopPropagation()}
-                                      >
-                                        {weekDays.map((d, i) => (
-                                          <option key={d} value={d}>
-                                            {dayNames[i]}
-                                          </option>
-                                        ))}
-                                      </select>
-                                      <button
-                                        onClick={() => handleDelete(task.id)}
-                                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                        title="Delete task"
-                                      >
-                                        ×
-                                      </button>
-                                    </div>
-                                  </div>
-                                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                    <span className="text-xs font-medium px-2 py-0.5 bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark rounded-md">
-                                      {taskTypeDisplay}
-                                    </span>
-                                    {project && (
-                                      <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark truncate">• {project.name}</span>
-                                    )}
-                                  </div>
-                                </div>
-                              </motion.div>
                             </motion.div>
-                          )
-                        })}
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                          </motion.div>
+                        )
+                      })}
+                    </AnimatePresence>
+                  </div>
                 </div>
-              </div>
-            )
-          })}
-        </div>
+              )}
+            </motion.div>
+          )
+        })}
       </div>
 
       {/* Weekly Review Section */}
