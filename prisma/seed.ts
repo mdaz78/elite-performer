@@ -25,13 +25,26 @@ async function main() {
   }
 
   // Check if courses already exist for this user
-  const existingCourses = await prisma.codingCourse.findMany({
+  const existingCodingCourses = await prisma.codingCourse.findMany({
     where: { userId: user.id },
   })
 
-  if (existingCourses.length > 0) {
-    console.log(`⚠️  User already has ${existingCourses.length} courses. Skipping seed.`)
+  if (existingCodingCourses.length > 0) {
+    console.log(`⚠️  User already has ${existingCodingCourses.length} coding courses. Skipping coding seed.`)
     console.log('💡 To reseed, delete existing courses first or modify the seed script.')
+  }
+
+  // Check if trading courses already exist for this user
+  const existingTradingCourses = await prisma.tradingCourse.findMany({
+    where: { userId: user.id },
+  })
+
+  if (existingTradingCourses.length > 0) {
+    console.log(`⚠️  User already has ${existingTradingCourses.length} trading courses. Skipping trading seed.`)
+    console.log('💡 To reseed, delete existing courses first or modify the seed script.')
+  }
+
+  if (existingCodingCourses.length > 0 && existingTradingCourses.length > 0) {
     return
   }
 
@@ -734,30 +747,443 @@ async function main() {
     },
   ]
 
-  // Create courses with modules
-  for (const courseData of coursesData) {
-    const { modules, ...courseInfo } = courseData
-    const course = await prisma.codingCourse.create({
-      data: {
-        name: courseInfo.name,
-        description: courseInfo.description,
-        userId: user.id,
-        startDate: transformationStartDate,
-        targetDate: targetDate,
-        modules: {
-          create: modules.map((module, index) => ({
-            name: module.name,
-            order: index + 1,
-            completed: module.completed,
-            completedAt: module.completed ? new Date() : null,
-          })),
+  // Create coding courses with modules
+  if (existingCodingCourses.length === 0) {
+    for (const courseData of coursesData) {
+      const { modules, ...courseInfo } = courseData
+      const course = await prisma.codingCourse.create({
+        data: {
+          name: courseInfo.name,
+          description: courseInfo.description,
+          userId: user.id,
+          startDate: transformationStartDate,
+          targetDate: targetDate,
+          modules: {
+            create: modules.map((module, index) => ({
+              name: module.name,
+              order: index + 1,
+              completed: module.completed,
+              completedAt: module.completed ? new Date() : null,
+            })),
+          },
         },
-      },
-      include: {
-        modules: true,
-      },
-    })
-    console.log(`✅ Created course: ${course.name} with ${course.modules.length} modules`)
+        include: {
+          modules: true,
+        },
+      })
+      console.log(`✅ Created coding course: ${course.name} with ${course.modules.length} modules`)
+    }
+  }
+
+  // Trading courses data
+  const tradingCoursesData = [
+    {
+      name: "A Beginner's Guide to the Stock Market — Matthew R. Kratter",
+      modules: [
+        { name: "Chapter 1: The World's Greatest Opportunity Machine", completed: false },
+        { name: 'Chapter 2: How to Get Started with Stocks', completed: false },
+        { name: 'Chapter 3: Make Money with ETFs', completed: false },
+        { name: 'Chapter 4: Passive Income with Dividend Stocks', completed: false },
+        { name: 'Chapter 5: Investor Psychology', completed: false },
+        { name: 'Chapter 6: Common Mistakes to Avoid', completed: false },
+        { name: 'Chapter 7: Basic Trading Strategies', completed: false },
+        { name: 'Chapter 8: Next Steps', completed: false },
+      ],
+    },
+    {
+      name: 'The Psychology of Money — Morgan Housel',
+      modules: [
+        { name: "Chapter 1: No One's Crazy", completed: false },
+        { name: 'Chapter 2: Luck & Risk', completed: false },
+        { name: 'Chapter 3: Never Enough', completed: false },
+        { name: 'Chapter 4: Confounding Compounding', completed: false },
+        { name: 'Chapter 5: Getting Wealthy vs Staying Wealthy', completed: false },
+        { name: 'Chapter 6: Tails, You Win', completed: false },
+        { name: 'Chapter 7: Freedom', completed: false },
+        { name: 'Chapter 8: Man in the Car Paradox', completed: false },
+        { name: "Chapter 9: Wealth is What You Don't See", completed: false },
+        { name: 'Chapter 10: Save Money', completed: false },
+        { name: 'Chapter 11: Reasonable > Rational', completed: false },
+        { name: 'Chapter 12: Surprise!', completed: false },
+        { name: 'Chapter 13: Room for Error', completed: false },
+        { name: "Chapter 14: You'll Change", completed: false },
+        { name: "Chapter 15: Nothing's Free", completed: false },
+        { name: 'Chapter 16: You & Me', completed: false },
+        { name: 'Chapter 17: Seduction of Pessimism', completed: false },
+        { name: "Chapter 18: When You'll Believe Anything", completed: false },
+        { name: 'Chapter 19: All Together Now', completed: false },
+        { name: 'Chapter 20: Confessions', completed: false },
+      ],
+    },
+    {
+      name: 'Trading in the Zone — Mark Douglas',
+      modules: [
+        { name: 'Chapter 1: The Road to Success: Fundamental, Technical, or Mental Analysis?', completed: false },
+        { name: 'Chapter 2: The Lure (And the Dangers) of Trading', completed: false },
+        { name: 'Chapter 3: Taking Responsibility', completed: false },
+        { name: 'Chapter 4: Consistency: A State of Mind', completed: false },
+        { name: 'Chapter 5: The Dynamics of Perception', completed: false },
+        { name: "Chapter 6: The Market's Perspective", completed: false },
+        { name: "Chapter 7: The Trader's Edge: Thinking in Probabilities", completed: false },
+        { name: 'Chapter 8: Working With Your Beliefs', completed: false },
+        { name: 'Chapter 9: The Nature of Beliefs', completed: false },
+        { name: 'Chapter 10: Impact of Beliefs on Trading', completed: false },
+        { name: 'Chapter 11: Thinking Like a Trader', completed: false },
+      ],
+    },
+    {
+      name: 'Getting Started in Technical Analysis — Jack Schwager',
+      modules: [
+        { name: 'Chapter 1: Trends', completed: false },
+        { name: 'Chapter 2: Trading Ranges', completed: false },
+        { name: 'Chapter 3: Support and Resistance', completed: false },
+        { name: 'Chapter 4: Chart Patterns', completed: false },
+        { name: 'Chapter 5: Oscillators', completed: false },
+        { name: 'Chapter 6: Reaction Count', completed: false },
+        { name: 'Chapter 7: Run Days', completed: false },
+        { name: 'Chapter 8: Technical Indicators', completed: false },
+        { name: 'Chapter 9: Moving Averages', completed: false },
+        { name: 'Chapter 10: Is Chart Analysis Still Valid?', completed: false },
+        { name: 'Chapter 11: Midtrend Entry and Pyramiding', completed: false },
+        { name: 'Chapter 12: Choosing Stop-Loss Points', completed: false },
+        { name: 'Chapter 13: The Planned Trading Approach', completed: false },
+        { name: 'Chapter 14: Eighty-Two Trading Rules', completed: false },
+        { name: 'Chapter 15: Market Wisdom', completed: false },
+      ],
+    },
+    {
+      name: 'Technical Analysis of the Financial Markets — John J. Murphy',
+      modules: [
+        { name: 'Chapter 1: Introduction to Technical Analysis', completed: false },
+        { name: 'Chapter 2: The Philosophy of Technical Analysis', completed: false },
+        { name: 'Chapter 3: The Basics of Chart Construction', completed: false },
+        { name: 'Chapter 4: Trends', completed: false },
+        { name: 'Chapter 5: Support and Resistance', completed: false },
+        { name: 'Chapter 6: Major Reversal Patterns', completed: false },
+        { name: 'Chapter 7: Continuation Patterns', completed: false },
+        { name: 'Chapter 8: Volume and Open Interest', completed: false },
+        { name: 'Chapter 9: Moving Averages', completed: false },
+        { name: 'Chapter 10: Oscillators', completed: false },
+        { name: 'Chapter 11: Indicators', completed: false },
+        { name: 'Chapter 12: Technical Analysis in Practice', completed: false },
+        { name: 'Chapter 13: Putting it All Together', completed: false },
+      ],
+    },
+    {
+      name: 'Currency Trading for Dummies — Brian Dolan',
+      modules: [
+        { name: 'Chapter 1: Currency Trading 101', completed: false },
+        { name: 'Chapter 2: What is the Forex Market?', completed: false },
+        { name: 'Chapter 3: Who Trades Currencies? Meet the Players', completed: false },
+        { name: 'Chapter 4: Major Currency Pairs', completed: false },
+        { name: 'Chapter 5: Minor Currency Pairs', completed: false },
+        { name: 'Chapter 6: Cross-Currency Trading', completed: false },
+        { name: 'Chapter 7: Getting Started', completed: false },
+        { name: 'Chapter 8: Fundamental Analysis', completed: false },
+        { name: 'Chapter 9: Technical Analysis', completed: false },
+        { name: 'Chapter 10: Creating Your Trading Plan', completed: false },
+        { name: 'Chapter 11: Risk Management', completed: false },
+        { name: 'Chapter 12: Advanced Trading Techniques', completed: false },
+        { name: 'Chapter 13: Becoming a Successful Trader', completed: false },
+      ],
+    },
+    {
+      name: 'One Up On Wall Street — Peter Lynch',
+      modules: [
+        { name: 'Chapter 1: The Making of a Stockpicker', completed: false },
+        { name: 'Chapter 2: The Wall Street Oxymorons', completed: false },
+        { name: 'Chapter 3: Is This Gambling, or What?', completed: false },
+        { name: 'Chapter 4: Passing the Mirror Test', completed: false },
+        { name: 'Chapter 5: Is This a Good Market?', completed: false },
+        { name: 'Chapter 6: Stalking the Tenbagger', completed: false },
+        { name: "Chapter 7: I've Got It, I've Got It—What Is It?", completed: false },
+        { name: 'Chapter 8: The Perfect Stock, What a Deal!', completed: false },
+        { name: "Chapter 9: Stocks I'd Avoid", completed: false },
+        { name: 'Chapter 10: Earnings, Earnings, Earnings', completed: false },
+        { name: 'Chapter 11: The Two-Minute Drill', completed: false },
+        { name: 'Chapter 12: Getting the Facts', completed: false },
+        { name: 'Chapter 13: Some Famous Numbers', completed: false },
+        { name: 'Chapter 14: Rechecking the Story', completed: false },
+        { name: 'Chapter 15: The Final Checklist', completed: false },
+      ],
+    },
+    {
+      name: "How to Make Money in Stocks — William J. O'Neil",
+      modules: [
+        { name: 'Chapter 1: The Most Important Thing', completed: false },
+        { name: 'Chapter 2: The Three Types of Companies', completed: false },
+        { name: 'Chapter 3: Seven Common Characteristics of Winning Stocks', completed: false },
+        { name: 'Chapter 4: Common Investor Mistakes', completed: false },
+        { name: 'Chapter 5: The CAN SLIM Investing System', completed: false },
+        { name: 'Chapter 6: How to Identify a Properly Formed Base', completed: false },
+        { name: 'Chapter 7: Buy Rules for Winning Stocks', completed: false },
+        { name: 'Chapter 8: How to Sell', completed: false },
+        { name: 'Chapter 9: Market Trends', completed: false },
+        { name: 'Chapter 10: Price and Volume Action', completed: false },
+        { name: 'Chapter 11: Developing Your Investment Plan', completed: false },
+      ],
+    },
+    {
+      name: 'Day Trading and Swing Trading the Currency Market — Kathy Lien',
+      modules: [
+        { name: 'Chapter 1: Understanding Forex Markets', completed: false },
+        { name: 'Chapter 2: Market Participants', completed: false },
+        { name: 'Chapter 3: Currency Pairs', completed: false },
+        { name: 'Chapter 4: What Moves the Currency Market?', completed: false },
+        { name: 'Chapter 5: Trading Strategies for Major Market Conditions', completed: false },
+        { name: 'Chapter 6: Technical Trading Strategies', completed: false },
+        { name: 'Chapter 7: Fundamental Trading Strategies', completed: false },
+        { name: 'Chapter 8: Profitable Patterns and Setups', completed: false },
+        { name: 'Chapter 9: Risk Management in FX', completed: false },
+        { name: 'Chapter 10: Day Trading Tactics', completed: false },
+        { name: 'Chapter 11: Swing Trading Tactics', completed: false },
+        { name: 'Chapter 12: Advanced Strategies', completed: false },
+      ],
+    },
+    {
+      name: 'Market Wizards — Jack Schwager',
+      modules: [
+        { name: 'Preface', completed: false },
+        { name: 'Prologue', completed: false },
+        { name: 'Marty Schwartz: Champion Trader', completed: false },
+        { name: 'James B. Rogers, Jr.: Buying Value and Selling Hysteria', completed: false },
+        { name: 'Mark Weinstein: High-Percentage Trader', completed: false },
+        { name: 'Brian Gelber: Trader and Volume', completed: false },
+        { name: 'Tom Baldwin: Trading T-Bonds', completed: false },
+        { name: 'Tony Saliba: Options Trader', completed: false },
+        { name: 'Dr. Van K. Tharp: Trading Psychology', completed: false },
+        { name: 'Ed Seykota: Systems Trading', completed: false },
+        { name: 'Interview Summaries', completed: false },
+      ],
+    },
+    {
+      name: 'How to Day Trade for a Living — Andrew Aziz',
+      modules: [
+        { name: 'Chapter 1: Why Day Trade?', completed: false },
+        { name: 'Chapter 2: Market Basics', completed: false },
+        { name: 'Chapter 3: Day Trading Tools', completed: false },
+        { name: 'Chapter 4: Building a Strategy', completed: false },
+        { name: 'Chapter 5: Developing a Trading Plan', completed: false },
+        { name: 'Chapter 6: Day Trading Strategies', completed: false },
+        { name: 'Chapter 7: Money Management', completed: false },
+        { name: 'Chapter 8: Psychology and Risk', completed: false },
+        { name: 'Chapter 9: Getting Started', completed: false },
+        { name: 'Chapter 10: Advanced Tips', completed: false },
+      ],
+    },
+    {
+      name: 'Volume Price Analysis — Anna Coulling',
+      modules: [
+        { name: "Chapter 1: There's Nothing New in Trading", completed: false },
+        { name: 'Chapter 2: Why Volume', completed: false },
+        { name: 'Chapter 3: The Right Price', completed: false },
+        { name: 'Chapter 4: Volume Price Analysis - First Principles', completed: false },
+        { name: 'Chapter 5: Building the Picture', completed: false },
+        { name: 'Chapter 6: The Next Level', completed: false },
+        { name: 'Chapter 7: Support and Resistance Explained', completed: false },
+        { name: 'Chapter 8: Dynamic Trends and Trend Lines', completed: false },
+        { name: 'Chapter 9: Volume at Price (VAP)', completed: false },
+        { name: 'Chapter 10: Examples', completed: false },
+        { name: 'Chapter 11: Putting it All Together', completed: false },
+        { name: 'Chapter 12: Volume and Price—The Next Generation', completed: false },
+      ],
+    },
+    {
+      name: 'A Complete Guide to Volume Price Analysis — Anna Coulling',
+      modules: [
+        { name: "Chapter 1: There's Nothing New in Trading", completed: false },
+        { name: 'Chapter 2: Why Volume', completed: false },
+        { name: 'Chapter 3: The Right Price', completed: false },
+        { name: 'Chapter 4: Volume Price Analysis - First Principles', completed: false },
+        { name: 'Chapter 5: Building the Picture', completed: false },
+        { name: 'Chapter 6: The Next Level', completed: false },
+        { name: 'Chapter 7: Support and Resistance Explained', completed: false },
+        { name: 'Chapter 8: Dynamic Trends and Trend Lines', completed: false },
+        { name: 'Chapter 9: Volume at Price (VAP)', completed: false },
+        { name: 'Chapter 10: Volume Price Analysis Examples', completed: false },
+        { name: 'Chapter 11: Putting it All Together', completed: false },
+        { name: 'Chapter 12: Volume and Price—The Next Generation', completed: false },
+      ],
+    },
+    {
+      name: 'The New Market Wizards — Jack Schwager',
+      modules: [
+        { name: 'Preface', completed: false },
+        { name: 'Prologue', completed: false },
+        { name: 'Misadventures in Trading', completed: false },
+        { name: 'Bill Lipschutz: The Sultan of Currencies', completed: false },
+        { name: 'Randy McKay: Veteran Trader', completed: false },
+        { name: 'Linda Bradford Raschke: Reading the Music of the Markets', completed: false },
+        { name: 'CRT: The Trading Machine', completed: false },
+        { name: 'Mark Ritchie: God in the Pits', completed: false },
+        { name: 'Joe Ritchie: The Intuitive Theoretician', completed: false },
+        { name: 'Blair Hull: Getting the Edge', completed: false },
+        { name: 'Jeff Yass: The Mathematics of Strategy', completed: false },
+        { name: 'The Psychology of Trading', completed: false },
+        { name: 'Zen and the Art of Trading', completed: false },
+        { name: 'Charles Faulkner: The Mind of an Achiever', completed: false },
+        { name: 'Institutional Trader Interviews', completed: false },
+      ],
+    },
+    {
+      name: 'Trade Like a Stock Market Wizard — Mark Minervini',
+      modules: [
+        { name: 'Chapter 1: An Introduction Worth Reading', completed: false },
+        { name: 'Chapter 2: What You Need to Know First', completed: false },
+        { name: 'Chapter 3: Specific Entry Point Analysis: The SEPA Strategy', completed: false },
+        { name: 'Chapter 4: Value Comes at a Price', completed: false },
+        { name: 'Chapter 5: Trading with the Trend', completed: false },
+        { name: 'Chapter 6: Categories, Industry Groups, and Catalysts', completed: false },
+        { name: 'Chapter 7: Fundamentals to Focus On', completed: false },
+        { name: 'Chapter 8: Assessing Earnings Quality', completed: false },
+        { name: 'Chapter 9: Follow the Leaders', completed: false },
+        { name: 'Chapter 10: A Picture Is Worth a Million Dollars', completed: false },
+        { name: "Chapter 11: Don't Just Buy What You Know", completed: false },
+        { name: 'Chapter 12: The Nature of Risk', completed: false },
+        { name: 'Chapter 13: How to Deal with and Control Risk', completed: false },
+      ],
+    },
+    {
+      name: 'Beat the Forex Dealer — Agustin Silvani',
+      modules: [
+        { name: 'Acknowledgments', completed: false },
+        { name: 'Introduction', completed: false },
+        { name: 'Part I: Through the Eyes of a Trader - On Markets', completed: false },
+        { name: 'Part I: Through the Eyes of a Trader - The Currency Market', completed: false },
+        { name: 'Part I: Through the Eyes of a Trader - A Rare Breed', completed: false },
+        { name: 'Part I: Through the Eyes of a Trader - FX Dealers', completed: false },
+        { name: "Part I: Through the Eyes of a Trader - Today's FX Market", completed: false },
+        { name: 'Part I: Through the Eyes of a Trader - The Players', completed: false },
+        { name: 'Part II: The Retail Side of Things - Card Stacking', completed: false },
+        { name: "Part II: The Retail Side of Things - Don't Trust Your FCM", completed: false },
+        { name: 'Part II: The Retail Side of Things - Third-Party Services', completed: false },
+        { name: 'Part II: The Retail Side of Things - Fighting Back', completed: false },
+        { name: 'Part III: Joining the 10% - Becoming a Great Trader', completed: false },
+        { name: 'Part III: Joining the 10% - Picking the Right Approach', completed: false },
+        { name: 'Part IV: FX Trading Tips - Dealer Trades', completed: false },
+        { name: 'Part IV: FX Trading Tips - Trading Against Dealers', completed: false },
+        { name: 'Part IV: FX Trading Tips - The Big Figure Trade', completed: false },
+        { name: 'Part IV: FX Trading Tips - The Friday to Sunday Extension', completed: false },
+        { name: 'Part IV: FX Trading Tips - Sticking it to Your Dealer', completed: false },
+        { name: 'Part V: The Future - The End of the Beginning', completed: false },
+        { name: "Appendix: Trading How-To's, FX Glossary, Maxims", completed: false },
+      ],
+    },
+    {
+      name: 'Mastering the Trade — John Carter',
+      modules: [
+        { name: 'Chapter 1: What Really Causes the Markets to Move?', completed: false },
+        { name: "Chapter 2: Psychology 101: What Didn't They Teach in School?", completed: false },
+        { name: 'Chapter 3: Hardware and Software—Top Tools for Traders', completed: false },
+        { name: 'Chapter 4: Futures Markets 101—Understanding the Basics', completed: false },
+        { name: 'Chapter 5: Stock Options: How Do They Work?', completed: false },
+        { name: 'Chapter 6: The Stock Market Is Now Open', completed: false },
+        { name: 'Chapter 7: The Opening Gap', completed: false },
+        { name: 'Chapter 8: Pivot Points', completed: false },
+        { name: 'Chapter 9: Tick Fades', completed: false },
+        { name: 'Chapter 10: Reverting Back to the Mean', completed: false },
+        { name: 'Chapter 11: The Squeeze', completed: false },
+        { name: 'Chapter 12: Brick Plays', completed: false },
+        { name: 'Chapter 13: The 3:52 Play', completed: false },
+        { name: 'Chapter 14: HOLP and LOHP', completed: false },
+        { name: 'Chapter 15: Propulsion Plays', completed: false },
+        { name: 'Chapter 16: Gold Trades', completed: false },
+        { name: 'Chapter 17: Live Trading Room', completed: false },
+        { name: 'Chapter 18: Premarket Checklist', completed: false },
+        { name: "Chapter 19: Trader's Business Plan", completed: false },
+        { name: 'Chapter 20: Tips and Tricks', completed: false },
+        { name: 'Chapter 21: Mastering the Trade', completed: false },
+      ],
+    },
+    {
+      name: 'Systematic Trading — Robert Carver',
+      modules: [
+        { name: 'Preface', completed: false },
+        { name: 'Introduction', completed: false },
+        { name: 'Part 1: Theory - The Theory Behind Systematic Trading', completed: false },
+        { name: 'Part 1: Theory - Human Biases', completed: false },
+        { name: 'Part 1: Theory - The Death of Rational Economic Man', completed: false },
+        { name: 'Part 2: Toolbox - Designing Effective Strategies', completed: false },
+        { name: 'Part 2: Toolbox - Position Management Framework', completed: false },
+        { name: 'Part 2: Toolbox - Portfolio Allocation', completed: false },
+        { name: 'Part 2: Toolbox - Backtesting', completed: false },
+        { name: 'Part 3: Framework - Creating Rules', completed: false },
+        { name: 'Part 3: Framework - Fully Systematic/Discretionary Management', completed: false },
+        { name: 'Part 4: Practice - Application Examples', completed: false },
+        { name: 'Epilogue: What Makes a Good Systematic Trader?', completed: false },
+        { name: 'Appendices: Resources, Trading Rules, Portfolio Optimization, Details', completed: false },
+      ],
+    },
+    {
+      name: 'Algorithmic Trading — Ernest P. Chan',
+      modules: [
+        { name: 'Preface', completed: false },
+        { name: 'Chapter 1: Backtesting and Automated Execution', completed: false },
+        { name: 'Chapter 2: Basics of Mean Reversion', completed: false },
+        { name: 'Chapter 3: Implementing Mean Reversion Strategies', completed: false },
+        { name: 'Chapter 4: Mean Reversion of Stocks and ETFs', completed: false },
+        { name: 'Chapter 5: Mean Reversion of Currencies and Futures', completed: false },
+        { name: 'Chapter 6: Interday Momentum Strategies', completed: false },
+        { name: 'Chapter 7: Intraday Momentum Strategies', completed: false },
+        { name: 'Chapter 8: Risk Management', completed: false },
+        { name: 'Conclusion', completed: false },
+        { name: 'Bibliography', completed: false },
+        { name: 'About the Author', completed: false },
+      ],
+    },
+    {
+      name: 'Reminiscences of a Stock Operator — Edwin Lefevre',
+      modules: [
+        { name: 'Chapter 1: The Early Years — Lessons from the Bucket Shops', completed: false },
+        { name: 'Chapter 2: Wall Street and the Perils of Leverage', completed: false },
+        { name: 'Chapter 3: The Importance of Market Timing and Patience', completed: false },
+        { name: 'Chapter 4: Overcoming Adversity and Learning from Mistakes', completed: false },
+        { name: 'Chapter 5: The Art of Short Selling and Market Manipulation', completed: false },
+        { name: 'Chapter 6: Expanding Horizons — Trading Commodities and Beyond', completed: false },
+        { name: 'Chapter 7: Lessons in Risk — Managing Drawdowns and Setbacks', completed: false },
+        { name: 'Chapter 8: The Psychology of Speculation — Controlling Greed and Fear', completed: false },
+        { name: "Chapter 9: Manipulating the Market — The Operator's Art", completed: false },
+        { name: 'Chapter 10: Dealing with Market Insiders and Tips', completed: false },
+        { name: 'Chapter 11: Surviving Booms and Busts — The Market Cycle', completed: false },
+        { name: 'Chapter 12: Bankruptcy and Recovery — Rising from Ruin', completed: false },
+        { name: 'Chapter 13: Government Interventions and Unforeseen Events', completed: false },
+        { name: 'Chapter 14: On Market Regulations and Ethics', completed: false },
+        { name: 'Chapter 15: Losing Streaks — Handling Extended Adversity', completed: false },
+        { name: 'Chapter 16: Bankrupt Again — Lessons in Humility', completed: false },
+        { name: 'Chapter 17: Rebuilding Reputation and Capital', completed: false },
+        { name: 'Chapter 18: The Power of Observation — Tape Reading Mastery', completed: false },
+        { name: 'Chapter 19: The Final Years — Wisdom and Trading Rules', completed: false },
+        { name: 'Chapter 20: Legacy in the Markets — Reflections and Enduring Principles', completed: false },
+      ],
+    },
+  ]
+
+  // Create trading courses with modules
+  if (existingTradingCourses.length === 0) {
+    for (const courseData of tradingCoursesData) {
+      const { modules, ...courseInfo } = courseData
+      const course = await prisma.tradingCourse.create({
+        data: {
+          name: courseInfo.name,
+          description: courseInfo.description,
+          userId: user.id,
+          startDate: transformationStartDate,
+          targetDate: targetDate,
+          modules: {
+            create: modules.map((module, index) => ({
+              name: module.name,
+              order: index + 1,
+              completed: module.completed,
+              completedAt: module.completed ? new Date() : null,
+            })),
+          },
+        },
+        include: {
+          modules: true,
+        },
+      })
+      console.log(`✅ Created trading course: ${course.name} with ${course.modules.length} modules`)
+    }
   }
 
   console.log('🎉 Seed completed successfully!')
