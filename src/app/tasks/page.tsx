@@ -232,7 +232,7 @@ function TasksPageContent() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-gray-500">Loading tasks...</p>
+        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading tasks...</p>
       </div>
     )
   }
@@ -243,8 +243,8 @@ function TasksPageContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Tasks</h1>
-        <p className="mt-2 text-gray-600">Plan your week and manage your tasks</p>
+        <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Tasks</h1>
+        <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Plan your week and manage your tasks</p>
       </div>
 
       {/* Week Selector */}

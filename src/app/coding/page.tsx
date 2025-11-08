@@ -48,7 +48,7 @@ function CodingPageContent() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-gray-500">Loading courses...</p>
+        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading courses...</p>
       </div>
     )
   }
@@ -57,13 +57,13 @@ function CodingPageContent() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Coding Courses</h1>
-          <p className="mt-2 text-gray-600">Track your learning progress</p>
+          <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Coding Courses</h1>
+          <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Track your learning progress</p>
         </div>
         <div className="flex gap-3">
           <button
             onClick={() => setShowAddDialog(true)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
           >
             Add Course
           </button>
@@ -73,12 +73,12 @@ function CodingPageContent() {
       {coursesWithProgress.length === 0 ? (
         <Card>
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">
+            <p className="text-text-tertiary dark:text-text-tertiary-dark mb-4 transition-colors duration-200">
               No courses yet. Add your first course to get started!
             </p>
             <button
               onClick={() => setShowAddDialog(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
               Add Course
             </button>
@@ -94,7 +94,7 @@ function CodingPageContent() {
             >
               <div className="mb-4 relative z-0">
                 <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-500 transition-colors">
+                  <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark group-hover:text-accent-blue dark:group-hover:text-accent-blue-dark transition-colors duration-200">
                     {course.name}
                   </h3>
                   <button
@@ -102,7 +102,7 @@ function CodingPageContent() {
                       e.stopPropagation()
                       handleDeleteCourse(course.id)
                     }}
-                    className="text-red-600 hover:text-red-700 relative z-20 p-1.5 hover:bg-red-100 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-md cursor-pointer"
+                    className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 relative z-20 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-md cursor-pointer"
                     aria-label={`Delete ${course.name}`}
                     title="Delete course"
                   >
@@ -117,20 +117,20 @@ function CodingPageContent() {
                   </button>
                 </div>
                 {course.description && (
-                  <p className="text-sm text-gray-600 mb-2">{course.description}</p>
+                  <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">{course.description}</p>
                 )}
                 {course.startDate && (
-                  <p className="text-xs text-gray-500">
+                  <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
                     Started: {formatDisplayDate(course.startDate.toISOString())}
                   </p>
                 )}
               </div>
               <ProgressBar progress={course.progress} color="career" showPercentage={true} />
               <div className="mt-4 flex justify-between items-center">
-                <span className="text-sm text-blue-500 font-medium group-hover:underline">
+                <span className="text-sm text-accent-blue dark:text-accent-blue-dark font-medium group-hover:underline transition-colors duration-200">
                   View Details →
                 </span>
-                <span className="text-xs text-gray-500">{Math.round(course.progress)}%</span>
+                <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">{Math.round(course.progress)}%</span>
               </div>
             </Card>
           ))}

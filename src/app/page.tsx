@@ -58,8 +58,8 @@ function DashboardContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="mt-2 text-gray-600">180-Day Transformation Overview</p>
+        <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Dashboard</h1>
+        <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">180-Day Transformation Overview</p>
       </div>
 
       {/* 180-Day Progress */}
@@ -67,8 +67,8 @@ function DashboardContent() {
         <Card className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-gray-900">Transformation Progress</h2>
-              <p className="text-sm text-gray-600 mt-1">
+              <h2 className="text-xl font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Transformation Progress</h2>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-1 transition-colors duration-200">
                 {daysRemaining} days remaining • Started {formatDisplayDate(startDate)}
               </p>
             </div>
@@ -82,17 +82,17 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Coding Progress</p>
-              <p className="text-2xl font-bold text-blue-500 mt-1">{Math.round(codingProgress)}%</p>
+              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Coding Progress</p>
+              <p className="text-2xl font-bold text-accent-blue dark:text-accent-blue-dark mt-1 transition-colors duration-200">{Math.round(codingProgress)}%</p>
             </div>
-            <div className="p-3 bg-blue-500/10 rounded-lg">
-              <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-accent-blue/10 dark:bg-accent-blue-dark/10 rounded-lg transition-colors duration-200">
+              <svg className="w-8 h-8 text-accent-blue dark:text-accent-blue-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/coding" className="text-sm text-blue-500 hover:underline">
+            <Link href="/coding" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
               View courses →
             </Link>
           </div>
@@ -101,19 +101,19 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Fitness</p>
-              <p className="text-2xl font-bold text-amber-500 mt-1">
+              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Fitness</p>
+              <p className="text-2xl font-bold text-accent-amber dark:text-accent-amber-dark mt-1 transition-colors duration-200">
                 {latestWeight ? `${latestWeight} lbs` : 'No data'}
               </p>
             </div>
-            <div className="p-3 bg-amber-500/10 rounded-lg">
-              <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-accent-amber/10 dark:bg-accent-amber-dark/10 rounded-lg transition-colors duration-200">
+              <svg className="w-8 h-8 text-accent-amber dark:text-accent-amber-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/fitness" className="text-sm text-amber-500 hover:underline">
+            <Link href="/fitness" className="text-sm text-accent-amber dark:text-accent-amber-dark hover:underline transition-colors duration-200">
               View logs →
             </Link>
           </div>
@@ -122,22 +122,22 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-gray-600">Trading</p>
-              <p className="text-2xl font-bold text-emerald-500 mt-1">
+              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Trading</p>
+              <p className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark mt-1 transition-colors duration-200">
                 ${tradingStats?.totalPnL?.toFixed(2) || '0.00'}
               </p>
-              <p className="text-xs text-gray-500 mt-1">
+              <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
                 {tradingStats?.totalTrades || 0} trades • {tradingStats?.winRate?.toFixed(1) || 0}% win rate
               </p>
             </div>
-            <div className="p-3 bg-emerald-500/10 rounded-lg">
-              <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
+              <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/trading" className="text-sm text-emerald-500 hover:underline">
+            <Link href="/trading" className="text-sm text-accent-emerald dark:text-accent-emerald-dark hover:underline transition-colors duration-200">
               View journal →
             </Link>
           </div>
@@ -148,29 +148,29 @@ function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Today's Tasks">
           {todayTasks.length === 0 ? (
-            <p className="text-gray-500 text-sm">No tasks scheduled for today</p>
+            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200">No tasks scheduled for today</p>
           ) : (
             <ul className="space-y-2">
               {todayTasks.map((task) => (
-                <li key={task.id} className="flex items-center justify-between p-2 hover:bg-gray-50 rounded">
+                <li key={task.id} className="flex items-center justify-between p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
                   <div className="flex items-center">
                     <input
                       type="checkbox"
                       checked={task.completed}
                       readOnly
-                      className="mr-3 h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded"
+                      className="mr-3 h-4 w-4 text-accent-blue dark:text-accent-blue-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark border-border dark:border-border-dark rounded transition-colors duration-200"
                     />
-                    <span className={task.completed ? 'line-through text-gray-400' : 'text-gray-900'}>
+                    <span className={task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark transition-colors duration-200'}>
                       {task.title}
                     </span>
                   </div>
-                  <span className="text-xs text-gray-500">{task.type}</span>
+                  <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">{task.type}</span>
                 </li>
               ))}
             </ul>
           )}
           <div className="mt-4">
-            <Link href="/tasks" className="text-sm text-blue-500 hover:underline">
+            <Link href="/tasks" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
               View all tasks →
             </Link>
           </div>
@@ -179,18 +179,18 @@ function DashboardContent() {
         <Card title="This Week's Activity">
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-gray-600 mb-2">Fitness Logs</p>
-              <p className="text-lg font-semibold text-amber-500">{fitnessLogs.length} entries</p>
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">Fitness Logs</p>
+              <p className="text-lg font-semibold text-accent-amber dark:text-accent-amber-dark transition-colors duration-200">{fitnessLogs.length} entries</p>
             </div>
             <div>
-              <p className="text-sm text-gray-600 mb-2">Week Range</p>
-              <p className="text-sm text-gray-900">
+              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">Week Range</p>
+              <p className="text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
                 {formatDisplayDate(weekStart)} - {formatDisplayDate(weekEnd)}
               </p>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/review" className="text-sm text-blue-500 hover:underline">
+            <Link href="/review" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
               Weekly Review →
             </Link>
           </div>
