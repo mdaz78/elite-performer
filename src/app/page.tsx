@@ -22,13 +22,9 @@ function DashboardContent() {
   const [expandedHabits, setExpandedHabits] = useState<Set<number>>(new Set());
   const utils = trpc.useUtils();
 
-  // Load settings for transformation progress
-  const { data: startDateSetting } = trpc.settings.getByKey.useQuery({
-    key: 'transformationStartDate',
-  });
-  const { data: endDateSetting } = trpc.settings.getByKey.useQuery({
-    key: 'transformationEndDate',
-  });
+  // Hardcoded transformation dates
+  const TRANSFORMATION_START_DATE = '2024-11-10'; // Update this to your desired start date
+  const TRANSFORMATION_END_DATE = '2026-05-09'; // Update this to your desired end date (180 days later)
 
   // Load all data
   const { data: courses = [] } = trpc.codingCourses.getAll.useQuery();
@@ -124,12 +120,10 @@ function DashboardContent() {
   };
 
   // Calculate transformation progress
-  const startDate = startDateSetting?.value || today;
-  const endDate = endDateSetting?.value || '';
-  const transformationProgress = endDate ? getProgressPercentage(startDate, endDate) : 0;
-  const daysRemaining = endDate
-    ? getDaysRemaining(endDate, today < startDate ? startDate : today)
-    : 0;
+  const startDate = TRANSFORMATION_START_DATE;
+  const endDate = TRANSFORMATION_END_DATE;
+  const transformationProgress = getProgressPercentage(startDate, endDate);
+  const daysRemaining = getDaysRemaining(endDate, today < startDate ? startDate : today);
 
   // Calculate coding progress
   let totalModules = 0;
@@ -168,21 +162,19 @@ function DashboardContent() {
       </div>
 
       {/* 180-Day Progress */}
-      {startDate && endDate && (
-        <Card className="mb-6">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <h2 className="text-xl font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                Transformation Progress
-              </h2>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-1 transition-colors duration-200">
-                {daysRemaining} days remaining • Started {formatDisplayDate(startDate)}
-              </p>
-            </div>
+      <Card className="mb-6">
+        <div className="flex justify-between items-center mb-4">
+          <div>
+            <h2 className="text-xl font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+              Transformation Progress
+            </h2>
+            <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-1 transition-colors duration-200">
+              {daysRemaining} days remaining • Started {formatDisplayDate(startDate)}
+            </p>
           </div>
-          <ProgressBar progress={transformationProgress} color="career" />
-        </Card>
-      )}
+        </div>
+        <ProgressBar progress={transformationProgress} color="career" />
+      </Card>
 
       {/* Overview Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
