@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import Link from 'next/link'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card, ProgressBar } from '@/src/components'
@@ -12,11 +13,14 @@ import {
   formatDisplayDate,
   getDaysRemaining,
 } from '@/src/utils/date'
+import { Check, ChevronDown, ChevronUp } from 'lucide-react'
 
 function DashboardContent() {
   const today = getToday()
   const weekStart = getWeekStart()
   const weekEnd = getWeekEnd()
+  const [expandedHabits, setExpandedHabits] = useState<Set<number>>(new Set())
+  const utils = trpc.useUtils()
 
   // Load settings for transformation progress
   const { data: startDateSetting } = trpc.settings.getByKey.useQuery({ key: 'transformationStartDate' })
@@ -34,6 +38,33 @@ function DashboardContent() {
     endDate: new Date(today).toISOString(),
   })
   const { data: todayHabits = [] } = trpc.habits.getToday.useQuery()
+
+  // Mutation to toggle sub-habit completion
+  const markSubHabitCompleteMutation = trpc.habits.markSubHabitComplete.useMutation({
+    onSuccess: () => {
+      utils.habits.getToday.invalidate()
+    },
+  })
+
+  const toggleSubHabit = async (subHabitId: number, completed: boolean) => {
+    await markSubHabitCompleteMutation.mutateAsync({
+      subHabitId,
+      date: new Date().toISOString(),
+      completed: !completed,
+    })
+  }
+
+  const toggleExpandHabit = (habitId: number) => {
+    setExpandedHabits((prev) => {
+      const newSet = new Set(prev)
+      if (newSet.has(habitId)) {
+        newSet.delete(habitId)
+      } else {
+        newSet.add(habitId)
+      }
+      return newSet
+    })
+  }
 
   // Calculate transformation progress
   const startDate = startDateSetting?.value || today
@@ -187,11 +218,12 @@ function DashboardContent() {
                 const completedSubHabits = habit.subHabitCompletions.filter((sc) => sc.completed).length
                 const totalSubHabits = habit.subHabits.length
                 const progress = totalSubHabits > 0 ? (completedSubHabits / totalSubHabits) * 100 : 0
+                const isExpanded = expandedHabits.has(habit.id)
 
                 return (
                   <li key={habit.id} className="p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
                     <div className="flex items-center justify-between mb-1">
-                      <div className="flex items-center">
+                      <div className="flex items-center flex-1">
                         <div className={`mr-3 h-4 w-4 rounded border-2 flex items-center justify-center ${
                           isComplete
                             ? 'bg-green-500 border-green-500'
@@ -207,10 +239,64 @@ function DashboardContent() {
                           {habit.name}
                         </span>
                       </div>
+                      {totalSubHabits > 0 && (
+                        <button
+                          onClick={() => toggleExpandHabit(habit.id)}
+                          className="ml-2 p-1 hover:bg-surface dark:hover:bg-surface-dark rounded transition-colors duration-200"
+                          aria-label={isExpanded ? 'Collapse sub-habits' : 'Expand sub-habits'}
+                        >
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-text-secondary dark:text-text-secondary-dark" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-text-secondary dark:text-text-secondary-dark" />
+                          )}
+                        </button>
+                      )}
                     </div>
                     {totalSubHabits > 0 && (
-                      <div className="ml-7 text-xs text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                      <div className="ml-7 text-xs text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-1">
                         {completedSubHabits} / {totalSubHabits} sub-habits ({Math.round(progress)}%)
+                      </div>
+                    )}
+                    {isExpanded && totalSubHabits > 0 && (
+                      <div className="ml-7 mt-2 space-y-1">
+                        {habit.subHabits
+                          .sort((a, b) => a.order - b.order)
+                          .map((subHabit) => {
+                            const subCompletion = habit.subHabitCompletions.find(
+                              (sc) => sc.subHabitId === subHabit.id
+                            )
+                            const isSubComplete = subCompletion?.completed || false
+
+                            return (
+                              <div
+                                key={subHabit.id}
+                                className="flex items-center justify-between p-2 bg-surface dark:bg-surface-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                              >
+                                <span
+                                  className={`text-sm flex-1 ${
+                                    isSubComplete
+                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
+                                      : 'text-text-primary dark:text-text-primary-dark'
+                                  } transition-colors duration-200`}
+                                >
+                                  {subHabit.name}
+                                </span>
+                                <button
+                                  onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
+                                  disabled={markSubHabitCompleteMutation.isPending}
+                                  className={`ml-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                                    isSubComplete
+                                      ? 'bg-accent-blue dark:bg-accent-blue-dark border-accent-blue dark:border-accent-blue-dark text-white'
+                                      : 'border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark'
+                                  } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                  aria-label={isSubComplete ? `Mark ${subHabit.name} as incomplete` : `Mark ${subHabit.name} as complete`}
+                                >
+                                  {isSubComplete && <Check className="w-3 h-3" />}
+                                </button>
+                              </div>
+                            )
+                          })}
                       </div>
                     )}
                   </li>
