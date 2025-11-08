@@ -172,7 +172,23 @@ export const CourseDetail = () => {
       completed: !completed,
       completedAt: !completed ? now : undefined,
     });
-    loadCourse(parseInt(id!, 10));
+
+    // Update local state instead of reloading to preserve scroll position
+    const updatedModules = modules.map((module) =>
+      module.id === moduleId
+        ? {
+            ...module,
+            completed: !completed,
+            completedAt: !completed ? now : undefined,
+          }
+        : module
+    );
+    setModules(updatedModules);
+
+    // Recalculate progress
+    const completedCount = updatedModules.filter((m) => m.completed).length;
+    const prog = updatedModules.length > 0 ? (completedCount / updatedModules.length) * 100 : 0;
+    setProgress(prog);
   };
 
   const handleAddModule = async () => {
