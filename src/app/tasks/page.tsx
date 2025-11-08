@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
+import { Pencil, Trash2 } from 'lucide-react'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card, ProgressBar, TasksTabs, DatePicker } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
@@ -512,10 +513,34 @@ function TasksPageContent() {
                     <motion.div
                       key={taskProject.id}
                       variants={createVariants}
-                      className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer"
+                      className="group relative bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer"
                     >
+                      {/* Hover Actions */}
+                      <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleEditProject(taskProject)
+                          }}
+                          className="p-2 rounded-lg bg-white dark:bg-neutral-50 border border-neutral-200 dark:border-neutral-200 text-primary-600 dark:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-50 hover:border-primary-300 dark:hover:border-primary-300 transition-all duration-150 shadow-sm"
+                          title="Edit project"
+                        >
+                          <Pencil className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleDeleteProject(taskProject.id)
+                          }}
+                          className="p-2 rounded-lg bg-white dark:bg-neutral-50 border border-neutral-200 dark:border-neutral-200 text-error-600 dark:text-error-500 hover:bg-error-100 dark:hover:bg-error-500/15 hover:border-error-400 dark:hover:border-error-400 transition-all duration-150 shadow-sm"
+                          title="Delete project"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+
                       <div className="flex justify-between items-start mb-4">
-                        <div className="flex-1">
+                        <div className="flex-1 pr-20">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-900">
                               {taskProject.name}
@@ -536,20 +561,6 @@ function TasksPageContent() {
                               {formatDisplayDate(taskProject.startDate.toISOString())} - {formatDisplayDate(taskProject.targetDate.toISOString())}
                             </p>
                           )}
-                        </div>
-                        <div className="flex gap-2 ml-4">
-                          <button
-                            onClick={() => handleEditProject(taskProject)}
-                            className="text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-600 text-sm font-medium transition-colors duration-150"
-                          >
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => handleDeleteProject(taskProject.id)}
-                            className="text-error-600 dark:text-error-500 hover:text-error-700 dark:hover:text-error-600 text-sm font-medium transition-colors duration-150"
-                          >
-                            Delete
-                          </button>
                         </div>
                       </div>
 
