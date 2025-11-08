@@ -1,8 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { db } from '@/src/db'
+import { useState, useEffect } from 'react'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import {
   getToday,
   formatDisplayDate,
@@ -13,215 +14,209 @@ import {
   addDays,
   isSameDay,
 } from '@/src/utils/date'
-import type { Task, Project, TaskType, Review } from '@/src/types'
 import dayjs from 'dayjs'
 
-export default function TasksPage() {
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [projects, setProjects] = useState<Project[]>([])
+function TasksPageContent() {
+  const utils = trpc.useUtils()
   const [selectedWeekStart, setSelectedWeekStart] = useState<string>(getWeekStartSunday())
-  const [isLoading, setIsLoading] = useState(true)
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [showReviewSection, setShowReviewSection] = useState(false)
   const [showRolloverDialog, setShowRolloverDialog] = useState(false)
 
-  const [formData, setFormData] = useState<Partial<Task>>({
+  const [formData, setFormData] = useState({
     title: '',
-    type: 'Deep Work',
-    projectId: undefined,
-    completed: false,
+    type: 'DeepWork' as const,
+    projectId: undefined as number | undefined,
     scheduledDate: getToday(),
   })
 
-  const [reviewData, setReviewData] = useState<Partial<Review>>({
-    weekStartDate: getWeekStartSunday(),
+  const [reviewData, setReviewData] = useState({
     wins: '',
     mistakes: '',
     nextWeekGoals: '',
   })
 
-  const taskTypes: TaskType[] = [
-    'Deep Work',
-    'Gym',
-    'Trading Practice',
-    'Coding',
-    'Review',
-    'Other',
-  ]
-
+  const taskTypes = ['DeepWork', 'Gym', 'TradingPractice', 'Coding', 'Review', 'Other'] as const
   const weekDays = getWeekDays(selectedWeekStart)
   const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
   const today = getToday()
+  const weekEnd = getWeekEndSaturday(selectedWeekStart)
+
+  const { data: tasks = [], isLoading: tasksLoading } = trpc.tasks.getByDate.useQuery(
+    {
+      startDate: new Date(selectedWeekStart).toISOString(),
+      endDate: new Date(weekEnd).toISOString(),
+    },
+    { enabled: !!selectedWeekStart }
+  )
+
+  const { data: projects = [], isLoading: projectsLoading } = trpc.projects.getAll.useQuery()
+  const { data: weekReview } = trpc.reviews.getByWeek.useQuery(
+    {
+      weekStartDate: new Date(selectedWeekStart).toISOString(),
+    },
+    { enabled: !!selectedWeekStart }
+  )
+
+  const createTaskMutation = trpc.tasks.create.useMutation({
+    onSuccess: () => {
+      utils.tasks.getByDate.invalidate()
+      setFormData({
+        title: '',
+        type: 'DeepWork',
+        projectId: undefined,
+        scheduledDate: selectedWeekStart,
+      })
+      setShowTaskForm(false)
+    },
+  })
+
+  const updateTaskMutation = trpc.tasks.update.useMutation({
+    onSuccess: () => {
+      utils.tasks.getByDate.invalidate()
+    },
+  })
+
+  const deleteTaskMutation = trpc.tasks.delete.useMutation({
+    onSuccess: () => {
+      utils.tasks.getByDate.invalidate()
+    },
+  })
+
+  const createReviewMutation = trpc.reviews.create.useMutation({
+    onSuccess: () => {
+      utils.reviews.getByWeek.invalidate()
+    },
+  })
+
+  const updateReviewMutation = trpc.reviews.update.useMutation({
+    onSuccess: () => {
+      utils.reviews.getByWeek.invalidate()
+    },
+  })
 
   useEffect(() => {
-    loadData()
-  }, [selectedWeekStart])
-
-  const loadData = async () => {
-    setIsLoading(true)
-    const weekEnd = getWeekEndSaturday(selectedWeekStart)
-
-    // Load tasks for the week
-    const allTasks = await db.tasks
-      .where('scheduledDate')
-      .between(selectedWeekStart, weekEnd, true, true)
-      .toArray()
-    setTasks(allTasks)
-
-    // Load projects
-    const allProjects = await db.projects.toArray()
-    setProjects(allProjects)
-
-    // Load review for this week
-    const weekReview = await db.reviews
-      .where('weekStartDate')
-      .equals(selectedWeekStart)
-      .first()
     if (weekReview) {
       setReviewData({
-        weekStartDate: weekReview.weekStartDate,
         wins: weekReview.wins,
         mistakes: weekReview.mistakes,
         nextWeekGoals: weekReview.nextWeekGoals,
       })
     } else {
       setReviewData({
-        weekStartDate: selectedWeekStart,
         wins: '',
         mistakes: '',
         nextWeekGoals: '',
       })
     }
-
-    setIsLoading(false)
-  }
+  }, [weekReview])
 
   const handleTaskSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const taskData: Omit<Task, 'id'> = {
-      title: formData.title || '',
-      type: formData.type || 'Deep Work',
-      projectId: formData.projectId,
-      completed: false,
-      scheduledDate: formData.scheduledDate || selectedWeekStart,
-    }
-
-    await db.tasks.add(taskData)
-
-    // Reset form
-    setFormData({
-      title: '',
-      type: 'Deep Work',
-      projectId: undefined,
-      completed: false,
-      scheduledDate: selectedWeekStart,
+    await createTaskMutation.mutateAsync({
+      title: formData.title,
+      type: formData.type,
+      projectId: formData.projectId || null,
+      scheduledDate: new Date(formData.scheduledDate).toISOString(),
     })
-    setShowTaskForm(false)
-
-    loadData()
   }
 
   const handleToggleComplete = async (taskId: number, completed: boolean) => {
-    const now = new Date().toISOString()
-    await db.tasks.update(taskId, {
+    await updateTaskMutation.mutateAsync({
+      id: taskId,
       completed: !completed,
-      completedAt: !completed ? now : undefined,
+      completedAt: !completed ? new Date().toISOString() : null,
     })
-    loadData()
   }
 
   const handleDelete = async (taskId: number) => {
     if (!confirm('Delete this task?')) return
-    await db.tasks.delete(taskId)
-    loadData()
+    await deleteTaskMutation.mutateAsync({ id: taskId })
   }
 
-  const handleAssignTask = async (task: Task, newDate: string) => {
-    await db.tasks.update(task.id!, {
-      scheduledDate: newDate,
+  const handleAssignTask = async (task: typeof tasks[0], newDate: string) => {
+    await updateTaskMutation.mutateAsync({
+      id: task.id,
+      scheduledDate: new Date(newDate).toISOString(),
     })
-    loadData()
   }
 
   const handleReviewSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const existing = await db.reviews
-      .where('weekStartDate')
-      .equals(selectedWeekStart)
-      .first()
+    const weekEndDate = getWeekEndSaturday(selectedWeekStart)
 
-    const reviewDataToSave: Omit<Review, 'id'> = {
-      weekStartDate: selectedWeekStart,
-      wins: reviewData.wins || '',
-      mistakes: reviewData.mistakes || '',
-      nextWeekGoals: reviewData.nextWeekGoals || '',
-      metrics: await generateMetrics(),
-    }
+    // Get metrics from other data
+    const weekTasks = tasks
+    const fitnessLogs = await utils.fitness.getByDateRange.fetch({
+      startDate: new Date(selectedWeekStart).toISOString(),
+      endDate: new Date(weekEndDate).toISOString(),
+    })
+    const weekTrades = await utils.trades.getAll.fetch({
+      startDate: new Date(selectedWeekStart).toISOString(),
+      endDate: new Date(weekEndDate).toISOString(),
+    })
+    const courses = await utils.codingCourses.getAll.fetch()
 
-    if (existing) {
-      await db.reviews.update(existing.id!, reviewDataToSave)
-    } else {
-      await db.reviews.add(reviewDataToSave)
-    }
+    let totalModules = 0
+    let completedModules = 0
+    courses.forEach((course: typeof courses[0]) => {
+      totalModules += course.modules?.length || 0
+      completedModules += course.modules?.filter((m: typeof course.modules[0]) => m.completed).length || 0
+    })
 
-    loadData()
-  }
-
-  const generateMetrics = async () => {
-    const weekEnd = getWeekEndSaturday(selectedWeekStart)
-
-    const tasks = await db.tasks
-      .where('scheduledDate')
-      .between(selectedWeekStart, weekEnd, true, true)
-      .toArray()
-
-    const fitnessLogs = await db.fitnessLogs
-      .where('date')
-      .between(selectedWeekStart, weekEnd, true, true)
-      .toArray()
-
-    const trades = await db.trades
-      .where('date')
-      .between(selectedWeekStart, weekEnd, true, true)
-      .toArray()
-
-    const courses = await db.codingCourses.toArray()
-    const modules = await db.courseModules.toArray()
-    const totalModules = modules.length
-    const completedModules = modules.filter((m) => m.completed).length
-
-    return {
-      tasksCompleted: tasks.filter((t) => t.completed).length,
-      tasksTotal: tasks.length,
+    const metrics = {
+      tasksCompleted: weekTasks.filter((t) => t.completed).length,
+      tasksTotal: weekTasks.length,
       fitnessLogs: fitnessLogs.length,
-      tradesCount: trades.length,
-      tradesPnl: trades.reduce((sum, t) => sum + t.pnl, 0),
+      tradesCount: weekTrades.length,
+      tradesPnl: weekTrades.reduce((sum: number, t: typeof weekTrades[0]) => sum + t.pnl, 0),
       codingProgress: totalModules > 0 ? (completedModules / totalModules) * 100 : 0,
+    }
+
+    if (weekReview) {
+      await updateReviewMutation.mutateAsync({
+        id: weekReview.id,
+        wins: reviewData.wins,
+        mistakes: reviewData.mistakes,
+        nextWeekGoals: reviewData.nextWeekGoals,
+        metrics,
+      })
+    } else {
+      await createReviewMutation.mutateAsync({
+        weekStartDate: new Date(selectedWeekStart).toISOString(),
+        wins: reviewData.wins,
+        mistakes: reviewData.mistakes,
+        nextWeekGoals: reviewData.nextWeekGoals,
+        metrics,
+      })
     }
   }
 
   const handleRollover = async () => {
-    const weekEnd = getWeekEndSaturday(selectedWeekStart)
     const incompleteTasks = tasks.filter((t) => !t.completed)
     const nextWeekStart = addDays(selectedWeekStart, 7)
 
-    for (const task of incompleteTasks) {
-      await db.tasks.update(task.id!, {
-        scheduledDate: nextWeekStart,
-      })
-    }
-
+    await Promise.all(
+      incompleteTasks.map((task) =>
+        updateTaskMutation.mutateAsync({
+          id: task.id,
+          scheduledDate: new Date(nextWeekStart).toISOString(),
+        })
+      )
+    )
     setShowRolloverDialog(false)
-    loadData()
   }
 
-  const getTasksForDay = (date: string): Task[] => {
-    return tasks.filter((t) => isSameDay(t.scheduledDate, date))
+  const getTasksForDay = (date: string) => {
+    return tasks.filter((t) => {
+      const taskDate = new Date(t.scheduledDate).toISOString().split('T')[0]
+      return isSameDay(taskDate, date)
+    })
   }
 
-  const getIncompleteTasks = (): Task[] => {
+  const getIncompleteTasks = () => {
     return tasks.filter((t) => !t.completed)
   }
 
@@ -231,6 +226,8 @@ export default function TasksPage() {
       : addDays(selectedWeekStart, 7)
     setSelectedWeekStart(newWeekStart)
   }
+
+  const isLoading = tasksLoading || projectsLoading
 
   if (isLoading) {
     return (
@@ -320,12 +317,12 @@ export default function TasksPage() {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
                 <select
                   value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as TaskType })}
+                  onChange={(e) => setFormData({ ...formData, type: e.target.value as typeof formData.type })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                 >
                   {taskTypes.map((type) => (
                     <option key={type} value={type}>
-                      {type}
+                      {type === 'DeepWork' ? 'Deep Work' : type === 'TradingPractice' ? 'Trading Practice' : type}
                     </option>
                   ))}
                 </select>
@@ -378,9 +375,8 @@ export default function TasksPage() {
                   setShowTaskForm(false)
                   setFormData({
                     title: '',
-                    type: 'Deep Work',
+                    type: 'DeepWork',
                     projectId: undefined,
-                    completed: false,
                     scheduledDate: selectedWeekStart,
                   })
                 }}
@@ -448,6 +444,7 @@ export default function TasksPage() {
                     ) : (
                       dayTasks.map((task) => {
                         const project = projects.find((p) => p.id === task.projectId)
+                        const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
                         return (
                           <div
                             key={task.id}
@@ -461,7 +458,7 @@ export default function TasksPage() {
                               <input
                                 type="checkbox"
                                 checked={task.completed}
-                                onChange={() => handleToggleComplete(task.id!, task.completed)}
+                                onChange={() => handleToggleComplete(task.id, task.completed)}
                                 className="mt-0.5 h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
                               />
                               <div className="flex-1 min-w-0">
@@ -474,7 +471,7 @@ export default function TasksPage() {
                                 </p>
                                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
                                   <span className="text-xs font-medium px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md">
-                                    {task.type}
+                                    {taskTypeDisplay}
                                   </span>
                                   {project && (
                                     <span className="text-xs text-gray-500 truncate">• {project.name}</span>
@@ -483,7 +480,7 @@ export default function TasksPage() {
                               </div>
                               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                 <select
-                                  value={task.scheduledDate}
+                                  value={new Date(task.scheduledDate).toISOString().split('T')[0]}
                                   onChange={(e) => handleAssignTask(task, e.target.value)}
                                   className="text-xs border border-gray-300 rounded-md px-1.5 py-1 bg-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
                                   onClick={(e) => e.stopPropagation()}
@@ -495,7 +492,7 @@ export default function TasksPage() {
                                   ))}
                                 </select>
                                 <button
-                                  onClick={() => handleDelete(task.id!)}
+                                  onClick={() => handleDelete(task.id)}
                                   className="text-red-600 hover:text-red-800 text-lg font-bold leading-none px-1 hover:bg-red-50 rounded transition-colors"
                                   title="Delete task"
                                 >
@@ -517,16 +514,14 @@ export default function TasksPage() {
 
       {/* Weekly Review Section */}
       <Card
-        title={
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold text-gray-900">Weekly Review</span>
-            <button
-              onClick={() => setShowReviewSection(!showReviewSection)}
-              className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1 rounded-md transition-colors"
-            >
-              {showReviewSection ? 'Collapse' : 'Expand'}
-            </button>
-          </div>
+        title="Weekly Review"
+        action={
+          <button
+            onClick={() => setShowReviewSection(!showReviewSection)}
+            className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1 rounded-md transition-colors"
+          >
+            {showReviewSection ? 'Collapse' : 'Expand'}
+          </button>
         }
       >
         {showReviewSection && (
@@ -632,5 +627,13 @@ export default function TasksPage() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function TasksPage() {
+  return (
+    <ProtectedRoute>
+      <TasksPageContent />
+    </ProtectedRoute>
   )
 }

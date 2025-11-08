@@ -17,22 +17,22 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { useCallback, useEffect, useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter, useParams } from 'next/navigation'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card, CsvImporter, InputDialog, ProgressBar } from '@/src/components'
-import { db } from '@/src/db'
-import type { CodingCourse, CourseModule } from '@/src/types'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate } from '@/src/utils/date'
 
 interface SortableModuleItemProps {
-  module: CourseModule
+  module: { id: number; name: string; order: number; completed: boolean; completedAt: Date | null }
   onToggle: (moduleId: number, completed: boolean) => void
   onDelete: (moduleId: number) => void
 }
 
 const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-    id: module.id!,
+    id: module.id,
   })
 
   const style = {
@@ -84,7 +84,7 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
         <input
           type="checkbox"
           checked={module.completed}
-          onChange={() => onToggle(module.id!, module.completed)}
+          onChange={() => onToggle(module.id, module.completed)}
           className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
         />
         <div className="flex-1 min-w-0">
@@ -97,13 +97,13 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
           </p>
           {module.completedAt && (
             <p className="text-xs text-gray-500 mt-1">
-              Completed on {formatDisplayDate(module.completedAt)}
+              Completed on {formatDisplayDate(module.completedAt.toISOString())}
             </p>
           )}
         </div>
       </div>
       <button
-        onClick={() => onDelete(module.id!)}
+        onClick={() => onDelete(module.id)}
         className="ml-4 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded text-sm font-medium transition-colors"
         title="Delete module"
       >
@@ -113,14 +113,12 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
   )
 }
 
-export default function CourseDetail() {
+function CourseDetailContent() {
   const params = useParams<{ id: string }>()
   const router = useRouter()
-  const id = params.id
-  const [course, setCourse] = useState<CodingCourse | null>(null)
-  const [modules, setModules] = useState<CourseModule[]>([])
-  const [progress, setProgress] = useState(0)
-  const [isLoading, setIsLoading] = useState(true)
+  const courseId = params?.id ? parseInt(params.id, 10) : null
+
+  const utils = trpc.useUtils()
   const [editingName, setEditingName] = useState(false)
   const [editingDescription, setEditingDescription] = useState(false)
   const [editingDates, setEditingDates] = useState(false)
@@ -130,6 +128,54 @@ export default function CourseDetail() {
   const [editedTargetDate, setEditedTargetDate] = useState('')
   const [showAddModuleDialog, setShowAddModuleDialog] = useState(false)
 
+  const { data: course, isLoading: courseLoading } = trpc.codingCourses.getById.useQuery(
+    { id: courseId! },
+    { enabled: !!courseId }
+  )
+
+  const { data: modules = [], isLoading: modulesLoading } = trpc.courseModules.getByCourseId.useQuery(
+    { courseId: courseId! },
+    { enabled: !!courseId }
+  )
+
+  const updateCourseMutation = trpc.codingCourses.update.useMutation({
+    onSuccess: () => {
+      utils.codingCourses.getById.invalidate({ id: courseId! })
+      utils.codingCourses.getAll.invalidate()
+      setEditingName(false)
+      setEditingDescription(false)
+      setEditingDates(false)
+    },
+  })
+
+  const createModuleMutation = trpc.courseModules.create.useMutation({
+    onSuccess: () => {
+      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.codingCourses.getById.invalidate({ id: courseId! })
+      setShowAddModuleDialog(false)
+    },
+  })
+
+  const updateModuleMutation = trpc.courseModules.update.useMutation({
+    onSuccess: () => {
+      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.codingCourses.getById.invalidate({ id: courseId! })
+    },
+  })
+
+  const deleteModuleMutation = trpc.courseModules.delete.useMutation({
+    onSuccess: () => {
+      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.codingCourses.getById.invalidate({ id: courseId! })
+    },
+  })
+
+  const reorderModuleMutation = trpc.courseModules.reorder.useMutation({
+    onSuccess: () => {
+      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! })
+    },
+  })
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
@@ -137,96 +183,71 @@ export default function CourseDetail() {
     })
   )
 
-  const loadCourse = useCallback(
-    async (courseId: number) => {
-      setIsLoading(true)
-      const courseData = await db.codingCourses.get(courseId)
-      if (!courseData) {
-        router.push('/coding')
-        return
-      }
-
-      setCourse(courseData)
-
-      const courseModules = await db.courseModules
-        .where('courseId')
-        .equals(courseId)
-        .sortBy('order')
-
-      setModules(courseModules)
-
-      const completed = courseModules.filter((m) => m.completed).length
-      const prog = courseModules.length > 0 ? (completed / courseModules.length) * 100 : 0
-      setProgress(prog)
-
-      setIsLoading(false)
-    },
-    [router]
-  )
+  useEffect(() => {
+    if (!courseId) {
+      router.push('/coding')
+    }
+  }, [courseId, router])
 
   useEffect(() => {
-    if (id) {
-      loadCourse(parseInt(id, 10))
+    if (course) {
+      setEditedName(course.name)
+      setEditedDescription(course.description || '')
+      setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
+      setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
     }
-  }, [id, loadCourse])
+  }, [course])
+
+  if (!courseId) {
+    return null
+  }
+
+  if (courseLoading || modulesLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p className="text-gray-500">Loading course...</p>
+      </div>
+    )
+  }
+
+  if (!course) {
+    router.push('/coding')
+    return null
+  }
+
+  const completedModules = modules.filter((m) => m.completed).length
+  const totalModules = modules.length
+  const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
 
   const handleToggleModule = async (moduleId: number, completed: boolean) => {
-    const now = new Date().toISOString()
-    await db.courseModules.update(moduleId, {
+    await updateModuleMutation.mutateAsync({
+      id: moduleId,
       completed: !completed,
-      completedAt: !completed ? now : undefined,
+      completedAt: !completed ? new Date().toISOString() : null,
     })
-
-    // Update local state instead of reloading to preserve scroll position
-    const updatedModules = modules.map((module) =>
-      module.id === moduleId
-        ? {
-            ...module,
-            completed: !completed,
-            completedAt: !completed ? now : undefined,
-          }
-        : module
-    )
-    setModules(updatedModules)
-
-    // Recalculate progress
-    const completedCount = updatedModules.filter((m) => m.completed).length
-    const prog = updatedModules.length > 0 ? (completedCount / updatedModules.length) * 100 : 0
-    setProgress(prog)
   }
 
   const handleAddModule = async (name: string) => {
-    if (!name.trim() || !id) return
+    if (!name.trim() || !courseId) return
 
-    const courseModules = await db.courseModules
-      .where('courseId')
-      .equals(parseInt(id, 10))
-      .toArray()
+    const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0
 
-    const maxOrder = courseModules.length > 0 ? Math.max(...courseModules.map((m) => m.order)) : 0
-
-    const newModule: Omit<CourseModule, 'id'> = {
-      courseId: parseInt(id, 10),
+    await createModuleMutation.mutateAsync({
+      courseId,
       name: name.trim(),
       order: maxOrder + 1,
-      completed: false,
-    }
-
-    await db.courseModules.add(newModule)
-    setShowAddModuleDialog(false)
-    loadCourse(parseInt(id, 10))
+    })
   }
 
   const handleDeleteModule = async (moduleId: number) => {
     if (!confirm('Delete this module?')) return
-    await db.courseModules.delete(moduleId)
-    loadCourse(parseInt(id!, 10))
+    await deleteModuleMutation.mutateAsync({ id: moduleId })
   }
 
   const handleDragEnd = async (event: DragEndEvent) => {
     const { active, over } = event
 
-    if (!over || active.id === over.id || !id) {
+    if (!over || active.id === over.id || !courseId) {
       return
     }
 
@@ -240,122 +261,81 @@ export default function CourseDetail() {
     const newModules = arrayMove(modules, oldIndex, newIndex)
 
     // Update order values in database
-    const updates = newModules.map((module, index) => ({
-      id: module.id!,
-      order: index + 1,
-    }))
-
-    // Update all modules with new order values
     await Promise.all(
-      updates.map((update) => db.courseModules.update(update.id, { order: update.order }))
+      newModules.map((module, index) =>
+        reorderModuleMutation.mutateAsync({
+          moduleId: module.id,
+          newOrder: index + 1,
+        })
+      )
     )
-
-    // Update local state with new order (preserves scroll position)
-    const updatedModules = newModules.map((module, index) => ({
-      ...module,
-      order: index + 1,
-    }))
-    setModules(updatedModules)
   }
 
   const handleSaveCourseName = async () => {
-    if (!id || !editedName.trim()) return
-    await db.codingCourses.update(parseInt(id, 10), { name: editedName.trim() })
-    setEditingName(false)
-    loadCourse(parseInt(id, 10))
+    if (!courseId || !editedName.trim()) return
+    await updateCourseMutation.mutateAsync({
+      id: courseId,
+      name: editedName.trim(),
+    })
   }
 
   const handleSaveDescription = async () => {
-    if (!id) return
-    await db.codingCourses.update(parseInt(id, 10), {
+    if (!courseId) return
+    await updateCourseMutation.mutateAsync({
+      id: courseId,
       description: editedDescription.trim() || undefined,
     })
-    setEditingDescription(false)
-    loadCourse(parseInt(id, 10))
   }
 
   const handleSaveDates = async () => {
-    if (!id) return
-    await db.codingCourses.update(parseInt(id, 10), {
-      startDate: editedStartDate || undefined,
-      targetDate: editedTargetDate || undefined,
+    if (!courseId) return
+    await updateCourseMutation.mutateAsync({
+      id: courseId,
+      startDate: editedStartDate ? new Date(editedStartDate).toISOString() : undefined,
+      targetDate: editedTargetDate ? new Date(editedTargetDate).toISOString() : undefined,
     })
-    setEditingDates(false)
-    loadCourse(parseInt(id, 10))
   }
 
   const handleEditName = () => {
-    if (course) {
-      setEditedName(course.name)
-      setEditingName(true)
-    }
+    setEditedName(course.name)
+    setEditingName(true)
   }
 
   const handleEditDescription = () => {
-    if (course) {
-      setEditedDescription(course.description || '')
-      setEditingDescription(true)
-    }
+    setEditedDescription(course.description || '')
+    setEditingDescription(true)
   }
 
   const handleEditDates = () => {
-    if (course) {
-      // Extract date part (YYYY-MM-DD) from date strings
-      const startDate = course.startDate ? course.startDate.split('T')[0] : ''
-      const targetDate = course.targetDate ? course.targetDate.split('T')[0] : ''
-      setEditedStartDate(startDate)
-      setEditedTargetDate(targetDate)
-      setEditingDates(true)
-    }
+    setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
+    setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
+    setEditingDates(true)
   }
 
   const handleCSVImport = async (data: Record<string, unknown>[]) => {
-    if (!id) return
+    if (!courseId) return
     try {
-      const courseModules = await db.courseModules
-        .where('courseId')
-        .equals(parseInt(id, 10))
-        .toArray()
+      const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0
 
-      const maxOrder =
-        courseModules.length > 0 ? Math.max(...courseModules.map((m) => m.order)) : 0
-
-      const newModules: Omit<CourseModule, 'id'>[] = data.map(
-        (row: Record<string, unknown>, index: number) => ({
-          courseId: parseInt(id, 10),
-          name: (row.name ||
-            row.Name ||
-            row.module ||
-            row.Module ||
-            `Module ${index + 1}`) as string,
-          order: row.order ? parseInt(String(row.order), 10) : maxOrder + index + 1,
-          completed: false,
-        })
+      await Promise.all(
+        data.map((row: Record<string, unknown>, index: number) =>
+          createModuleMutation.mutateAsync({
+            courseId,
+            name: (row.name ||
+              row.Name ||
+              row.module ||
+              row.Module ||
+              `Module ${index + 1}`) as string,
+            order: row.order ? parseInt(String(row.order), 10) : maxOrder + index + 1,
+          })
+        )
       )
-
-      await db.courseModules.bulkAdd(newModules)
-      loadCourse(parseInt(id, 10))
     } catch (error) {
       alert(
         'Failed to import modules: ' + (error instanceof Error ? error.message : 'Unknown error')
       )
     }
   }
-
-  if (isLoading) {
-    return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-gray-500">Loading course...</p>
-      </div>
-    )
-  }
-
-  if (!course) {
-    return null
-  }
-
-  const completedModules = modules.filter((m) => m.completed).length
-  const totalModules = modules.length
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -607,8 +587,8 @@ export default function CourseDetail() {
               <button
                 onClick={() => {
                   setEditingDates(false)
-                  setEditedStartDate(course.startDate || '')
-                  setEditedTargetDate(course.targetDate || '')
+                  setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
+                  setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
                 }}
                 className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors flex items-center gap-2"
               >
@@ -629,13 +609,13 @@ export default function CourseDetail() {
             {course.startDate && (
               <div>
                 <span className="text-sm font-medium text-gray-700">Start Date:</span>
-                <p className="text-gray-900">{formatDisplayDate(course.startDate)}</p>
+                <p className="text-gray-900">{formatDisplayDate(course.startDate.toISOString())}</p>
               </div>
             )}
             {course.targetDate && (
               <div>
                 <span className="text-sm font-medium text-gray-700">Target Date:</span>
-                <p className="text-gray-900">{formatDisplayDate(course.targetDate)}</p>
+                <p className="text-gray-900">{formatDisplayDate(course.targetDate.toISOString())}</p>
               </div>
             )}
             {!course.startDate && !course.targetDate && (
@@ -645,7 +625,7 @@ export default function CourseDetail() {
             )}
             <div>
               <span className="text-sm font-medium text-gray-700">Created:</span>
-              <p className="text-gray-900">{formatDisplayDate(course.createdAt)}</p>
+              <p className="text-gray-900">{formatDisplayDate(course.createdAt.toISOString())}</p>
             </div>
           </div>
         )}
@@ -704,7 +684,7 @@ export default function CourseDetail() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext
-              items={modules.map((m) => m.id!)}
+              items={modules.map((m) => m.id)}
               strategy={verticalListSortingStrategy}
             >
               <div className="space-y-3">
@@ -734,5 +714,13 @@ export default function CourseDetail() {
         onCancel={() => setShowAddModuleDialog(false)}
       />
     </div>
+  )
+}
+
+export default function CourseDetail() {
+  return (
+    <ProtectedRoute>
+      <CourseDetailContent />
+    </ProtectedRoute>
   )
 }

@@ -1,84 +1,63 @@
-export interface CodingCourse {
-  id?: number;
-  name: string;
-  description?: string;
-  createdAt: string;
-  startDate?: string;
-  targetDate?: string;
+// Import Prisma-generated types
+import type {
+  User,
+  Account,
+  Session,
+  CodingCourse as PrismaCodingCourse,
+  CourseModule as PrismaCourseModule,
+  Project as PrismaProject,
+  Task as PrismaTask,
+  FitnessLog as PrismaFitnessLog,
+  Trade as PrismaTrade,
+  Review as PrismaReview,
+  Settings as PrismaSettings,
+  TaskType as PrismaTaskType,
+  ProjectStatus as PrismaProjectStatus,
+} from '@prisma/client'
+
+// Re-export Prisma types
+export type {
+  User,
+  Account,
+  Session,
+  PrismaCodingCourse,
+  PrismaCourseModule,
+  PrismaProject,
+  PrismaTask,
+  PrismaFitnessLog,
+  PrismaTrade,
+  PrismaReview,
+  PrismaSettings,
+  PrismaTaskType,
+  PrismaProjectStatus,
 }
 
-export interface CourseModule {
-  id?: number;
-  courseId: number;
-  name: string;
-  order: number;
-  completed: boolean;
-  completedAt?: string;
+// Extended types with relations for frontend use
+export type CodingCourse = PrismaCodingCourse & {
+  modules?: CourseModule[]
 }
 
-export interface Project {
-  id?: number;
-  name: string;
-  description?: string;
-  status: 'active' | 'completed' | 'paused';
-  startDate?: string;
-  targetDate?: string;
-  linkedTasks?: number[];
+export type CourseModule = PrismaCourseModule
+
+export type Project = PrismaProject & {
+  tasks?: Task[]
 }
 
-export type TaskType =
-  | 'Deep Work'
-  | 'Gym'
-  | 'Trading Practice'
-  | 'Coding'
-  | 'Review'
-  | 'Other';
-
-export interface Task {
-  id?: number;
-  title: string;
-  type: TaskType;
-  projectId?: number;
-  completed: boolean;
-  scheduledDate: string;
-  completedAt?: string;
+export type Task = PrismaTask & {
+  project?: Project | null
 }
 
-export interface FitnessLog {
-  id?: number;
-  date: string;
-  weight?: number;
-  bodyFat?: number;
-  waist?: number;
-  calories?: number;
-  workoutType?: string;
-  notes?: string;
-}
+export type FitnessLog = PrismaFitnessLog
 
-export interface Trade {
-  id?: number;
-  date: string;
-  symbol: string;
-  setup: string;
-  entry: number;
-  exit: number;
-  quantity: number;
-  pnl: number;
-  emotion?: string;
-  notes?: string;
-}
+export type Trade = PrismaTrade
 
-export interface Review {
-  id?: number;
-  weekStartDate: string;
-  wins: string;
-  mistakes: string;
-  nextWeekGoals: string;
-  metrics?: Record<string, any>;
-}
+export type Review = PrismaReview
 
-export interface Settings {
-  id?: number;
-  key: string;
-  value: string;
-}
+export type Settings = PrismaSettings
+
+// Type helpers for frontend
+export type TaskType = PrismaTaskType
+export type ProjectStatus = PrismaProjectStatus
+
+// Additional utility types
+export type ReviewMetrics = Record<string, string | number | boolean>

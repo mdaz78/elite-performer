@@ -1,6 +1,6 @@
 import type { Metadata } from 'next'
 import { Header } from '@/src/components'
-import { DatabaseSeeder } from './DatabaseSeeder'
+import { Providers } from './providers'
 import '@/src/index.css'
 
 export const metadata: Metadata = {
@@ -16,11 +16,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <DatabaseSeeder />
-        <div className="min-h-screen bg-gray-50">
-          <Header />
-          <main>{children}</main>
-        </div>
+        <Providers>
+          <div className="min-h-screen bg-gray-50">
+            <Header />
+            <main>{children}</main>
+          </div>
+        </Providers>
       </body>
     </html>
   )

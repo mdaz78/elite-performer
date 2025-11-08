@@ -1,86 +1,72 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
-import { db } from '@/src/db'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { getToday, formatDisplayDate } from '@/src/utils/date'
-import type { FitnessLog } from '@/src/types'
 
-export default function FitnessPage() {
-  const [logs, setLogs] = useState<FitnessLog[]>([])
-  const [formData, setFormData] = useState<Partial<FitnessLog>>({
+function FitnessPageContent() {
+  const utils = trpc.useUtils()
+  const [formData, setFormData] = useState({
     date: getToday(),
-    weight: undefined,
-    bodyFat: undefined,
-    waist: undefined,
-    calories: undefined,
+    weight: '',
+    bodyFat: '',
+    waist: '',
+    calories: '',
     workoutType: '',
     notes: '',
   })
-  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    loadLogs()
-  }, [])
-
-  const loadLogs = async () => {
-    setIsLoading(true)
-    const allLogs = await db.fitnessLogs.orderBy('date').reverse().toArray()
-    setLogs(allLogs)
-    setIsLoading(false)
-  }
+  const { data: logs = [], isLoading } = trpc.fitness.getAll.useQuery()
+  const createMutation = trpc.fitness.create.useMutation({
+    onSuccess: () => {
+      utils.fitness.getAll.invalidate()
+      setFormData({
+        date: getToday(),
+        weight: '',
+        bodyFat: '',
+        waist: '',
+        calories: '',
+        workoutType: '',
+        notes: '',
+      })
+    },
+  })
+  const deleteMutation = trpc.fitness.delete.useMutation({
+    onSuccess: () => {
+      utils.fitness.getAll.invalidate()
+    },
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const logData: Omit<FitnessLog, 'id'> = {
-      date: formData.date || getToday(),
+    await createMutation.mutateAsync({
+      date: new Date(formData.date).toISOString(),
       weight: formData.weight ? Number(formData.weight) : undefined,
       bodyFat: formData.bodyFat ? Number(formData.bodyFat) : undefined,
       waist: formData.waist ? Number(formData.waist) : undefined,
       calories: formData.calories ? Number(formData.calories) : undefined,
       workoutType: formData.workoutType || undefined,
       notes: formData.notes || undefined,
-    }
-
-    // Check if log for this date already exists
-    const existing = await db.fitnessLogs.where('date').equals(logData.date).first()
-
-    if (existing) {
-      await db.fitnessLogs.update(existing.id!, logData)
-    } else {
-      await db.fitnessLogs.add(logData)
-    }
-
-    // Reset form
-    setFormData({
-      date: getToday(),
-      weight: undefined,
-      bodyFat: undefined,
-      waist: undefined,
-      calories: undefined,
-      workoutType: '',
-      notes: '',
     })
-
-    loadLogs()
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this fitness log entry?')) return
-    await db.fitnessLogs.delete(id)
-    loadLogs()
+    await deleteMutation.mutateAsync({ id })
   }
 
   // Prepare chart data
-  const chartData = logs
-    .filter((log) => log.weight || log.bodyFat)
-    .sort((a, b) => a.date.localeCompare(b.date))
+  const chartData = [...logs]
+    .filter((log) => log.weight != null || log.bodyFat != null)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
     .map((log) => ({
-      date: formatDisplayDate(log.date),
-      weight: log.weight || null,
-      bodyFat: log.bodyFat || null,
+      date: formatDisplayDate(log.date.toISOString()),
+      weight: log.weight ?? null,
+      bodyFat: log.bodyFat ?? null,
     }))
 
   if (isLoading) {
@@ -117,8 +103,8 @@ export default function FitnessPage() {
               <input
                 type="number"
                 step="0.1"
-                value={formData.weight || ''}
-                onChange={(e) => setFormData({ ...formData, weight: e.target.value ? parseFloat(e.target.value) : undefined })}
+                value={formData.weight}
+                onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 180.5"
               />
@@ -129,8 +115,8 @@ export default function FitnessPage() {
               <input
                 type="number"
                 step="0.1"
-                value={formData.bodyFat || ''}
-                onChange={(e) => setFormData({ ...formData, bodyFat: e.target.value ? parseFloat(e.target.value) : undefined })}
+                value={formData.bodyFat}
+                onChange={(e) => setFormData({ ...formData, bodyFat: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 15.5"
               />
@@ -141,8 +127,8 @@ export default function FitnessPage() {
               <input
                 type="number"
                 step="0.1"
-                value={formData.waist || ''}
-                onChange={(e) => setFormData({ ...formData, waist: e.target.value ? parseFloat(e.target.value) : undefined })}
+                value={formData.waist}
+                onChange={(e) => setFormData({ ...formData, waist: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 32.5"
               />
@@ -152,8 +138,8 @@ export default function FitnessPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Calories</label>
               <input
                 type="number"
-                value={formData.calories || ''}
-                onChange={(e) => setFormData({ ...formData, calories: e.target.value ? parseInt(e.target.value, 10) : undefined })}
+                value={formData.calories}
+                onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-amber-500 focus:border-amber-500"
                 placeholder="e.g., 2500"
               />
@@ -249,7 +235,7 @@ export default function FitnessPage() {
                 {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {formatDisplayDate(log.date)}
+                      {formatDisplayDate(log.date.toISOString())}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {log.weight ? `${log.weight} lbs` : '-'}
@@ -261,14 +247,14 @@ export default function FitnessPage() {
                       {log.waist ? `${log.waist}"` : '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.calories || '-'}
+                      {log.calories ?? '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {log.workoutType || '-'}
+                      {log.workoutType ?? '-'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <button
-                        onClick={() => handleDelete(log.id!)}
+                        onClick={() => handleDelete(log.id)}
                         className="text-red-600 hover:text-red-800"
                       >
                         Delete
@@ -282,5 +268,13 @@ export default function FitnessPage() {
         )}
       </Card>
     </div>
+  )
+}
+
+export default function FitnessPage() {
+  return (
+    <ProtectedRoute>
+      <FitnessPageContent />
+    </ProtectedRoute>
   )
 }

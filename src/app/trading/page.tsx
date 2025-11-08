@@ -1,100 +1,72 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { db } from '@/src/db'
+import { useState } from 'react'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { getToday, formatDisplayDate } from '@/src/utils/date'
-import type { Trade } from '@/src/types'
 
-export default function TradingPage() {
-  const [trades, setTrades] = useState<Trade[]>([])
-  const [formData, setFormData] = useState<Partial<Trade>>({
+function TradingPageContent() {
+  const utils = trpc.useUtils()
+  const [formData, setFormData] = useState({
     date: getToday(),
     symbol: '',
     setup: '',
-    entry: 0,
-    exit: 0,
-    quantity: 0,
-    pnl: 0,
+    entry: '',
+    exit: '',
+    quantity: '',
+    pnl: '',
     emotion: '',
     notes: '',
   })
-  const [isLoading, setIsLoading] = useState(true)
-  const [stats, setStats] = useState({
-    totalPnl: 0,
-    winRate: 0,
-    tradeCount: 0,
-    averagePnl: 0,
-    winningTrades: 0,
-    losingTrades: 0,
+
+  const { data: trades = [], isLoading } = trpc.trades.getAll.useQuery({})
+  const { data: stats } = trpc.trades.getStats.useQuery({})
+
+  const createMutation = trpc.trades.create.useMutation({
+    onSuccess: () => {
+      utils.trades.getAll.invalidate()
+      utils.trades.getStats.invalidate()
+      setFormData({
+        date: getToday(),
+        symbol: '',
+        setup: '',
+        entry: '',
+        exit: '',
+        quantity: '',
+        pnl: '',
+        emotion: '',
+        notes: '',
+      })
+    },
   })
 
-  useEffect(() => {
-    loadTrades()
-  }, [])
-
-  const loadTrades = async () => {
-    setIsLoading(true)
-    const allTrades = await db.trades.orderBy('date').reverse().toArray()
-    setTrades(allTrades)
-    calculateStats(allTrades)
-    setIsLoading(false)
-  }
-
-  const calculateStats = (tradeList: Trade[]) => {
-    const totalPnl = tradeList.reduce((sum, trade) => sum + trade.pnl, 0)
-    const winningTrades = tradeList.filter((trade) => trade.pnl > 0).length
-    const losingTrades = tradeList.filter((trade) => trade.pnl < 0).length
-    const winRate = tradeList.length > 0 ? (winningTrades / tradeList.length) * 100 : 0
-    const averagePnl = tradeList.length > 0 ? totalPnl / tradeList.length : 0
-
-    setStats({
-      totalPnl,
-      winRate,
-      tradeCount: tradeList.length,
-      averagePnl,
-      winningTrades,
-      losingTrades,
-    })
-  }
+  const deleteMutation = trpc.trades.delete.useMutation({
+    onSuccess: () => {
+      utils.trades.getAll.invalidate()
+      utils.trades.getStats.invalidate()
+    },
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    const tradeData: Omit<Trade, 'id'> = {
-      date: formData.date || getToday(),
-      symbol: formData.symbol || '',
-      setup: formData.setup || '',
-      entry: Number(formData.entry) || 0,
-      exit: Number(formData.exit) || 0,
-      quantity: Number(formData.quantity) || 0,
-      pnl: Number(formData.pnl) || 0,
+    await createMutation.mutateAsync({
+      date: new Date(formData.date).toISOString(),
+      symbol: formData.symbol,
+      setup: formData.setup,
+      entry: Number(formData.entry),
+      exit: Number(formData.exit),
+      quantity: Number(formData.quantity),
+      pnl: Number(formData.pnl),
       emotion: formData.emotion || undefined,
       notes: formData.notes || undefined,
-    }
-
-    await db.trades.add(tradeData)
-
-    // Reset form
-    setFormData({
-      date: getToday(),
-      symbol: '',
-      setup: '',
-      entry: 0,
-      exit: 0,
-      quantity: 0,
-      pnl: 0,
-      emotion: '',
-      notes: '',
     })
-
-    loadTrades()
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this trade?')) return
-    await db.trades.delete(id)
-    loadTrades()
+    await deleteMutation.mutateAsync({ id })
   }
 
   const handleCalculatePnl = () => {
@@ -102,7 +74,7 @@ export default function TradingPage() {
     const exit = Number(formData.exit) || 0
     const quantity = Number(formData.quantity) || 0
     const pnl = (exit - entry) * quantity
-    setFormData({ ...formData, pnl })
+    setFormData({ ...formData, pnl: pnl.toString() })
   }
 
   if (isLoading) {
@@ -126,8 +98,8 @@ export default function TradingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Total P&L</p>
-              <p className={`text-2xl font-bold mt-1 ${stats.totalPnl >= 0 ? 'text-emerald-500' : 'text-red-600'}`}>
-                ${stats.totalPnl.toFixed(2)}
+              <p className={`text-2xl font-bold mt-1 ${(stats?.totalPnL ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-600'}`}>
+                ${(stats?.totalPnL ?? 0).toFixed(2)}
               </p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-lg">
@@ -142,7 +114,7 @@ export default function TradingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Win Rate</p>
-              <p className="text-2xl font-bold text-emerald-500 mt-1">{stats.winRate.toFixed(1)}%</p>
+              <p className="text-2xl font-bold text-emerald-500 mt-1">{(stats?.winRate ?? 0).toFixed(1)}%</p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-lg">
               <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -156,7 +128,7 @@ export default function TradingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Trade Count</p>
-              <p className="text-2xl font-bold text-emerald-500 mt-1">{stats.tradeCount}</p>
+              <p className="text-2xl font-bold text-emerald-500 mt-1">{stats?.totalTrades ?? 0}</p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-lg">
               <svg className="w-8 h-8 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -170,8 +142,8 @@ export default function TradingPage() {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-gray-600">Avg P&L</p>
-              <p className={`text-2xl font-bold mt-1 ${stats.averagePnl >= 0 ? 'text-emerald-500' : 'text-red-600'}`}>
-                ${stats.averagePnl.toFixed(2)}
+              <p className={`text-2xl font-bold mt-1 ${(stats?.avgPnL ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-600'}`}>
+                ${(stats?.avgPnL ?? 0).toFixed(2)}
               </p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-lg">
@@ -227,8 +199,8 @@ export default function TradingPage() {
                 <input
                   type="number"
                   step="0.01"
-                  value={formData.entry || ''}
-                  onChange={(e) => setFormData({ ...formData, entry: e.target.value ? parseFloat(e.target.value) : 0 })}
+                  value={formData.entry}
+                  onChange={(e) => setFormData({ ...formData, entry: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                   required
                 />
@@ -239,8 +211,8 @@ export default function TradingPage() {
                 <input
                   type="number"
                   step="0.01"
-                  value={formData.exit || ''}
-                  onChange={(e) => setFormData({ ...formData, exit: e.target.value ? parseFloat(e.target.value) : 0 })}
+                  value={formData.exit}
+                  onChange={(e) => setFormData({ ...formData, exit: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                   required
                 />
@@ -251,8 +223,8 @@ export default function TradingPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Quantity</label>
               <input
                 type="number"
-                value={formData.quantity || ''}
-                onChange={(e) => setFormData({ ...formData, quantity: e.target.value ? parseInt(e.target.value, 10) : 0 })}
+                value={formData.quantity}
+                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 required
               />
@@ -272,8 +244,8 @@ export default function TradingPage() {
               <input
                 type="number"
                 step="0.01"
-                value={formData.pnl || ''}
-                onChange={(e) => setFormData({ ...formData, pnl: e.target.value ? parseFloat(e.target.value) : 0 })}
+                value={formData.pnl}
+                onChange={(e) => setFormData({ ...formData, pnl: e.target.value })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-emerald-500 focus:border-emerald-500"
                 required
               />
@@ -332,7 +304,7 @@ export default function TradingPage() {
                   {trades.map((trade) => (
                     <tr key={trade.id} className="hover:bg-gray-50">
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {formatDisplayDate(trade.date)}
+                        {formatDisplayDate(trade.date.toISOString())}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                         {trade.symbol}
@@ -356,7 +328,7 @@ export default function TradingPage() {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
-                          onClick={() => handleDelete(trade.id!)}
+                          onClick={() => handleDelete(trade.id)}
                           className="text-red-600 hover:text-red-800"
                         >
                           Delete
@@ -371,5 +343,13 @@ export default function TradingPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function TradingPage() {
+  return (
+    <ProtectedRoute>
+      <TradingPageContent />
+    </ProtectedRoute>
   )
 }

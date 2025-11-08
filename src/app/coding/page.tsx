@@ -1,58 +1,48 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card, InputDialog, ProgressBar } from '@/src/components'
-import { db } from '@/src/db'
-import type { CodingCourse } from '@/src/types'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate } from '@/src/utils/date'
 
-export default function CodingPage() {
+function CodingPageContent() {
   const router = useRouter()
-  const [courses, setCourses] = useState<(CodingCourse & { progress: number })[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const utils = trpc.useUtils()
   const [showAddDialog, setShowAddDialog] = useState(false)
 
-  useEffect(() => {
-    loadCourses()
-  }, [])
+  const { data: courses = [], isLoading } = trpc.codingCourses.getAll.useQuery()
+  const createMutation = trpc.codingCourses.create.useMutation({
+    onSuccess: () => {
+      utils.codingCourses.getAll.invalidate()
+      setShowAddDialog(false)
+    },
+  })
+  const deleteMutation = trpc.codingCourses.delete.useMutation({
+    onSuccess: () => {
+      utils.codingCourses.getAll.invalidate()
+    },
+  })
 
-  const loadCourses = async () => {
-    setIsLoading(true)
-    const allCourses = await db.codingCourses.toArray()
-    const allModules = await db.courseModules.toArray()
-
-    const coursesWithProgress = allCourses.map((course) => {
-      const courseModules = allModules.filter((m) => m.courseId === course.id)
-      const completed = courseModules.filter((m) => m.completed).length
-      const progress = courseModules.length > 0 ? (completed / courseModules.length) * 100 : 0
-      return { ...course, progress }
-    })
-
-    setCourses(coursesWithProgress)
-    setIsLoading(false)
-  }
+  // Calculate progress for each course
+  const coursesWithProgress = courses.map((course) => {
+    const courseModules = course.modules || []
+    const completed = courseModules.filter((m) => m.completed).length
+    const progress = courseModules.length > 0 ? (completed / courseModules.length) * 100 : 0
+    return { ...course, progress }
+  })
 
   const handleAddCourse = async (name: string) => {
     if (!name.trim()) return
-
-    const newCourse: Omit<CodingCourse, 'id'> = {
+    await createMutation.mutateAsync({
       name: name.trim(),
-      description: '',
-      createdAt: new Date().toISOString().split('T')[0],
-    }
-
-    await db.codingCourses.add(newCourse)
-    setShowAddDialog(false)
-    loadCourses()
+    })
   }
 
   const handleDeleteCourse = async (id: number) => {
     if (!confirm('Delete this course? All modules will also be deleted.')) return
-
-    await db.courseModules.where('courseId').equals(id).delete()
-    await db.codingCourses.delete(id)
-    loadCourses()
+    await deleteMutation.mutateAsync({ id })
   }
 
   if (isLoading) {
@@ -80,7 +70,7 @@ export default function CodingPage() {
         </div>
       </div>
 
-      {courses.length === 0 ? (
+      {coursesWithProgress.length === 0 ? (
         <Card>
           <div className="text-center py-12">
             <p className="text-gray-500 mb-4">
@@ -96,7 +86,7 @@ export default function CodingPage() {
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {courses.map((course) => (
+          {coursesWithProgress.map((course) => (
             <Card
               key={course.id}
               className="hover:shadow-lg transition-all cursor-pointer group relative"
@@ -110,7 +100,7 @@ export default function CodingPage() {
                   <button
                     onClick={(e) => {
                       e.stopPropagation()
-                      handleDeleteCourse(course.id!)
+                      handleDeleteCourse(course.id)
                     }}
                     className="text-red-600 hover:text-red-700 relative z-20 p-1.5 hover:bg-red-100 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-md cursor-pointer"
                     aria-label={`Delete ${course.name}`}
@@ -131,7 +121,7 @@ export default function CodingPage() {
                 )}
                 {course.startDate && (
                   <p className="text-xs text-gray-500">
-                    Started: {formatDisplayDate(course.startDate)}
+                    Started: {formatDisplayDate(course.startDate.toISOString())}
                   </p>
                 )}
               </div>
@@ -159,5 +149,13 @@ export default function CodingPage() {
         onCancel={() => setShowAddDialog(false)}
       />
     </div>
+  )
+}
+
+export default function CodingPage() {
+  return (
+    <ProtectedRoute>
+      <CodingPageContent />
+    </ProtectedRoute>
   )
 }

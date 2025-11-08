@@ -1,8 +1,7 @@
 'use client'
 
-import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { seedDatabase } from '@/src/db/seed'
+import { useEffect } from 'react'
 
 export default function ReviewPage() {
   const router = useRouter()

@@ -1,15 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { db } from '@/src/db'
+import { useState } from 'react'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card, ProgressBar } from '@/src/components'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate, getToday, addDays } from '@/src/utils/date'
-import type { Project, Task } from '@/src/types'
 
-export default function ProjectsPage() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const [tasks, setTasks] = useState<Task[]>([])
-  const [formData, setFormData] = useState<Partial<Project>>({
+function ProjectsPageContent() {
+  const utils = trpc.useUtils()
+  const [formData, setFormData] = useState<{
+    name: string
+    description: string
+    status: 'active' | 'completed' | 'paused'
+    startDate: string
+    targetDate: string
+  }>({
     name: '',
     description: '',
     status: 'active',
@@ -17,88 +22,94 @@ export default function ProjectsPage() {
     targetDate: addDays(getToday(), 30),
   })
   const [editingId, setEditingId] = useState<number | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
 
-  useEffect(() => {
-    loadData()
-  }, [])
+  const { data: projects = [], isLoading: projectsLoading } = trpc.projects.getAll.useQuery()
+  const { data: tasks = [], isLoading: tasksLoading } = trpc.tasks.getAll.useQuery()
 
-  const loadData = async () => {
-    setIsLoading(true)
-    const allProjects = await db.projects.toArray()
-    setProjects(allProjects)
+  const createMutation = trpc.projects.create.useMutation({
+    onSuccess: () => {
+      utils.projects.getAll.invalidate()
+      setFormData({
+        name: '',
+        description: '',
+        status: 'active',
+        startDate: getToday(),
+        targetDate: addDays(getToday(), 30),
+      })
+    },
+  })
 
-    const allTasks = await db.tasks.toArray()
-    setTasks(allTasks)
-    setIsLoading(false)
-  }
+  const updateMutation = trpc.projects.update.useMutation({
+    onSuccess: () => {
+      utils.projects.getAll.invalidate()
+      setEditingId(null)
+      setFormData({
+        name: '',
+        description: '',
+        status: 'active',
+        startDate: getToday(),
+        targetDate: addDays(getToday(), 30),
+      })
+    },
+  })
+
+  const deleteMutation = trpc.projects.delete.useMutation({
+    onSuccess: () => {
+      utils.projects.getAll.invalidate()
+    },
+  })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
     if (editingId) {
-      // Update existing project
-      await db.projects.update(editingId, {
-        name: formData.name || '',
-        description: formData.description || '',
-        status: formData.status || 'active',
-        startDate: formData.startDate,
-        targetDate: formData.targetDate,
+      await updateMutation.mutateAsync({
+        id: editingId,
+        name: formData.name,
+        description: formData.description || undefined,
+        status: formData.status,
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
+        targetDate: formData.targetDate ? new Date(formData.targetDate).toISOString() : undefined,
       })
-      setEditingId(null)
     } else {
-      // Create new project
-      const projectData: Omit<Project, 'id'> = {
-        name: formData.name || '',
-        description: formData.description || '',
-        status: formData.status || 'active',
-        startDate: formData.startDate,
-        targetDate: formData.targetDate,
-        linkedTasks: [],
-      }
-
-      await db.projects.add(projectData)
+      await createMutation.mutateAsync({
+        name: formData.name,
+        description: formData.description || undefined,
+        status: formData.status,
+        startDate: formData.startDate ? new Date(formData.startDate).toISOString() : undefined,
+        targetDate: formData.targetDate ? new Date(formData.targetDate).toISOString() : undefined,
+      })
     }
-
-    // Reset form
-    setFormData({
-      name: '',
-      description: '',
-      status: 'active',
-      startDate: getToday(),
-      targetDate: addDays(getToday(), 30),
-    })
-
-    loadData()
   }
 
-  const handleEdit = (project: Project) => {
+  const handleEdit = (project: typeof projects[0]) => {
     setFormData({
       name: project.name,
       description: project.description || '',
       status: project.status,
-      startDate: project.startDate || getToday(),
-      targetDate: project.targetDate || addDays(getToday(), 30),
+      startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : getToday(),
+      targetDate: project.targetDate ? new Date(project.targetDate).toISOString().split('T')[0] : addDays(getToday(), 30),
     })
-    setEditingId(project.id!)
+    setEditingId(project.id)
   }
 
   const handleDelete = async (id: number) => {
     if (!confirm('Delete this project? Tasks linked to it will remain but lose the link.')) return
-    await db.projects.delete(id)
-    loadData()
+    await deleteMutation.mutateAsync({ id })
   }
 
-  const getProjectTasks = (projectId: number): Task[] => {
+  const getProjectTasks = (projectId: number) => {
     return tasks.filter((t) => t.projectId === projectId)
   }
 
-  const getProjectProgress = (project: Project): number => {
-    const projectTasks = getProjectTasks(project.id!)
+  const getProjectProgress = (project: typeof projects[0]): number => {
+    const projectTasks = getProjectTasks(project.id)
     if (projectTasks.length === 0) return 0
     const completed = projectTasks.filter((t) => t.completed).length
     return (completed / projectTasks.length) * 100
   }
+
+  const isLoading = projectsLoading || tasksLoading
 
   if (isLoading) {
     return (
@@ -145,7 +156,7 @@ export default function ProjectsPage() {
               <label className="block text-sm font-medium text-gray-700 mb-1">Status</label>
               <select
                 value={formData.status}
-                onChange={(e) => setFormData({ ...formData, status: e.target.value as Project['status'] })}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'active' | 'completed' | 'paused' })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="active">Active</option>
@@ -209,7 +220,7 @@ export default function ProjectsPage() {
           ) : (
             <div className="space-y-4">
               {projects.map((project) => {
-                const projectTasks = getProjectTasks(project.id!)
+                const projectTasks = getProjectTasks(project.id)
                 const progress = getProjectProgress(project)
                 const statusColors = {
                   active: 'bg-blue-500',
@@ -237,7 +248,7 @@ export default function ProjectsPage() {
                         )}
                         {project.startDate && project.targetDate && (
                           <p className="text-xs text-gray-500">
-                            {formatDisplayDate(project.startDate)} - {formatDisplayDate(project.targetDate)}
+                            {formatDisplayDate(project.startDate.toISOString())} - {formatDisplayDate(project.targetDate.toISOString())}
                           </p>
                         )}
                       </div>
@@ -249,7 +260,7 @@ export default function ProjectsPage() {
                           Edit
                         </button>
                         <button
-                          onClick={() => handleDelete(project.id!)}
+                          onClick={() => handleDelete(project.id)}
                           className="text-red-600 hover:text-red-800 text-sm"
                         >
                           Delete
@@ -274,5 +285,13 @@ export default function ProjectsPage() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function ProjectsPage() {
+  return (
+    <ProtectedRoute>
+      <ProjectsPageContent />
+    </ProtectedRoute>
   )
 }

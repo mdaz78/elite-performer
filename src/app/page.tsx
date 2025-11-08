@@ -1,9 +1,9 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Link from 'next/link'
-import { db } from '@/src/db'
+import { trpc } from '@/src/lib/trpc-client'
 import { Card, ProgressBar } from '@/src/components'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import {
   getToday,
   getWeekStart,
@@ -12,96 +12,48 @@ import {
   formatDisplayDate,
   getDaysRemaining,
 } from '@/src/utils/date'
-import type { CodingCourse, CourseModule, Task, Trade, FitnessLog, Settings } from '@/src/types'
 
-export default function Dashboard() {
-  const [codingProgress, setCodingProgress] = useState(0)
-  const [fitnessLogs, setFitnessLogs] = useState<FitnessLog[]>([])
-  const [tradingStats, setTradingStats] = useState({
-    totalPnl: 0,
-    winRate: 0,
-    tradeCount: 0,
+function DashboardContent() {
+  const today = getToday()
+  const weekStart = getWeekStart()
+  const weekEnd = getWeekEnd()
+
+  // Load settings for transformation progress
+  const { data: startDateSetting } = trpc.settings.getByKey.useQuery({ key: 'transformationStartDate' })
+  const { data: endDateSetting } = trpc.settings.getByKey.useQuery({ key: 'transformationEndDate' })
+
+  // Load all data
+  const { data: courses = [] } = trpc.codingCourses.getAll.useQuery()
+  const { data: fitnessLogs = [] } = trpc.fitness.getByDateRange.useQuery({
+    startDate: new Date(weekStart).toISOString(),
+    endDate: new Date(weekEnd).toISOString(),
   })
-  const [todayTasks, setTodayTasks] = useState<Task[]>([])
-  const [transformationProgress, setTransformationProgress] = useState(0)
-  const [daysRemaining, setDaysRemaining] = useState(0)
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
+  const { data: tradingStats } = trpc.trades.getStats.useQuery({})
+  const { data: todayTasks = [] } = trpc.tasks.getByDate.useQuery({
+    startDate: new Date(today).toISOString(),
+    endDate: new Date(today).toISOString(),
+  })
 
-  useEffect(() => {
-    loadDashboardData()
-  }, [])
+  // Calculate transformation progress
+  const startDate = startDateSetting?.value || today
+  const endDate = endDateSetting?.value || ''
+  const transformationProgress = endDate ? getProgressPercentage(startDate, endDate) : 0
+  const daysRemaining = endDate ? getDaysRemaining(endDate, today < startDate ? startDate : today) : 0
 
-  const loadDashboardData = async () => {
-    const today = getToday()
-    const weekStart = getWeekStart()
-    const weekEnd = getWeekEnd()
+  // Calculate coding progress
+  let totalModules = 0
+  let completedModules = 0
+  courses.forEach((course) => {
+    totalModules += course.modules?.length || 0
+    completedModules += course.modules?.filter((m) => m.completed).length || 0
+  })
+  const codingProgress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
 
-    // Load transformation dates
-    const startDateSetting = await db.settings.where('key').equals('transformationStartDate').first()
-    const endDateSetting = await db.settings.where('key').equals('transformationEndDate').first()
-
-    const start = startDateSetting?.value || today
-    const end = endDateSetting?.value || ''
-
-    setStartDate(start)
-    setEndDate(end)
-
-    if (end) {
-      const progress = getProgressPercentage(start, end)
-      // Calculate days remaining: if today is before start, use full period, otherwise calculate from today
-      const today = getToday()
-      const remaining = getDaysRemaining(end, today < start ? start : today)
-      setTransformationProgress(progress)
-      setDaysRemaining(remaining)
-    }
-
-    // Calculate coding progress
-    const courses = await db.codingCourses.toArray()
-    const modules = await db.courseModules.toArray()
-
-    let totalModules = 0
-    let completedModules = 0
-
-    courses.forEach((course) => {
-      const courseModules = modules.filter((m) => m.courseId === course.id)
-      totalModules += courseModules.length
-      completedModules += courseModules.filter((m) => m.completed).length
-    })
-
-    const codingProg = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
-    setCodingProgress(codingProg)
-
-    // Load recent fitness logs
-    const recentLogs = await db.fitnessLogs
-      .where('date')
-      .between(weekStart, weekEnd, true, true)
-      .toArray()
-    setFitnessLogs(recentLogs)
-
-    // Calculate trading stats
-    const allTrades = await db.trades.toArray()
-    const totalPnl = allTrades.reduce((sum, trade) => sum + trade.pnl, 0)
-    const winningTrades = allTrades.filter((trade) => trade.pnl > 0).length
-    const winRate = allTrades.length > 0 ? (winningTrades / allTrades.length) * 100 : 0
-
-    setTradingStats({
-      totalPnl,
-      winRate,
-      tradeCount: allTrades.length,
-    })
-
-    // Load today's tasks
-    const tasks = await db.tasks
-      .where('scheduledDate')
-      .equals(today)
-      .toArray()
-    setTodayTasks(tasks)
-  }
-
-  const latestWeight = fitnessLogs
-    .filter((log) => log.weight)
-    .sort((a, b) => b.date.localeCompare(a.date))[0]?.weight
+  // Get latest weight
+  const sortedLogs = [...fitnessLogs]
+    .filter((log) => log.weight != null)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  const latestWeight = sortedLogs[0]?.weight
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -172,10 +124,10 @@ export default function Dashboard() {
             <div>
               <p className="text-sm font-medium text-gray-600">Trading</p>
               <p className="text-2xl font-bold text-emerald-500 mt-1">
-                ${tradingStats.totalPnl.toFixed(2)}
+                ${tradingStats?.totalPnL?.toFixed(2) || '0.00'}
               </p>
               <p className="text-xs text-gray-500 mt-1">
-                {tradingStats.tradeCount} trades • {tradingStats.winRate.toFixed(1)}% win rate
+                {tradingStats?.totalTrades || 0} trades • {tradingStats?.winRate?.toFixed(1) || 0}% win rate
               </p>
             </div>
             <div className="p-3 bg-emerald-500/10 rounded-lg">
@@ -233,7 +185,7 @@ export default function Dashboard() {
             <div>
               <p className="text-sm text-gray-600 mb-2">Week Range</p>
               <p className="text-sm text-gray-900">
-                {formatDisplayDate(getWeekStart())} - {formatDisplayDate(getWeekEnd())}
+                {formatDisplayDate(weekStart)} - {formatDisplayDate(weekEnd)}
               </p>
             </div>
           </div>
@@ -245,5 +197,13 @@ export default function Dashboard() {
         </Card>
       </div>
     </div>
+  )
+}
+
+export default function Dashboard() {
+  return (
+    <ProtectedRoute>
+      <DashboardContent />
+    </ProtectedRoute>
   )
 }
