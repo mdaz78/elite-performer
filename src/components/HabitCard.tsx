@@ -88,29 +88,6 @@ export function HabitCard({
     )
   }
 
-  // Get metric columns based on habit type
-  const getMetrics = () => {
-    if (totalSubHabits > 0) {
-      // For habits with sub-habits, show progress
-      const subHabitName = habit.subHabits?.[0]?.name || 'Items'
-      // Try to extract a unit or make it more readable
-      const firstMetric = `${completedSubHabits}/${totalSubHabits} ${subHabitName}`
-      return [
-        firstMetric,
-        `${Math.round(todayProgress)}% Today`,
-        `${Math.round(weeklyProgress)}% This Week`,
-      ]
-    }
-    // For simple habits without sub-habits
-    return [
-      isComplete ? 'Completed' : '0/1',
-      `${Math.round(todayProgress)}% Today`,
-      `${Math.round(weeklyProgress)}% This Week`,
-    ]
-  }
-
-  const metrics = getMetrics()
-
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -226,15 +203,6 @@ export function HabitCard({
           )}
         </div>
       )}
-
-      {/* Metrics - Three Columns */}
-      <div className="grid grid-cols-3 gap-2 text-xs text-gray-600 mt-auto">
-        {metrics.map((metric, index) => (
-          <div key={index} className="text-center">
-            {metric}
-          </div>
-        ))}
-      </div>
 
       {/* Actions - Only show when showActions is true */}
       {showActions && (
