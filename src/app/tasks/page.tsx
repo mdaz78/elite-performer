@@ -102,6 +102,7 @@ function TasksPageContent() {
   const updateTaskMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
       utils.tasks.getByDate.invalidate()
+      utils.tasks.getAll.invalidate()
     },
   })
 
@@ -721,18 +722,16 @@ function TasksPageContent() {
                             </h4>
                           </div>
                           <div className="flex gap-2">
-                            <select
-                              value=""
-                              onChange={(e) => handleAssignTask(task, e.target.value)}
+                            <input
+                              type="date"
+                              placeholder="Assign date"
+                              onChange={(e) => {
+                                if (e.target.value) {
+                                  handleAssignTask(task, e.target.value);
+                                }
+                              }}
                               className="text-xs border border-border dark:border-border-dark rounded-md px-2 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark cursor-pointer"
-                            >
-                              <option value="">Assign to...</option>
-                              {weekDays.map((d, i) => (
-                                <option key={d} value={d}>
-                                  {dayNames[i]} - {formatDisplayDate(d)}
-                                </option>
-                              ))}
-                            </select>
+                            />
                             <button
                               onClick={() => handleDelete(task.id)}
                               className="text-xs px-2 py-1 rounded-md border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium"
