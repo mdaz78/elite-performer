@@ -2,6 +2,7 @@
 
 import { useTheme } from '@/src/lib/use-theme';
 import {
+  Activity,
   BookOpen,
   CheckSquare,
   ChevronDown,
@@ -62,6 +63,7 @@ export const Header = () => {
     { path: '/', label: 'Dashboard', icon: LayoutDashboard },
     { path: '/tasks', label: 'Tasks', icon: CheckSquare },
     { path: '/habit-tracker', label: 'Habit Tracker', icon: Target },
+    { path: '/fitness', label: 'Fitness', icon: Activity },
   ];
 
   const learningLinks = [

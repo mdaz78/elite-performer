@@ -16,8 +16,6 @@ function FitnessPageContent() {
     weight: '',
     bodyFat: '',
     waist: '',
-    calories: '',
-    workoutType: '',
     notes: '',
   })
 
@@ -30,8 +28,6 @@ function FitnessPageContent() {
         weight: '',
         bodyFat: '',
         waist: '',
-        calories: '',
-        workoutType: '',
         notes: '',
       })
     },
@@ -50,8 +46,6 @@ function FitnessPageContent() {
       weight: formData.weight ? Number(formData.weight) : undefined,
       bodyFat: formData.bodyFat ? Number(formData.bodyFat) : undefined,
       waist: formData.waist ? Number(formData.waist) : undefined,
-      calories: formData.calories ? Number(formData.calories) : undefined,
-      workoutType: formData.workoutType || undefined,
       notes: formData.notes || undefined,
     })
   }
@@ -74,7 +68,7 @@ function FitnessPageContent() {
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading fitness logs...</p>
+        <p className="text-neutral-500 dark:text-neutral-500 text-body-sm">Loading fitness logs...</p>
       </div>
     )
   }
@@ -82,8 +76,8 @@ function FitnessPageContent() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Fitness Tracker</h1>
-        <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Log your workouts and track your progress</p>
+        <h1 className="text-h1 text-neutral-800 dark:text-neutral-800">Fitness Tracker</h1>
+        <p className="mt-2 text-body-sm text-neutral-600 dark:text-neutral-600">Log your workouts and track your progress</p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
@@ -101,14 +95,14 @@ function FitnessPageContent() {
             </div>
 
             <div>
-              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Weight (lbs)</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Weight (KG)</label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.weight}
                 onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                 className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
-                placeholder="e.g., 180.5"
+                placeholder="e.g., 82.0"
               />
             </div>
 
@@ -137,28 +131,6 @@ function FitnessPageContent() {
             </div>
 
             <div>
-              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Calories</label>
-              <input
-                type="number"
-                value={formData.calories}
-                onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
-                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
-                placeholder="e.g., 2500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Workout Type</label>
-              <input
-                type="text"
-                value={formData.workoutType}
-                onChange={(e) => setFormData({ ...formData, workoutType: e.target.value })}
-                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
-                placeholder="e.g., Upper Body, Cardio"
-              />
-            </div>
-
-            <div>
               <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Notes</label>
               <textarea
                 value={formData.notes}
@@ -171,7 +143,7 @@ function FitnessPageContent() {
 
             <button
               type="submit"
-              className="w-full h-10 px-6 bg-accent-500 dark:bg-accent-500 text-body-sm font-semibold text-white rounded shadow-sm hover:bg-accent-600 dark:hover:bg-accent-600 transition-all duration-[150ms]"
+              className="w-full h-10 px-6 bg-primary-500 dark:bg-primary-500 text-body-sm font-semibold text-white rounded shadow-sm hover:bg-primary-600 dark:hover:bg-primary-600 transition-all duration-[150ms]"
             >
               Save Entry
             </button>
@@ -180,7 +152,7 @@ function FitnessPageContent() {
 
         <Card title="Progress Chart" className="lg:col-span-2">
           {chartData.length === 0 ? (
-            <div className="flex items-center justify-center h-64 text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
+            <div className="flex items-center justify-center h-64 text-neutral-500 dark:text-neutral-500 text-body-sm">
               No data to display. Log some entries to see your progress!
             </div>
           ) : (
@@ -198,7 +170,7 @@ function FitnessPageContent() {
                   dataKey="weight"
                   stroke="#F59E0B"
                   strokeWidth={2}
-                  name="Weight (lbs)"
+                  name="Weight (KG)"
                   dot={{ r: 4 }}
                 />
                 <Line
@@ -218,19 +190,18 @@ function FitnessPageContent() {
 
       <Card title="Recent Entries">
         {logs.length === 0 ? (
-          <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">No fitness logs yet. Add your first entry above!</p>
+          <p className="text-neutral-500 dark:text-neutral-500 text-body-sm text-center py-8">No fitness logs yet. Add your first entry above!</p>
         ) : (
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-border dark:divide-border-dark">
-              <thead className="bg-background dark:bg-background-dark">
+            <table className="min-w-full divide-y divide-neutral-200 dark:divide-neutral-200">
+              <thead className="bg-neutral-50 dark:bg-neutral-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Date</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Weight</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Body Fat</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Waist</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Calories</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Workout</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Actions</th>
+                  <th className="px-6 py-3 text-left text-caption font-medium text-neutral-600 dark:text-neutral-600 uppercase tracking-wider">Date</th>
+                  <th className="px-6 py-3 text-left text-caption font-medium text-neutral-600 dark:text-neutral-600 uppercase tracking-wider">Weight</th>
+                  <th className="px-6 py-3 text-left text-caption font-medium text-neutral-600 dark:text-neutral-600 uppercase tracking-wider">Body Fat</th>
+                  <th className="px-6 py-3 text-left text-caption font-medium text-neutral-600 dark:text-neutral-600 uppercase tracking-wider">Waist</th>
+                  <th className="px-6 py-3 text-left text-caption font-medium text-neutral-600 dark:text-neutral-600 uppercase tracking-wider">Notes</th>
+                  <th className="px-6 py-3 text-left text-caption font-medium text-neutral-600 dark:text-neutral-600 uppercase tracking-wider">Actions</th>
                 </tr>
               </thead>
               <AnimatePresence mode="popLayout">
@@ -238,7 +209,7 @@ function FitnessPageContent() {
                   variants={staggerContainer}
                   initial="initial"
                   animate="animate"
-                  className="bg-surface dark:bg-surface-dark divide-y divide-border dark:divide-border-dark"
+                  className="bg-neutral-0 dark:bg-neutral-100 divide-y divide-neutral-200 dark:divide-neutral-200"
                 >
                   {logs.map((log) => (
                     <motion.tr
@@ -248,30 +219,27 @@ function FitnessPageContent() {
                       animate="animate"
                       exit="exit"
                       layout
-                      className="hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                      className="hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-colors duration-[150ms]"
                     >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-body-sm text-neutral-800 dark:text-neutral-800">
                         {formatDisplayDate(log.date.toISOString())}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {log.weight ? `${log.weight} lbs` : '-'}
+                      <td className="px-6 py-4 whitespace-nowrap text-body-sm text-neutral-800 dark:text-neutral-800">
+                        {log.weight ? `${log.weight} KG` : '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-body-sm text-neutral-800 dark:text-neutral-800">
                         {log.bodyFat ? `${log.bodyFat}%` : '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                      <td className="px-6 py-4 whitespace-nowrap text-body-sm text-neutral-800 dark:text-neutral-800">
                         {log.waist ? `${log.waist}"` : '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {log.calories ?? '-'}
+                      <td className="px-6 py-4 text-body-sm text-neutral-800 dark:text-neutral-800">
+                        {log.notes ?? '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {log.workoutType ?? '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                      <td className="px-6 py-4 whitespace-nowrap text-body-sm">
                         <button
                           onClick={() => handleDelete(log.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200"
+                          className="text-error-600 dark:text-error-500 hover:text-error-700 dark:hover:text-error-600 transition-colors duration-[150ms]"
                         >
                           Delete
                         </button>
