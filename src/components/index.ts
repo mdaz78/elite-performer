@@ -13,3 +13,4 @@ export { HabitTabs } from './HabitTabs';
 export { TasksTabs } from './TasksTabs';
 export { FloatingActionButton } from './FloatingActionButton';
 export { IconPicker } from './IconPicker';
+export { DatePicker } from './DatePicker';

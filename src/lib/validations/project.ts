@@ -25,7 +25,7 @@ export const createTaskSchema = z.object({
   title: z.string().min(1, 'Task title is required').max(200),
   type: taskTypeEnum,
   projectId: z.number().optional().nullable(),
-  scheduledDate: z.string().datetime(),
+  scheduledDate: z.string().datetime().optional().nullable(),
 })
 
 export const updateTaskSchema = z.object({
@@ -34,7 +34,7 @@ export const updateTaskSchema = z.object({
   type: taskTypeEnum.optional(),
   projectId: z.number().optional().nullable(),
   completed: z.boolean().optional(),
-  scheduledDate: z.string().datetime().optional(),
+  scheduledDate: z.string().datetime().optional().nullable(),
   completedAt: z.string().datetime().optional().nullable(),
 })
 

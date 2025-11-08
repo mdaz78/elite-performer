@@ -91,9 +91,11 @@ export const tasksRouter = router({
 
       return await ctx.prisma.task.create({
         data: {
-          ...input,
+          title: input.title,
+          type: input.type,
+          projectId: input.projectId,
           userId,
-          scheduledDate: new Date(input.scheduledDate),
+          scheduledDate: input.scheduledDate ? new Date(input.scheduledDate) : null,
         },
         include: {
           project: true,

@@ -238,7 +238,7 @@ model Task {
   type          TaskType
   projectId     Int?
   completed     Boolean   @default(false)
-  scheduledDate DateTime
+  scheduledDate DateTime?
   completedAt   DateTime?
   createdAt     DateTime  @default(now())
   project       Project?  @relation(fields: [projectId], references: [id])

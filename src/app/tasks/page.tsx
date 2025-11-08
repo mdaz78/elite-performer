@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
-import { Card, ProgressBar, TasksTabs } from '@/src/components'
+import { Card, ProgressBar, TasksTabs, DatePicker } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { createVariants, updateVariants, staggerContainer } from '@/src/lib/animations'
 import {
@@ -45,7 +45,7 @@ function TasksPageContent() {
     title: '',
     type: 'DeepWork' as const,
     projectId: undefined as number | undefined,
-    scheduledDate: getToday(),
+    scheduledDate: 'unassigned' as string,
   })
 
   const [reviewData, setReviewData] = useState({
@@ -89,11 +89,12 @@ function TasksPageContent() {
   const createTaskMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
       utils.tasks.getByDate.invalidate()
+      utils.tasks.getAll.invalidate()
       setFormData({
         title: '',
         type: 'DeepWork',
         projectId: undefined,
-        scheduledDate: selectedWeekStart,
+        scheduledDate: 'unassigned',
       })
       setShowTaskForm(false)
     },
@@ -190,12 +191,16 @@ function TasksPageContent() {
   const handleTaskSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
 
-    await createTaskMutation.mutateAsync({
-      title: formData.title,
-      type: formData.type,
-      projectId: formData.projectId || null,
-      scheduledDate: new Date(formData.scheduledDate).toISOString(),
-    })
+    try {
+      await createTaskMutation.mutateAsync({
+        title: formData.title,
+        type: formData.type,
+        projectId: formData.projectId || null,
+        scheduledDate: formData.scheduledDate === 'unassigned' ? null : dayjs(formData.scheduledDate).startOf('day').toDate().toISOString(),
+      })
+    } catch (error) {
+      console.error('Error creating task:', error)
+    }
   }
 
   const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null)
@@ -401,8 +406,8 @@ function TasksPageContent() {
   }
 
   const getBacklogTasks = () => {
-    // Tasks without a scheduled date or scheduled for the default week start (considered unassigned)
-    return allTasks.filter((t) => !t.scheduledDate || new Date(t.scheduledDate).toISOString().split('T')[0] === selectedWeekStart)
+    // Tasks without a scheduled date (unassigned tasks)
+    return allTasks.filter((t) => !t.scheduledDate)
   }
 
   const getIncompleteTasks = () => {
@@ -722,15 +727,11 @@ function TasksPageContent() {
                             </h4>
                           </div>
                           <div className="flex gap-2">
-                            <input
-                              type="date"
+                            <DatePicker
+                              value={task.scheduledDate ? new Date(task.scheduledDate).toISOString().split('T')[0] : undefined}
+                              onChange={(date) => handleAssignTask(task, date)}
                               placeholder="Assign date"
-                              onChange={(e) => {
-                                if (e.target.value) {
-                                  handleAssignTask(task, e.target.value);
-                                }
-                              }}
-                              className="text-xs border border-border dark:border-border-dark rounded-md px-2 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark cursor-pointer"
+                              variant="icon"
                             />
                             <button
                               onClick={() => handleDelete(task.id)}
@@ -869,7 +870,7 @@ function TasksPageContent() {
                   onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
                   className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 >
-                  <option value={selectedWeekStart}>Unassigned (This Week)</option>
+                  <option value="unassigned">Unassigned (Backlog)</option>
                   {weekDays.map((date, idx) => (
                     <option key={date} value={date}>
                       {dayNames[idx]} - {formatDisplayDate(date)}
@@ -888,7 +889,7 @@ function TasksPageContent() {
                     title: '',
                     type: 'DeepWork',
                     projectId: undefined,
-                    scheduledDate: selectedWeekStart,
+                    scheduledDate: 'unassigned',
                   })
                 }}
                 className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
