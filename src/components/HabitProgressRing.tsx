@@ -28,15 +28,23 @@ export function HabitProgressRing({
   }
 
   return (
-    <div
-      className="relative cursor-pointer"
+    <motion.div
+      className="relative cursor-pointer group"
       onClick={onClick}
       style={{ width: size, height: size }}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
+      transition={{ duration: 0.2 }}
     >
+      {/* Glow effect on hover */}
+      <div className={`absolute inset-0 rounded-full blur-lg opacity-0 group-hover:opacity-30 transition-opacity duration-300 ${
+        completed ? 'bg-accent-emerald dark:bg-accent-emerald-dark' : 'bg-accent-blue dark:bg-accent-blue-dark'
+      }`} />
+
       <svg
         width={size}
         height={size}
-        className="transform -rotate-90"
+        className="transform -rotate-90 relative z-10"
       >
         {/* Background circle */}
         <circle
@@ -46,7 +54,7 @@ export function HabitProgressRing({
           fill="none"
           stroke="currentColor"
           strokeWidth={strokeWidth}
-          className="text-border dark:text-border-dark opacity-20"
+          className="text-background dark:text-background-dark opacity-40"
         />
         {/* Progress circle */}
         <motion.circle
@@ -60,19 +68,20 @@ export function HabitProgressRing({
           strokeDasharray={circumference}
           initial={{ strokeDashoffset: circumference }}
           animate={{ strokeDashoffset: offset }}
-          transition={{ duration: 0.5, ease: 'easeOut' }}
+          transition={{ duration: 0.8, ease: [0.4, 0, 0.2, 1] }}
         />
       </svg>
       {/* Center content */}
-      <div className="absolute inset-0 flex items-center justify-center">
+      <div className="absolute inset-0 flex items-center justify-center z-20">
         {completed ? (
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 200, damping: 15 }}
+            initial={{ scale: 0, rotate: -180 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 200, damping: 15, delay: 0.2 }}
+            className="w-8 h-8 rounded-full bg-accent-emerald dark:bg-accent-emerald-dark flex items-center justify-center shadow-md"
           >
             <svg
-              className="w-6 h-6 text-white"
+              className="w-5 h-5 text-white"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -86,11 +95,11 @@ export function HabitProgressRing({
             </svg>
           </motion.div>
         ) : (
-          <span className="text-xs font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+          <span className="text-xs font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
             {Math.round(progress)}%
           </span>
         )}
       </div>
-    </div>
+    </motion.div>
   )
 }

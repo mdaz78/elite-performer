@@ -23,7 +23,7 @@ import {
 } from '@/src/utils/date'
 import dayjs from 'dayjs'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, Pause, Play, Check, X } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, Pause, Play, Check, X, Flame } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 
 type TabType = 'today' | 'habits' | 'progress'
@@ -117,38 +117,89 @@ function HabitAnalyticsCard({ habitId, habitName, icon }: { habitId: number; hab
   }
 
   return (
-    <Card title={habitName} className="flex flex-col">
-      <div className="space-y-4 flex-1">
-        <div className="grid grid-cols-3 gap-4">
-          <div className="p-4 bg-background dark:bg-background-dark rounded-lg border border-border dark:border-border-dark">
-            <div className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-1">Current Streak</div>
-            <div className="text-2xl font-bold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
+    <Card className="flex flex-col shadow-sm hover:shadow-md transition-shadow duration-300">
+      <div className="space-y-5 flex-1">
+        {/* Header with icon and name */}
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-accent-blue/10 dark:from-accent-blue-dark/20 to-accent-blue/5 dark:to-accent-blue-dark/10 flex items-center justify-center shadow-sm">
+            {renderIcon()}
+          </div>
+          <h3 className="text-lg font-bold text-text-primary dark:text-text-primary-dark">
+            {habitName}
+          </h3>
+        </div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="p-4 bg-gradient-to-br from-accent-blue/5 dark:from-accent-blue-dark/10 to-accent-blue/10 dark:to-accent-blue-dark/15 rounded-2xl border border-accent-blue/20 dark:border-accent-blue-dark/20">
+            <div className="flex items-center gap-2 mb-2">
+              <Flame className="w-4 h-4 text-accent-amber dark:text-accent-amber-dark" />
+              <div className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                Current Streak
+              </div>
+            </div>
+            <div className="text-3xl font-bold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
               {history.streak}
+              <span className="text-sm font-normal text-text-tertiary dark:text-text-tertiary-dark ml-1">
+                {history.streak === 1 ? 'day' : 'days'}
+              </span>
             </div>
           </div>
-          <div className="p-4 bg-background dark:bg-background-dark rounded-lg border border-border dark:border-border-dark">
-            <div className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-1">Completion</div>
-            <div className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200">
+          <div className="p-4 bg-gradient-to-br from-accent-emerald/5 dark:from-accent-emerald-dark/10 to-accent-emerald/10 dark:to-accent-emerald-dark/15 rounded-2xl border border-accent-emerald/20 dark:border-accent-emerald-dark/20">
+            <div className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-2">
+              Completion Rate
+            </div>
+            <div className="text-3xl font-bold text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200">
               {history.completionPercentage.toFixed(0)}%
             </div>
           </div>
-          <div className="p-4 bg-background dark:bg-background-dark rounded-lg border border-border dark:border-border-dark flex items-center justify-center">
-            {renderIcon()}
-          </div>
         </div>
 
-        <div className="p-4 bg-background dark:bg-background-dark rounded-lg border border-border dark:border-border-dark">
-          <div className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-2">
-            Last 30 Days: {history.completedDays} / {history.applicableDays} days
+        {/* Chart Section */}
+        <div className="p-5 bg-white/50 dark:bg-surface-dark/50 backdrop-blur-sm rounded-2xl border border-border/50 dark:border-border-dark/50">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-sm font-semibold text-text-primary dark:text-text-primary-dark">
+              Last 30 Days
+            </div>
+            <div className="text-xs text-text-secondary dark:text-text-secondary-dark">
+              {history.completedDays} / {history.applicableDays} completed
+            </div>
           </div>
           {chartData.length > 0 && (
-            <ResponsiveContainer width="100%" height={200}>
+            <ResponsiveContainer width="100%" height={160}>
               <BarChart data={chartData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-20" />
-                <XAxis dataKey="date" tick={{ fontSize: 10 }} stroke="currentColor" className="text-text-secondary dark:text-text-secondary-dark" />
+                <CartesianGrid strokeDasharray="3 3" stroke="currentColor" className="opacity-10" />
+                <XAxis
+                  dataKey="date"
+                  tick={{ fontSize: 10 }}
+                  stroke="currentColor"
+                  className="text-text-secondary dark:text-text-secondary-dark"
+                  tickLine={false}
+                  axisLine={false}
+                />
                 <YAxis hide />
-                <Tooltip />
-                <Bar dataKey="completed" fill="#10B981" radius={[4, 4, 0, 0]} />
+                <Tooltip
+                  contentStyle={{
+                    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+                    border: 'none',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                    padding: '8px 12px',
+                  }}
+                  cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+                />
+                <Bar
+                  dataKey="completed"
+                  fill="url(#colorGradient)"
+                  radius={[6, 6, 0, 0]}
+                  maxBarSize={40}
+                />
+                <defs>
+                  <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity={1} />
+                    <stop offset="100%" stopColor="#10B981" stopOpacity={0.6} />
+                  </linearGradient>
+                </defs>
               </BarChart>
             </ResponsiveContainer>
           )}
@@ -521,10 +572,16 @@ function HabitTrackerPageContent() {
 
             {/* Today's Habits */}
             {todayHabits.length === 0 ? (
-              <Card className="mb-6">
-                <div className="text-center py-12">
-                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200 mb-4">
-                    No habits scheduled for today
+              <Card className="mb-6 border-dashed border-2">
+                <div className="text-center py-16">
+                  <div className="w-16 h-16 bg-gradient-to-br from-accent-blue/10 dark:from-accent-blue-dark/20 to-accent-blue/5 dark:to-accent-blue-dark/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <Plus className="w-8 h-8 text-accent-blue dark:text-accent-blue-dark" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark mb-2">
+                    No habits for today
+                  </h3>
+                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200 mb-6 max-w-sm mx-auto">
+                    Start building better habits by creating your first one
                   </p>
                   <button
                     onClick={() => {
@@ -533,9 +590,9 @@ function HabitTrackerPageContent() {
                       setHabitFormData({ name: '', icon: null, frequency: 'daily', customDays: [], targetCount: 1, startDate: '', endDate: '' })
                       setSubHabitsInForm([])
                     }}
-                    className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200 shadow-sm font-medium text-sm flex items-center gap-2 mx-auto"
+                    className="px-6 py-3 bg-gradient-to-r from-accent-blue dark:from-accent-blue-dark to-accent-blue/90 dark:to-accent-blue-dark/90 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-semibold shadow-md inline-flex items-center gap-2"
                   >
-                    <Plus className="w-4 h-4 text-white" />
+                    <Plus className="w-5 h-5 text-white" />
                     Create Your First Habit
                   </button>
                 </div>
@@ -610,11 +667,25 @@ function HabitTrackerPageContent() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <Card title="All Habits" className="mb-6">
+            <Card className="mb-6 shadow-sm">
+              <div className="mb-6">
+                <h2 className="text-xl font-bold text-text-primary dark:text-text-primary-dark">
+                  All Habits
+                </h2>
+                <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-1">
+                  Manage and track all your habits
+                </p>
+              </div>
               {allHabits.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200 mb-4">
-                    No habits created yet
+                <div className="text-center py-16 border-2 border-dashed border-border dark:border-border-dark rounded-2xl">
+                  <div className="w-16 h-16 bg-gradient-to-br from-accent-blue/10 dark:from-accent-blue-dark/20 to-accent-blue/5 dark:to-accent-blue-dark/10 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-sm">
+                    <Plus className="w-8 h-8 text-accent-blue dark:text-accent-blue-dark" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark mb-2">
+                    No habits yet
+                  </h3>
+                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200 mb-6 max-w-sm mx-auto">
+                    Create your first habit to start tracking your progress
                   </p>
                   <button
                     onClick={() => {
@@ -623,9 +694,9 @@ function HabitTrackerPageContent() {
                       setHabitFormData({ name: '', icon: null, frequency: 'daily', customDays: [], targetCount: 1, startDate: '', endDate: '' })
                       setSubHabitsInForm([])
                     }}
-                    className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200 shadow-sm font-medium text-sm flex items-center gap-2 mx-auto"
+                    className="px-6 py-3 bg-gradient-to-r from-accent-blue dark:from-accent-blue-dark to-accent-blue/90 dark:to-accent-blue-dark/90 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-semibold shadow-md inline-flex items-center gap-2"
                   >
-                    <Plus className="w-4 h-4 text-white" />
+                    <Plus className="w-5 h-5 text-white" />
                     Create Your First Habit
                   </button>
                 </div>
@@ -691,28 +762,38 @@ function HabitTrackerPageContent() {
 
       {/* Habit Form Modal */}
       {showHabitForm && (
-        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity">
+        <div className="fixed inset-0 bg-gray-900/60 dark:bg-gray-900/80 backdrop-blur-md z-40 transition-opacity">
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
-              <div className="bg-surface dark:bg-surface-dark rounded-lg shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200 max-h-[90vh] overflow-y-auto">
-                <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-4 transition-colors duration-200">
-                  {editingHabit ? 'Edit Habit' : 'Create Habit'}
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                transition={{ duration: 0.2 }}
+                className="bg-white dark:bg-surface-dark rounded-3xl shadow-2xl p-8 max-w-lg w-full border border-border/30 dark:border-border-dark/30 transition-colors duration-200 max-h-[90vh] overflow-y-auto"
+              >
+                <h3 className="text-2xl font-bold text-text-primary dark:text-text-primary-dark mb-6 transition-colors duration-200">
+                  {editingHabit ? 'Edit Habit' : 'Create New Habit'}
                 </h3>
-                <form onSubmit={editingHabit ? handleUpdateHabit : handleCreateHabit} className="space-y-4">
+                <form onSubmit={editingHabit ? handleUpdateHabit : handleCreateHabit} className="space-y-5">
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Name</label>
+                    <label className="block text-sm font-semibold text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">
+                      Habit Name
+                    </label>
                     <input
                       type="text"
                       value={habitFormData.name}
                       onChange={(e) => setHabitFormData({ ...habitFormData, name: e.target.value })}
-                      className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                      placeholder="e.g., Daily Prayers"
+                      className="w-full px-4 py-3 bg-background/50 dark:bg-background-dark/50 text-text-primary dark:text-text-primary-dark border border-border/50 dark:border-border-dark/50 rounded-xl focus:ring-2 focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-transparent transition-all duration-200 outline-none"
+                      placeholder="e.g., Daily Meditation"
                       required
                     />
                   </div>
 
                   <div>
-                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Icon</label>
+                    <label className="block text-sm font-semibold text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">
+                      Icon
+                    </label>
                     {showIconPicker ? (
                       <IconPicker
                         selectedIcon={habitFormData.icon}
@@ -726,19 +807,19 @@ function HabitTrackerPageContent() {
                       <button
                         type="button"
                         onClick={() => setShowIconPicker(true)}
-                        className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md hover:bg-background dark:hover:bg-background-dark transition-colors duration-200 flex items-center justify-center gap-2"
+                        className="w-full px-4 py-3 bg-background/50 dark:bg-background-dark/50 text-text-primary dark:text-text-primary-dark border border-border/50 dark:border-border-dark/50 rounded-xl hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue/50 dark:hover:border-accent-blue-dark/50 transition-all duration-200 flex items-center justify-center gap-2 font-medium"
                       >
                         {habitFormData.icon ? (
                           <>
                             {(LucideIcons as any)[habitFormData.icon] && (
                               <>
-                                {React.createElement((LucideIcons as any)[habitFormData.icon], { className: 'w-5 h-5 text-text-primary dark:text-text-primary-dark' })}
+                                {React.createElement((LucideIcons as any)[habitFormData.icon], { className: 'w-5 h-5 text-accent-blue dark:text-accent-blue-dark' })}
                                 <span>{habitFormData.icon}</span>
                               </>
                             )}
                           </>
                         ) : (
-                          <span>Select Icon</span>
+                          <span className="text-text-tertiary dark:text-text-tertiary-dark">Select Icon</span>
                         )}
                       </button>
                     )}
@@ -897,7 +978,7 @@ function HabitTrackerPageContent() {
                     </div>
                   )}
 
-                  <div className="flex justify-end gap-2 pt-2">
+                  <div className="flex justify-end gap-3 pt-4 mt-6 border-t border-border/30 dark:border-border-dark/30">
                     <button
                       type="button"
                       onClick={() => {
@@ -907,19 +988,19 @@ function HabitTrackerPageContent() {
                         setHabitFormData({ name: '', icon: null, frequency: 'daily', customDays: [], targetCount: 1, startDate: '', endDate: '' })
                         setSubHabitsInForm([])
                       }}
-                      className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
+                      className="px-6 py-3 border border-border/50 dark:border-border-dark/50 rounded-xl hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-semibold transition-all duration-200 hover:scale-105"
                     >
                       Cancel
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors font-medium shadow-sm"
+                      className="px-6 py-3 bg-gradient-to-r from-accent-blue dark:from-accent-blue-dark to-accent-blue/90 dark:to-accent-blue-dark/90 text-white rounded-xl hover:shadow-lg hover:scale-105 transition-all duration-200 font-semibold shadow-md"
                     >
-                      {editingHabit ? 'Update' : 'Create'}
+                      {editingHabit ? 'Update Habit' : 'Create Habit'}
                     </button>
                   </div>
                 </form>
-              </div>
+              </motion.div>
             </div>
           </div>
         </div>
