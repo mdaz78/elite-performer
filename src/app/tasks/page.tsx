@@ -455,23 +455,23 @@ function TasksPageContent() {
 
       {/* Week View - Horizontal Date Sections */}
       <div className="mb-8 space-y-6">
-        {weekDays.map((date, idx) => {
-          const dayTasks = getTasksForDay(date)
-          const dayModules = getScheduledModulesForDay(date)
-          const isToday = isSameDay(date, today)
-          const isSunday = idx === 0
+          {weekDays.map((date, idx) => {
+            const dayTasks = getTasksForDay(date)
+            const dayModules = getScheduledModulesForDay(date)
+            const isToday = isSameDay(date, today)
+            const isSunday = idx === 0
           const hasItems = dayTasks.length > 0 || dayModules.length > 0
 
-          return (
+            return (
             <motion.div
-              key={date}
+                key={date}
               variants={createVariants}
               initial="initial"
               animate="animate"
               className={`p-5 rounded-xl border-2 transition-all duration-200 ${
-                isToday
+                  isToday
                   ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-r from-blue-50/30 to-transparent dark:from-blue-900/20 dark:to-transparent shadow-md'
-                  : isSunday
+                    : isSunday
                   ? 'border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/30 dark:to-transparent shadow-sm'
                   : 'border-border dark:border-border-dark bg-surface/30 dark:bg-surface-dark/30 shadow-sm hover:shadow-md'
               }`}
@@ -483,18 +483,18 @@ function TasksPageContent() {
                 }`}>
                   <span className="text-2xl font-bold">{dayjs(date).format('D')}</span>
                   <span className="text-sm font-semibold uppercase tracking-wide">{dayNames[idx]}</span>
-                </div>
-                {isSunday && (
+                    </div>
+                    {isSunday && (
                   <span className="text-xs font-bold bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-3 py-1 rounded-full shadow-sm">
-                    Planning
-                  </span>
-                )}
+                        Planning
+                      </span>
+                    )}
                 {isToday && (
                   <span className="text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded-full shadow-sm">
                     Today
                   </span>
                 )}
-              </div>
+                  </div>
 
               {/* Cards Container */}
               {!hasItems ? (
@@ -504,82 +504,82 @@ function TasksPageContent() {
               ) : (
                 <div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                    <AnimatePresence mode="popLayout">
+                  <AnimatePresence mode="popLayout">
                       {/* Scheduled Modules */}
-                      {dayModules.map((module) => (
-                        <motion.div
-                          key={`module-${module.id}`}
-                          variants={createVariants}
-                          initial="initial"
-                          animate="animate"
-                          exit="exit"
-                          layout
-                          className="group p-4 border-2 border-purple-300 dark:border-purple-600 rounded-xl transition-all duration-200 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/30 dark:to-purple-900/10 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md cursor-pointer"
-                          onClick={() => handleNavigateToCourse(module)}
-                        >
-                          <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-2 justify-between">
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-semibold px-2 py-1 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-md">
-                                  {module.courseType === 'coding' ? '💻 Coding' : '📈 Trading'}
-                                </span>
-                                {module.completed && (
-                                  <span className="text-xs font-medium px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
-                                    ✓ Done
-                                  </span>
-                                )}
-                              </div>
-                              <select
-                                value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
-                                onChange={(e) => handleRescheduleModule(module, e.target.value)}
-                                className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200 opacity-0 group-hover:opacity-100"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                {weekDays.map((d, i) => (
-                                  <option key={d} value={d}>
-                                    {dayNames[i]}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1 opacity-90">
-                                {module.courseName}
-                              </p>
-                              <p
-                                className={`text-sm font-semibold leading-tight ${
-                                  module.completed
-                                    ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
-                                    : 'text-text-primary dark:text-text-primary-dark'
-                                }`}
-                              >
-                                {module.name}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-
-                      {/* Regular Tasks */}
-                      {dayTasks.map((task) => {
-                        const project = projects.find((p) => p.id === task.projectId)
-                        const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
-                        const isAnimating = animatingTaskId === task.id
-                        return (
+                        {dayModules.map((module) => (
                           <motion.div
-                            key={task.id}
+                            key={`module-${module.id}`}
                             variants={createVariants}
                             initial="initial"
                             animate="animate"
                             exit="exit"
                             layout
+                          className="group p-4 border-2 border-purple-300 dark:border-purple-600 rounded-xl transition-all duration-200 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/30 dark:to-purple-900/10 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md cursor-pointer"
+                            onClick={() => handleNavigateToCourse(module)}
+                          >
+                          <div className="flex flex-col gap-3">
+                              <div className="flex items-center gap-2 justify-between">
+                                <div className="flex items-center gap-2 flex-wrap">
+                                <span className="text-xs font-semibold px-2 py-1 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-md">
+                                  {module.courseType === 'coding' ? '💻 Coding' : '📈 Trading'}
+                                  </span>
+                                  {module.completed && (
+                                  <span className="text-xs font-medium px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
+                                      ✓ Done
+                                    </span>
+                                  )}
+                                </div>
+                                <select
+                                  value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
+                                  onChange={(e) => handleRescheduleModule(module, e.target.value)}
+                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {weekDays.map((d, i) => (
+                                    <option key={d} value={d}>
+                                      {dayNames[i]}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                              <div>
+                              <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1 opacity-90">
+                                  {module.courseName}
+                                </p>
+                                <p
+                                className={`text-sm font-semibold leading-tight ${
+                                    module.completed
+                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
+                                      : 'text-text-primary dark:text-text-primary-dark'
+                                  }`}
+                                >
+                                  {module.name}
+                                </p>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+
+                      {/* Regular Tasks */}
+                        {dayTasks.map((task) => {
+                          const project = projects.find((p) => p.id === task.projectId)
+                          const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
+                          const isAnimating = animatingTaskId === task.id
+                          return (
+                            <motion.div
+                              key={task.id}
+                              variants={createVariants}
+                              initial="initial"
+                              animate="animate"
+                              exit="exit"
+                              layout
                             className={`group p-4 border-2 rounded-xl transition-all duration-200 ${
-                              task.completed
+                                task.completed
                                 ? 'bg-gradient-to-br from-gray-50 to-gray-50/50 dark:from-gray-900/30 dark:to-gray-900/10 border-gray-300 dark:border-gray-700 opacity-60'
                                 : 'bg-gradient-to-br from-slate-50 to-slate-50/50 dark:from-slate-900/30 dark:to-slate-900/10 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:shadow-md'
-                            }`}
-                          >
-                            <div className="flex flex-col gap-3">
+                              }`}
+                            >
+                              <div className="flex flex-col gap-3">
                               <div className="flex items-center gap-2 justify-between">
                                 <div className="flex items-center gap-2 flex-wrap">
                                   <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-md">
@@ -592,6 +592,17 @@ function TasksPageContent() {
                                   )}
                                 </div>
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+                                  <button
+                                    onClick={() => handleToggleComplete(task.id, task.completed)}
+                                    className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
+                                      task.completed
+                                        ? 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        : 'border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                    }`}
+                                    title={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                                  >
+                                    {task.completed ? '↶ Undo' : '✓ Done'}
+                                  </button>
                                   <select
                                     value={new Date(task.scheduledDate).toISOString().split('T')[0]}
                                     onChange={(e) => handleAssignTask(task, e.target.value)}
@@ -606,10 +617,10 @@ function TasksPageContent() {
                                   </select>
                                   <button
                                     onClick={() => handleDelete(task.id)}
-                                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                    className="text-xs px-2 py-0.5 rounded-md border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 font-medium"
                                     title="Delete task"
                                   >
-                                    ×
+                                    Delete
                                   </button>
                                 </div>
                               </div>
@@ -619,35 +630,27 @@ function TasksPageContent() {
                                     {project.name}
                                   </p>
                                 )}
-                                <div className="flex items-start gap-2">
-                                  <input
-                                    type="checkbox"
-                                    checked={task.completed}
-                                    onChange={() => handleToggleComplete(task.id, task.completed)}
-                                    className="mt-0.5 h-4 w-4 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400 border-slate-300 dark:border-slate-600 rounded cursor-pointer transition-colors duration-200 flex-shrink-0"
-                                  />
-                                  <p
-                                    className={`text-sm font-semibold leading-tight ${
-                                      task.completed
-                                        ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
-                                        : 'text-text-primary dark:text-text-primary-dark'
-                                    }`}
-                                  >
-                                    {task.title}
-                                  </p>
-                                </div>
+                                <p
+                                  className={`text-sm font-semibold leading-tight ${
+                                    task.completed
+                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
+                                      : 'text-text-primary dark:text-text-primary-dark'
+                                  }`}
+                                >
+                                  {task.title}
+                                </p>
                               </motion.div>
                             </div>
-                          </motion.div>
-                        )
-                      })}
-                    </AnimatePresence>
-                  </div>
+                            </motion.div>
+                          )
+                        })}
+                  </AnimatePresence>
                 </div>
+              </div>
               )}
             </motion.div>
-          )
-        })}
+            )
+          })}
       </div>
 
       {/* Weekly Review Section */}
