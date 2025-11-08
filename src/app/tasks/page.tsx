@@ -330,31 +330,31 @@ function TasksPageContent() {
 
       {/* Week Selector */}
       <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3 flex-wrap">
+        <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => navigateWeek('prev')}
-            className="px-4 py-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue dark:hover:border-accent-blue-dark transition-all duration-200 shadow-sm hover:shadow-md h-10"
+            className="inline-flex items-center justify-center px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue dark:hover:border-accent-blue-dark transition-all duration-200 shadow-sm hover:shadow-md h-10 text-sm whitespace-nowrap"
           >
             ← Previous
           </button>
-          <div className="flex items-center gap-3 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg px-4 py-2 shadow-sm hover:shadow-md transition-all duration-200 h-10">
+          <div className="inline-flex items-center gap-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg px-3 shadow-sm hover:shadow-md transition-all duration-200 h-10">
             <input
               type="date"
               value={selectedWeekStart}
               onChange={(e) => setSelectedWeekStart(getWeekStartSunday(e.target.value))}
-              className="border-0 bg-transparent text-text-primary dark:text-text-primary-dark font-medium focus:outline-none focus:ring-0 cursor-pointer h-full py-0 transition-colors duration-200"
+              className="border-0 bg-transparent text-text-primary dark:text-text-primary-dark font-medium focus:outline-none focus:ring-0 cursor-pointer text-sm transition-colors duration-200 w-auto"
             />
             <span className="text-text-primary dark:text-text-primary-dark font-semibold text-sm whitespace-nowrap">{formatWeekRange(selectedWeekStart)}</span>
           </div>
           <button
             onClick={() => navigateWeek('next')}
-            className="px-4 py-2.5 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue dark:hover:border-accent-blue-dark transition-all duration-200 shadow-sm hover:shadow-md h-10"
+            className="inline-flex items-center justify-center px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue dark:hover:border-accent-blue-dark transition-all duration-200 shadow-sm hover:shadow-md h-10 text-sm whitespace-nowrap"
           >
             Next →
           </button>
           <button
             onClick={() => setSelectedWeekStart(getWeekStartSunday())}
-            className="px-4 py-2.5 text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 rounded-lg transition-all duration-200 h-10 border border-transparent hover:border-accent-blue/20 dark:hover:border-accent-blue-dark/20"
+            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 rounded-lg transition-all duration-200 h-10 border border-transparent hover:border-accent-blue/20 dark:hover:border-accent-blue-dark/20 whitespace-nowrap"
           >
             This Week
           </button>
