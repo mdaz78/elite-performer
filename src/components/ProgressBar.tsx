@@ -1,7 +1,7 @@
 interface ProgressBarProps {
   progress: number;
   label?: string;
-  color?: 'career' | 'trading' | 'fitness';
+  color?: 'primary' | 'success' | 'accent';
   showPercentage?: boolean;
   className?: string;
 }
@@ -9,14 +9,14 @@ interface ProgressBarProps {
 export const ProgressBar = ({
   progress,
   label,
-  color = 'career',
+  color = 'primary',
   showPercentage = true,
   className = '',
 }: ProgressBarProps) => {
   const colorClasses = {
-    career: 'bg-accent-blue dark:bg-accent-blue-dark',
-    trading: 'bg-accent-emerald dark:bg-accent-emerald-dark',
-    fitness: 'bg-accent-amber dark:bg-accent-amber-dark',
+    primary: 'bg-gradient-to-r from-primary-500 to-primary-400',
+    success: 'bg-gradient-to-r from-success-500 to-success-600',
+    accent: 'bg-gradient-to-r from-accent-500 to-accent-600',
   };
 
   const clampedProgress = Math.min(100, Math.max(0, progress));
@@ -25,19 +25,19 @@ export const ProgressBar = ({
     <div className={className}>
       {label && (
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+          <span className="text-body-sm font-medium text-neutral-600 dark:text-neutral-600">
             {label}
           </span>
           {showPercentage && (
-            <span className="text-sm text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
+            <span className="text-body-sm text-neutral-500 dark:text-neutral-500">
               {Math.round(clampedProgress)}%
             </span>
           )}
         </div>
       )}
-      <div className="w-full bg-background dark:bg-background-dark rounded-full h-2.5 transition-colors duration-200">
+      <div className="w-full bg-neutral-200 dark:bg-neutral-200 rounded h-2 transition-colors duration-[150ms]">
         <div
-          className={`h-2.5 rounded-full transition-all duration-300 ${colorClasses[color]}`}
+          className={`h-2 rounded transition-all duration-[300ms] ${colorClasses[color]}`}
           style={{ width: `${clampedProgress}%` }}
         />
       </div>

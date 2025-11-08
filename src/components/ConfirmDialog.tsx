@@ -31,32 +31,32 @@ export const ConfirmDialog = ({
   const confirmButtonClass =
     variant === 'danger'
       ? disabled
-        ? 'bg-red-400 dark:bg-red-600 cursor-not-allowed opacity-50'
-        : 'bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 focus:ring-red-500 dark:focus:ring-red-400'
+        ? 'bg-error-500/50 dark:bg-error-500/50 cursor-not-allowed opacity-50'
+        : 'bg-error-600 dark:bg-error-600 hover:bg-error-700 dark:hover:bg-error-700 focus:ring-error-500 dark:focus:ring-error-500'
       : disabled
-      ? 'bg-accent-blue/50 dark:bg-accent-blue-dark/50 cursor-not-allowed opacity-50'
-      : 'bg-accent-blue dark:bg-accent-blue-dark hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 focus:ring-accent-blue dark:focus:ring-accent-blue-dark';
+      ? 'bg-primary-500/50 dark:bg-primary-500/50 cursor-not-allowed opacity-50'
+      : 'bg-primary-500 dark:bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600 focus:ring-primary-500 dark:focus:ring-primary-500';
 
   return (
     <Fragment>
-      <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm transition-opacity z-40" />
+      <div className="fixed inset-0 bg-neutral-900/50 dark:bg-neutral-900/70 backdrop-blur-sm transition-opacity z-40" />
       <div className="fixed inset-0 z-50 overflow-y-auto">
         <div className="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-          <div className="relative transform overflow-hidden rounded-lg bg-surface dark:bg-surface-dark text-left shadow-xl border border-border dark:border-border-dark transition-all sm:my-8 sm:w-full sm:max-w-lg">
-            <div className="bg-surface dark:bg-surface-dark px-4 pb-4 pt-5 sm:p-6 sm:pb-4 transition-colors duration-200">
+          <div className="relative transform overflow-hidden rounded-lg bg-neutral-0 dark:bg-neutral-100 text-left shadow-xl border border-neutral-200 dark:border-neutral-200 transition-all duration-[150ms] sm:my-8 sm:w-full sm:max-w-lg">
+            <div className="bg-neutral-0 dark:bg-neutral-100 px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
               <div className="sm:flex sm:items-start">
                 <div className="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                  <h3 className="text-base font-semibold leading-6 text-text-primary dark:text-text-primary-dark transition-colors duration-200">{title}</h3>
+                  <h3 className="text-h4 text-neutral-800 dark:text-neutral-800">{title}</h3>
                   <div className="mt-2">
-                    <p className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">{message}</p>
+                    <p className="text-body-sm text-neutral-600 dark:text-neutral-600">{message}</p>
                   </div>
                 </div>
               </div>
             </div>
-            <div className="bg-background dark:bg-background-dark px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-border dark:border-border-dark transition-colors duration-200">
+            <div className="bg-neutral-50 dark:bg-neutral-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-neutral-200 dark:border-neutral-200">
               <button
                 type="button"
-                className={`inline-flex w-full justify-center items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto transition-colors duration-200 ${confirmButtonClass}`}
+                className={`inline-flex w-full justify-center items-center h-10 px-6 rounded text-body-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto transition-all duration-[150ms] ${confirmButtonClass}`}
                 onClick={onConfirm}
                 disabled={disabled}
               >
@@ -64,7 +64,7 @@ export const ConfirmDialog = ({
               </button>
               <button
                 type="button"
-                className="mt-3 inline-flex w-full justify-center items-center space-x-2 rounded-md bg-surface dark:bg-surface-dark px-3 py-2 text-sm font-semibold text-text-primary dark:text-text-primary-dark shadow-sm ring-1 ring-inset ring-border dark:ring-border-dark hover:bg-background dark:hover:bg-background-dark sm:mt-0 sm:w-auto transition-colors duration-200"
+                className="mt-3 inline-flex w-full justify-center items-center space-x-2 h-10 px-6 rounded bg-transparent border-[1.5px] border-neutral-300 dark:border-neutral-200 text-body-sm font-semibold text-neutral-900 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-100 sm:mt-0 sm:w-auto transition-all duration-[150ms]"
                 onClick={onCancel}
               >
                 <X className="w-4 h-4" />

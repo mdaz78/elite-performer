@@ -71,15 +71,15 @@ export const Header = () => {
   ];
 
   return (
-    <header className="bg-surface dark:bg-surface-dark border-b border-border dark:border-border-dark transition-colors duration-200">
+    <header className="bg-neutral-0 dark:bg-neutral-100 border-b border-neutral-200 dark:border-neutral-200 transition-colors duration-[150ms]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link
               href="/"
-              className="flex items-center space-x-2 text-xl font-bold text-text-primary dark:text-text-primary-dark leading-none transition-colors duration-200"
+              className="flex items-center space-x-2 text-h4 font-bold text-neutral-800 dark:text-neutral-800 leading-none"
             >
-              <Trophy className="w-6 h-6 text-accent-blue dark:text-accent-blue-dark" />
+              <Trophy className="w-6 h-6 text-primary-500 dark:text-primary-500" />
               <span>Elite Performer</span>
             </Link>
           </div>
@@ -93,10 +93,10 @@ export const Header = () => {
                 <Link
                   key={link.path}
                   href={link.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 ${
+                  className={`px-3 py-2 rounded text-body-sm font-medium transition-all duration-[150ms] flex items-center space-x-2 ${
                     isActive
-                      ? 'bg-accent-blue dark:bg-accent-blue-dark text-white hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90'
-                      : 'text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark'
+                      ? 'bg-primary-500 dark:bg-primary-500 text-white hover:bg-primary-600 dark:hover:bg-primary-600'
+                      : 'text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50'
                   }`}
                 >
                   <IconComponent className="w-4 h-4" />
@@ -107,16 +107,16 @@ export const Header = () => {
             <div className="relative" ref={learningDropdownRef}>
               <button
                 onClick={() => setIsLearningDropdownOpen(!isLearningDropdownOpen)}
-                className="px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200 flex items-center space-x-2"
+                className="px-3 py-2 rounded text-body-sm font-medium text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms] flex items-center space-x-2"
               >
                 <BookOpen className="w-4 h-4" />
                 <span>Learning</span>
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-200 ${isLearningDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`w-4 h-4 transition-transform duration-[150ms] ${isLearningDropdownOpen ? 'rotate-180' : ''}`}
                 />
               </button>
               {isLearningDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-surface dark:bg-surface-dark border border-border dark:border-border-dark z-50">
+                <div className="absolute left-0 mt-2 w-48 rounded shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
                   <div className="py-1">
                     {learningLinks.map((link) => {
                       const isActive = pathname?.startsWith(link.path) ?? false;
@@ -126,10 +126,10 @@ export const Header = () => {
                           key={link.path}
                           href={link.path}
                           onClick={() => setIsLearningDropdownOpen(false)}
-                          className={`flex items-center space-x-3 px-4 py-2 text-sm transition-colors duration-200 ${
+                          className={`flex items-center space-x-3 px-4 py-2 text-body-sm transition-all duration-[150ms] ${
                             isActive
-                              ? 'bg-accent-blue dark:bg-accent-blue-dark text-white hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90'
-                              : 'text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark'
+                              ? 'bg-primary-500 dark:bg-primary-500 text-white hover:bg-primary-600 dark:hover:bg-primary-600'
+                              : 'text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50'
                           }`}
                         >
                           <IconComponent className="w-4 h-4" />
@@ -145,18 +145,18 @@ export const Header = () => {
               <div className="ml-4 relative" ref={dropdownRef}>
                 <button
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                  className="flex items-center space-x-2 px-3 py-2 rounded text-body-sm font-medium text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
                 >
                   <User className="w-4 h-4" />
                   <span>{session.user?.name || session.user?.email}</span>
                   <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
+                    className={`w-4 h-4 transition-transform duration-[150ms] ${isDropdownOpen ? 'rotate-180' : ''}`}
                   />
                 </button>
                 {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-surface dark:bg-surface-dark border border-border dark:border-border-dark z-50">
+                  <div className="absolute right-0 mt-2 w-48 rounded shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
                     <div className="py-1">
-                      <div className="px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark border-b border-border dark:border-border-dark">
+                      <div className="px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 border-b border-neutral-200 dark:border-neutral-200">
                         {session.user?.name || session.user?.email}
                       </div>
                       <button
@@ -164,7 +164,7 @@ export const Header = () => {
                           toggleTheme();
                           setIsDropdownOpen(false);
                         }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
                       >
                         {theme === 'dark' ? (
                           <>
@@ -183,7 +183,7 @@ export const Header = () => {
                           signOut({ callbackUrl: '/auth/login' });
                           setIsDropdownOpen(false);
                         }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                        className="w-full flex items-center space-x-3 px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
                       >
                         <LogOut className="w-5 h-5" />
                         <span>Sign out</span>

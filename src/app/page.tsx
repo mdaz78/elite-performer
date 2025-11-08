@@ -137,10 +137,10 @@ function DashboardContent() {
   const latestWeight = sortedLogs[0]?.weight
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-12 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Dashboard</h1>
-        <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">180-Day Transformation Overview</p>
+        <h1 className="text-h1 text-neutral-800 dark:text-neutral-800">Dashboard</h1>
+        <p className="mt-2 text-body-sm text-neutral-600 dark:text-neutral-600">180-Day Transformation Overview</p>
       </div>
 
       {/* 180-Day Progress */}
@@ -148,13 +148,13 @@ function DashboardContent() {
         <Card className="mb-6">
           <div className="flex justify-between items-center mb-4">
             <div>
-              <h2 className="text-xl font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Transformation Progress</h2>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-1 transition-colors duration-200">
+              <h2 className="text-h3 text-neutral-800 dark:text-neutral-800">Transformation Progress</h2>
+              <p className="text-body-sm text-neutral-600 dark:text-neutral-600 mt-1">
                 {daysRemaining} days remaining • Started {formatDisplayDate(startDate)}
               </p>
             </div>
           </div>
-          <ProgressBar progress={transformationProgress} color="career" />
+          <ProgressBar progress={transformationProgress} color="primary" />
         </Card>
       )}
 
@@ -163,17 +163,17 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Coding Progress</p>
-              <p className="text-2xl font-bold text-accent-blue dark:text-accent-blue-dark mt-1 transition-colors duration-200">{Math.round(codingProgress)}%</p>
+              <p className="text-body-sm font-medium text-neutral-600 dark:text-neutral-600">Coding Progress</p>
+              <p className="text-h2 font-bold text-primary-500 dark:text-primary-500 mt-1">{Math.round(codingProgress)}%</p>
             </div>
-            <div className="p-3 bg-accent-blue/10 dark:bg-accent-blue-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-blue dark:text-accent-blue-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-primary-50 dark:bg-primary-900/30 rounded-lg">
+              <svg className="w-8 h-8 text-primary-500 dark:text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/coding" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
+            <Link href="/coding" className="text-body-sm text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-[150ms]">
               View courses →
             </Link>
           </div>
@@ -182,19 +182,19 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Fitness</p>
-              <p className="text-2xl font-bold text-accent-amber dark:text-accent-amber-dark mt-1 transition-colors duration-200">
+              <p className="text-body-sm font-medium text-neutral-600 dark:text-neutral-600">Fitness</p>
+              <p className="text-h2 font-bold text-accent-500 dark:text-accent-500 mt-1">
                 {latestWeight ? `${latestWeight} lbs` : 'No data'}
               </p>
             </div>
-            <div className="p-3 bg-accent-amber/10 dark:bg-accent-amber-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-amber dark:text-accent-amber-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-accent-50 dark:bg-accent-900/30 rounded-lg">
+              <svg className="w-8 h-8 text-accent-500 dark:text-accent-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/fitness" className="text-sm text-accent-amber dark:text-accent-amber-dark hover:underline transition-colors duration-200">
+            <Link href="/fitness" className="text-body-sm text-accent-600 dark:text-accent-400 hover:underline transition-colors duration-[150ms]">
               View logs →
             </Link>
           </div>
@@ -203,22 +203,22 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Trading</p>
-              <p className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark mt-1 transition-colors duration-200">
+              <p className="text-body-sm font-medium text-neutral-600 dark:text-neutral-600">Trading</p>
+              <p className="text-h2 font-bold text-success-500 dark:text-success-500 mt-1">
                 ${tradingStats?.totalPnL?.toFixed(2) || '0.00'}
               </p>
-              <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
+              <p className="text-caption text-neutral-500 dark:text-neutral-500 mt-1">
                 {tradingStats?.totalTrades || 0} trades • {tradingStats?.winRate?.toFixed(1) || 0}% win rate
               </p>
             </div>
-            <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="p-3 bg-success-50 dark:bg-success-900/30 rounded-lg">
+              <svg className="w-8 h-8 text-success-500 dark:text-success-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
               </svg>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/trading" className="text-sm text-accent-emerald dark:text-accent-emerald-dark hover:underline transition-colors duration-200">
+            <Link href="/trading" className="text-body-sm text-success-600 dark:text-success-400 hover:underline transition-colors duration-[150ms]">
               View journal →
             </Link>
           </div>
@@ -229,47 +229,47 @@ function DashboardContent() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Today's Tasks">
           {todayTasks.length === 0 && todayModules.length === 0 ? (
-            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200">No tasks or modules scheduled for today</p>
+            <p className="text-neutral-500 dark:text-neutral-500 text-body-sm">No tasks or modules scheduled for today</p>
           ) : (
             <ul className="space-y-3">
               {/* Course Modules */}
               {todayModules.map((module) => {
                 const isUpdating = updateCodingModuleMutation.isPending || updateTradingModuleMutation.isPending
                 return (
-                  <li key={`${module.courseType}-${module.id}`} className="p-3 bg-surface dark:bg-surface-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200">
+                  <li key={`${module.courseType}-${module.id}`} className="p-3 bg-neutral-50 dark:bg-neutral-50 rounded hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-colors duration-[150ms]">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start flex-1">
                         <button
                           onClick={() => toggleModuleCompletion(module.id, module.completed, module.courseType)}
                           disabled={isUpdating}
-                          className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                          className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
                             module.completed
-                              ? 'bg-accent-blue dark:bg-accent-blue-dark border-accent-blue dark:border-accent-blue-dark text-white'
-                              : 'border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark'
+                              ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
+                              : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
                           } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                           {module.completed && <Check className="w-3 h-3" />}
                         </button>
                         <div className="flex-1">
-                          <div className={`font-medium ${module.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'} transition-colors duration-200`}>
+                          <div className={`font-medium ${module.completed ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-800 dark:text-neutral-800'}`}>
                             {module.name}
                           </div>
-                          <div className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
+                          <div className="text-caption text-neutral-500 dark:text-neutral-500 mt-1">
                             {module.courseName}
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-2">
-                        <span className={`text-xs px-2 py-1 rounded ${
+                        <span className={`text-caption px-2 py-1 rounded ${
                           module.courseType === 'coding'
-                            ? 'bg-accent-blue/10 dark:bg-accent-blue-dark/10 text-accent-blue dark:text-accent-blue-dark'
-                            : 'bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 text-accent-emerald dark:text-accent-emerald-dark'
-                        } transition-colors duration-200`}>
+                            ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                            : 'bg-success-50 dark:bg-success-900/30 text-success-600 dark:text-success-400'
+                        }`}>
                           {module.courseType}
                         </span>
                         <Link
                           href={`/${module.courseType}/${module.courseId}`}
-                          className="text-xs text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200"
+                          className="text-caption text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-[150ms]"
                         >
                           View →
                         </Link>
@@ -284,38 +284,38 @@ function DashboardContent() {
                 const isUpdating = updateTaskMutation.isPending
                 const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
                 return (
-                  <li key={`task-${task.id}`} className="p-3 bg-surface dark:bg-surface-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200">
+                  <li key={`task-${task.id}`} className="p-3 bg-neutral-50 dark:bg-neutral-50 rounded hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-colors duration-[150ms]">
                     <div className="flex items-start justify-between">
                       <div className="flex items-start flex-1">
                         <button
                           onClick={() => toggleTaskCompletion(task.id, task.completed)}
                           disabled={isUpdating}
-                          className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                          className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
                             task.completed
-                              ? 'bg-accent-blue dark:bg-accent-blue-dark border-accent-blue dark:border-accent-blue-dark text-white'
-                              : 'border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark'
+                              ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
+                              : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
                           } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                         >
                           {task.completed && <Check className="w-3 h-3" />}
                         </button>
                         <div className="flex-1">
-                          <div className={`font-medium ${task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'} transition-colors duration-200`}>
+                          <div className={`font-medium ${task.completed ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-800 dark:text-neutral-800'}`}>
                             {task.title}
                           </div>
                           {task.project && (
-                            <div className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
+                            <div className="text-caption text-neutral-500 dark:text-neutral-500 mt-1">
                               {task.project.name}
                             </div>
                           )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-2">
-                        <span className="text-xs px-2 py-1 rounded bg-accent-blue/10 dark:bg-accent-blue-dark/10 text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
+                        <span className="text-caption px-2 py-1 rounded bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400">
                           {taskTypeDisplay}
                         </span>
                         <Link
                           href="/tasks"
-                          className="text-xs text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200"
+                          className="text-caption text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-[150ms]"
                         >
                           View →
                         </Link>
@@ -327,7 +327,7 @@ function DashboardContent() {
             </ul>
           )}
           <div className="mt-4">
-            <Link href="/tasks" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
+            <Link href="/tasks" className="text-body-sm text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-[150ms]">
               View all tasks →
             </Link>
           </div>
@@ -335,7 +335,7 @@ function DashboardContent() {
 
         <Card title="Today's Habits">
           {todayHabits.length === 0 ? (
-            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200">No habits scheduled for today</p>
+            <p className="text-neutral-500 dark:text-neutral-500 text-body-sm">No habits scheduled for today</p>
           ) : (
             <ul className="space-y-2">
               {todayHabits.map((habit) => {
@@ -346,40 +346,40 @@ function DashboardContent() {
                 const isExpanded = expandedHabits.has(habit.id)
 
                 return (
-                  <li key={habit.id} className="p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
+                  <li key={habit.id} className="p-2 hover:bg-neutral-50 dark:hover:bg-neutral-50 rounded transition-colors duration-[150ms]">
                     <div className="flex items-center justify-between mb-1">
                       <div className="flex items-center flex-1">
                         <div className={`mr-3 h-4 w-4 rounded border-2 flex items-center justify-center ${
                           isComplete
-                            ? 'bg-green-500 border-green-500'
-                            : 'border-border dark:border-border-dark'
-                        } transition-colors duration-200`}>
+                            ? 'bg-success-500 dark:bg-success-500 border-success-500 dark:border-success-500'
+                            : 'border-neutral-300 dark:border-neutral-200'
+                        } transition-colors duration-[150ms]`}>
                           {isComplete && (
                             <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                             </svg>
                           )}
                         </div>
-                        <span className={isComplete ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark transition-colors duration-200'}>
+                        <span className={isComplete ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-800 dark:text-neutral-800'}>
                           {habit.name}
                         </span>
                       </div>
                       {totalSubHabits > 0 && (
                         <button
                           onClick={() => toggleExpandHabit(habit.id)}
-                          className="ml-2 p-1 hover:bg-surface dark:hover:bg-surface-dark rounded transition-colors duration-200"
+                          className="ml-2 p-1 hover:bg-neutral-50 dark:hover:bg-neutral-50 rounded transition-colors duration-[150ms]"
                           aria-label={isExpanded ? 'Collapse sub-habits' : 'Expand sub-habits'}
                         >
                           {isExpanded ? (
-                            <ChevronUp className="w-4 h-4 text-text-secondary dark:text-text-secondary-dark" />
+                            <ChevronUp className="w-4 h-4 text-neutral-600 dark:text-neutral-600" />
                           ) : (
-                            <ChevronDown className="w-4 h-4 text-text-secondary dark:text-text-secondary-dark" />
+                            <ChevronDown className="w-4 h-4 text-neutral-600 dark:text-neutral-600" />
                           )}
                         </button>
                       )}
                     </div>
                     {totalSubHabits > 0 && (
-                      <div className="ml-7 text-xs text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-1">
+                      <div className="ml-7 text-caption text-neutral-600 dark:text-neutral-600 mb-1">
                         {completedSubHabits} / {totalSubHabits} sub-habits ({Math.round(progress)}%)
                       </div>
                     )}
@@ -396,24 +396,24 @@ function DashboardContent() {
                             return (
                               <div
                                 key={subHabit.id}
-                                className="flex items-center justify-between p-2 bg-surface dark:bg-surface-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                                className="flex items-center justify-between p-2 bg-neutral-50 dark:bg-neutral-50 rounded hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-colors duration-[150ms]"
                               >
                                 <span
-                                  className={`text-sm flex-1 ${
+                                  className={`text-body-sm flex-1 ${
                                     isSubComplete
-                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
-                                      : 'text-text-primary dark:text-text-primary-dark'
-                                  } transition-colors duration-200`}
+                                      ? 'line-through text-neutral-500 dark:text-neutral-500'
+                                      : 'text-neutral-800 dark:text-neutral-800'
+                                  }`}
                                 >
                                   {subHabit.name}
                                 </span>
                                 <button
                                   onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
                                   disabled={markSubHabitCompleteMutation.isPending}
-                                  className={`ml-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                                  className={`ml-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-[150ms] ${
                                     isSubComplete
-                                      ? 'bg-accent-blue dark:bg-accent-blue-dark border-accent-blue dark:border-accent-blue-dark text-white'
-                                      : 'border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark'
+                                      ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
+                                      : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
                                   } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                   aria-label={isSubComplete ? `Mark ${subHabit.name} as incomplete` : `Mark ${subHabit.name} as complete`}
                                 >
@@ -430,7 +430,7 @@ function DashboardContent() {
             </ul>
           )}
           <div className="mt-4">
-            <Link href="/habit-tracker" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
+            <Link href="/habit-tracker" className="text-body-sm text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-[150ms]">
               View all habits →
             </Link>
           </div>
@@ -439,18 +439,18 @@ function DashboardContent() {
         <Card title="This Week's Activity">
           <div className="space-y-4">
             <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">Fitness Logs</p>
-              <p className="text-lg font-semibold text-accent-amber dark:text-accent-amber-dark transition-colors duration-200">{fitnessLogs.length} entries</p>
+              <p className="text-body-sm text-neutral-600 dark:text-neutral-600 mb-2">Fitness Logs</p>
+              <p className="text-h4 font-semibold text-accent-500 dark:text-accent-500">{fitnessLogs.length} entries</p>
             </div>
             <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">Week Range</p>
-              <p className="text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+              <p className="text-body-sm text-neutral-600 dark:text-neutral-600 mb-2">Week Range</p>
+              <p className="text-body-sm text-neutral-800 dark:text-neutral-800">
                 {formatDisplayDate(weekStart)} - {formatDisplayDate(weekEnd)}
               </p>
             </div>
           </div>
           <div className="mt-4">
-            <Link href="/review" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
+            <Link href="/review" className="text-body-sm text-primary-600 dark:text-primary-400 hover:underline transition-colors duration-[150ms]">
               Weekly Review →
             </Link>
           </div>

@@ -90,88 +90,88 @@ function FitnessPageContent() {
         <Card title="Log Entry" className="lg:col-span-1">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Date</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Date</label>
               <input
                 type="date"
                 value={formData.date}
                 onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Weight (lbs)</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Weight (lbs)</label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.weight}
                 onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="e.g., 180.5"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Body Fat (%)</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Body Fat (%)</label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.bodyFat}
                 onChange={(e) => setFormData({ ...formData, bodyFat: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="e.g., 15.5"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Waist (inches)</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Waist (inches)</label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.waist}
                 onChange={(e) => setFormData({ ...formData, waist: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="e.g., 32.5"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Calories</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Calories</label>
               <input
                 type="number"
                 value={formData.calories}
                 onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="e.g., 2500"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Workout Type</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Workout Type</label>
               <input
                 type="text"
                 value={formData.workoutType}
                 onChange={(e) => setFormData({ ...formData, workoutType: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="e.g., Upper Body, Cardio"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Notes</label>
+              <label className="block text-body-sm font-medium text-neutral-600 dark:text-neutral-600 mb-1">Notes</label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
+                className="w-full min-h-[88px] px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="Additional notes..."
               />
             </div>
 
             <button
               type="submit"
-              className="w-full px-4 py-2 bg-accent-amber dark:bg-accent-amber-dark text-white rounded-md hover:bg-accent-amber/90 dark:hover:bg-accent-amber-dark/90 transition-colors duration-200"
+              className="w-full h-10 px-6 bg-accent-500 dark:bg-accent-500 text-body-sm font-semibold text-white rounded shadow-sm hover:bg-accent-600 dark:hover:bg-accent-600 transition-all duration-[150ms]"
             >
               Save Entry
             </button>

@@ -85,8 +85,8 @@ export const DatePicker = ({
           title={value ? `Assigned: ${displayText}` : placeholder}
           className={`px-2 py-1 text-xs rounded transition-colors ${
             value
-              ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
-              : 'bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark hover:bg-surface dark:hover:bg-surface-dark'
+              ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/50'
+              : 'bg-neutral-50 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100'
           }`}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -102,8 +102,8 @@ export const DatePicker = ({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`text-xs border border-border dark:border-border-dark rounded-md px-2 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark cursor-pointer transition-all duration-200 hover:border-accent-blue dark:hover:border-accent-blue-dark w-full text-left ${
-            value ? 'font-medium' : 'text-text-tertiary dark:text-text-tertiary-dark'
+          className={`h-11 px-4 py-3 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded bg-neutral-0 dark:bg-neutral-50 text-body text-neutral-900 dark:text-neutral-900 focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 cursor-pointer transition-all duration-[150ms] hover:border-neutral-400 dark:hover:border-neutral-300 w-full text-left ${
+            value ? 'font-medium' : 'text-neutral-500 dark:text-neutral-500'
           }`}
         >
           {displayText}
@@ -122,26 +122,26 @@ export const DatePicker = ({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{ duration: 0.2 }}
-              className={`absolute z-50 ${variant === 'icon' ? 'right-0' : 'left-0'} mt-1 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg shadow-xl p-4 min-w-[280px]`}
+              className={`absolute z-50 ${variant === 'icon' ? 'right-0' : 'left-0'} mt-1 bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-lg shadow-xl p-4 min-w-[280px]`}
             >
               {/* Month Navigation */}
               <div className="flex items-center justify-between mb-4">
                 <button
                   type="button"
                   onClick={() => navigateMonth('prev')}
-                  className="p-1 rounded-md hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark transition-colors"
+                  className="p-1 rounded hover:bg-neutral-50 dark:hover:bg-neutral-100 text-neutral-800 dark:text-neutral-800 transition-colors duration-[150ms]"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                   </svg>
                 </button>
-                <h3 className="text-sm font-semibold text-text-primary dark:text-text-primary-dark">
+                <h3 className="text-body-sm font-semibold text-neutral-800 dark:text-neutral-800">
                   {currentMonth.format('MMMM YYYY')}
                 </h3>
                 <button
                   type="button"
                   onClick={() => navigateMonth('next')}
-                  className="p-1 rounded-md hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark transition-colors"
+                  className="p-1 rounded hover:bg-neutral-50 dark:hover:bg-neutral-100 text-neutral-800 dark:text-neutral-800 transition-colors duration-[150ms]"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -154,7 +154,7 @@ export const DatePicker = ({
                 {weekDays.map((day) => (
                   <div
                     key={day}
-                    className="text-xs font-semibold text-text-tertiary dark:text-text-tertiary-dark text-center py-1"
+                    className="text-caption font-semibold text-neutral-500 dark:text-neutral-500 text-center py-1"
                   >
                     {day}
                   </div>
@@ -176,12 +176,12 @@ export const DatePicker = ({
                       onClick={() => !disabled && handleDateSelect(date)}
                       disabled={disabled}
                       className={`
-                        text-xs p-2 rounded-md transition-all duration-200
-                        ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:bg-background dark:hover:bg-background-dark'}
-                        ${selected ? 'bg-accent-blue dark:bg-accent-blue-dark text-white font-semibold' : ''}
-                        ${today && !selected ? 'bg-accent-blue/20 dark:bg-accent-blue-dark/20 text-accent-blue dark:text-accent-blue-dark font-semibold' : ''}
+                        text-body-sm p-2 rounded transition-all duration-[150ms]
+                        ${disabled ? 'opacity-30 cursor-not-allowed' : 'cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-100'}
+                        ${selected ? 'bg-primary-500 dark:bg-primary-500 text-white font-semibold' : ''}
+                        ${today && !selected ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400 font-semibold' : ''}
                         ${!currentMonthDay && !selected ? 'opacity-40' : ''}
-                        ${!selected && !today && currentMonthDay ? 'text-text-primary dark:text-text-primary-dark' : ''}
+                        ${!selected && !today && currentMonthDay ? 'text-neutral-800 dark:text-neutral-800' : ''}
                       `}
                     >
                       {date.format('D')}
@@ -191,7 +191,7 @@ export const DatePicker = ({
               </div>
 
               {/* Quick Actions */}
-              <div className="mt-4 pt-4 border-t border-border dark:border-border-dark flex gap-2">
+              <div className="mt-4 pt-4 border-t border-neutral-200 dark:border-neutral-200 flex gap-2">
                 <button
                   type="button"
                   onClick={() => {
@@ -200,7 +200,7 @@ export const DatePicker = ({
                       handleDateSelect(today)
                     }
                   }}
-                  className="flex-1 text-xs px-3 py-1.5 rounded-md bg-background dark:bg-background-dark hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 text-text-primary dark:text-text-primary-dark transition-colors font-medium"
+                  className="flex-1 text-body-sm px-3 py-1.5 rounded bg-neutral-50 dark:bg-neutral-50 hover:bg-primary-50 dark:hover:bg-primary-900/20 text-neutral-800 dark:text-neutral-800 transition-colors duration-[150ms] font-medium"
                 >
                   Today
                 </button>
@@ -211,7 +211,7 @@ export const DatePicker = ({
                       onChange('')
                       setIsOpen(false)
                     }}
-                    className="flex-1 text-xs px-3 py-1.5 rounded-md bg-background dark:bg-background-dark hover:bg-red-50 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400 transition-colors font-medium"
+                    className="flex-1 text-body-sm px-3 py-1.5 rounded bg-neutral-50 dark:bg-neutral-50 hover:bg-error-500/10 dark:hover:bg-error-500/20 text-error-600 dark:text-error-500 transition-colors duration-[150ms] font-medium"
                   >
                     Clear
                   </button>

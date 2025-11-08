@@ -43,23 +43,23 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background dark:bg-background-dark py-12 px-4 sm:px-6 lg:px-8 transition-colors duration-200">
+    <div className="min-h-screen flex items-center justify-center bg-neutral-0 dark:bg-neutral-0 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8">
         <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-text-primary dark:text-text-primary-dark">
+          <h2 className="mt-6 text-center text-h1 text-neutral-800 dark:text-neutral-800">
             Sign in to your account
           </h2>
-          <p className="mt-2 text-center text-sm text-text-secondary dark:text-text-secondary-dark">
+          <p className="mt-2 text-center text-body-sm text-neutral-600 dark:text-neutral-600">
             Or{' '}
-            <Link href="/auth/signup" className="font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 transition-colors duration-200">
+            <Link href="/auth/signup" className="font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-500 transition-colors duration-[150ms]">
               create a new account
             </Link>
           </p>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           {error && (
-            <div className="rounded-md bg-red-50 dark:bg-red-900/20 p-4 border border-red-200 dark:border-red-800 transition-colors duration-200">
-              <div className="text-sm text-red-800 dark:text-red-300">{error}</div>
+            <div className="rounded bg-error-500/10 dark:bg-error-500/20 p-4 border border-error-500/20 dark:border-error-500/30">
+              <div className="text-body-sm text-error-600 dark:text-error-500">{error}</div>
             </div>
           )}
           <div className="rounded-md shadow-sm -space-y-px">
@@ -73,7 +73,7 @@ export default function LoginPage() {
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark placeholder-text-tertiary dark:placeholder-text-tertiary-dark rounded-t-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors duration-200"
+                className="relative block w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 placeholder-neutral-400 dark:placeholder-neutral-400 rounded-t focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="Email address"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -90,7 +90,7 @@ export default function LoginPage() {
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-none relative block w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark placeholder-text-tertiary dark:placeholder-text-tertiary-dark rounded-b-md focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm transition-colors duration-200"
+                className="relative block w-full h-11 px-4 py-3 bg-neutral-0 dark:bg-neutral-50 text-neutral-900 dark:text-neutral-900 border-[1.5px] border-neutral-300 dark:border-neutral-200 border-t-0 placeholder-neutral-400 dark:placeholder-neutral-400 rounded-b focus:outline-none focus:ring-[3px] focus:ring-primary-100 dark:focus:ring-primary-900/20 focus:border-primary-500 dark:focus:border-primary-400 text-body transition-all duration-[150ms]"
                 placeholder="Password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -103,7 +103,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={isLoading}
-              className="group relative w-full flex justify-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-accent-blue dark:bg-accent-blue-dark hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+              className="w-full flex justify-center h-10 px-6 rounded bg-primary-500 dark:bg-primary-500 text-body-sm font-semibold text-white shadow-sm hover:bg-primary-600 dark:hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-primary-500 dark:focus:ring-primary-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-[150ms]"
             >
               {isLoading ? 'Signing in...' : 'Sign in'}
             </button>
@@ -113,10 +113,10 @@ export default function LoginPage() {
         <div className="mt-6">
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-border dark:border-border-dark" />
+              <div className="w-full border-t border-neutral-200 dark:border-neutral-200" />
             </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-background dark:bg-background-dark text-text-tertiary dark:text-text-tertiary-dark">Or continue with</span>
+            <div className="relative flex justify-center text-body-sm">
+              <span className="px-2 bg-neutral-0 dark:bg-neutral-0 text-neutral-500 dark:text-neutral-500">Or continue with</span>
             </div>
           </div>
 
@@ -125,7 +125,7 @@ export default function LoginPage() {
               <button
                 onClick={() => handleOAuthSignIn('google')}
                 disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-border dark:border-border-dark rounded-md shadow-sm bg-surface dark:bg-surface-dark text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark disabled:opacity-50 transition-colors duration-200"
+                className="w-full inline-flex justify-center h-10 px-4 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded bg-neutral-0 dark:bg-neutral-50 text-body-sm font-medium text-neutral-900 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-100 disabled:opacity-50 transition-all duration-[150ms]"
               >
                 Google
               </button>
@@ -134,7 +134,7 @@ export default function LoginPage() {
               <button
                 onClick={() => handleOAuthSignIn('github')}
                 disabled={isLoading}
-                className="w-full inline-flex justify-center py-2 px-4 border border-border dark:border-border-dark rounded-md shadow-sm bg-surface dark:bg-surface-dark text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark disabled:opacity-50 transition-colors duration-200"
+                className="w-full inline-flex justify-center h-10 px-4 border-[1.5px] border-neutral-300 dark:border-neutral-200 rounded bg-neutral-0 dark:bg-neutral-50 text-body-sm font-medium text-neutral-900 dark:text-neutral-900 hover:bg-neutral-50 dark:hover:bg-neutral-100 disabled:opacity-50 transition-all duration-[150ms]"
               >
                 GitHub
               </button>
