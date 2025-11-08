@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
-import { useTheme } from '@/src/lib/theme-provider';
+import { useTheme } from '@/src/lib/use-theme';
 
 export const Header = () => {
   const pathname = usePathname();
