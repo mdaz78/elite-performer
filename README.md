@@ -47,11 +47,10 @@ A comprehensive personal productivity and transformation tracking application de
 
 ## Tech Stack
 
-- **Frontend Framework**: React 19 with TypeScript
-- **Build Tool**: Vite
-- **Routing**: React Router DOM v7
-- **Database**: Dexie (IndexedDB wrapper)
-- **Styling**: Tailwind CSS v4
+- **Framework**: Next.js 15 with React 19 and TypeScript
+- **Routing**: Next.js App Router (file-based routing)
+- **Database**: Dexie (IndexedDB wrapper for client-side storage)
+- **Styling**: Tailwind CSS v3
 - **Charts**: Recharts
 - **Date Handling**: Day.js
 - **CSV Processing**: PapaParse
@@ -82,7 +81,7 @@ npm install
 npm run dev
 ```
 
-4. Open your browser and navigate to `http://localhost:5173` (or the port shown in your terminal)
+4. Open your browser and navigate to `http://localhost:3000` (or the port shown in your terminal)
 
 ### Building for Production
 
@@ -90,17 +89,17 @@ npm run dev
 npm run build
 ```
 
-The production build will be in the `dist` directory. You can preview it with:
+The production build will be in the `.next` directory. You can start the production server with:
 
 ```bash
-npm run preview
+npm start
 ```
 
 ## Available Scripts
 
-- `npm run dev` - Start the development server
+- `npm run dev` - Start the Next.js development server
 - `npm run build` - Build for production
-- `npm run preview` - Preview the production build
+- `npm start` - Start the production server
 - `npm run lint` - Run ESLint to check code quality
 
 ## Project Structure
@@ -108,6 +107,17 @@ npm run preview
 ```
 elite-performer/
 ├── src/
+│   ├── app/                 # Next.js App Router pages
+│   │   ├── layout.tsx       # Root layout
+│   │   ├── page.tsx         # Dashboard (home page)
+│   │   ├── coding/          # Coding pages
+│   │   │   ├── page.tsx
+│   │   │   └── [id]/page.tsx
+│   │   ├── fitness/
+│   │   ├── trading/
+│   │   ├── tasks/
+│   │   ├── projects/
+│   │   └── review/
 │   ├── components/          # Reusable UI components
 │   │   ├── Card.tsx
 │   │   ├── ConfirmDialog.tsx
@@ -117,30 +127,20 @@ elite-performer/
 │   │   └── index.ts
 │   ├── db/                  # Database configuration
 │   │   ├── index.ts         # Dexie database setup
-│   │   └── seed.ts          # Seed data (if any)
-│   ├── pages/               # Page components
-│   │   ├── Dashboard.tsx
-│   │   ├── CodingPage.tsx
-│   │   ├── CourseDetail.tsx
-│   │   ├── FitnessPage.tsx
-│   │   ├── TradingPage.tsx
-│   │   ├── DailyTasksPage.tsx
-│   │   ├── ProjectsPage.tsx
-│   │   └── WeeklyReviewPage.tsx
+│   │   └── seed.ts          # Seed data
+│   ├── pages/               # Legacy page components (can be removed)
 │   ├── types/               # TypeScript type definitions
 │   │   └── index.d.ts
 │   ├── utils/               # Utility functions
 │   │   ├── date.ts
 │   │   └── export.ts
-│   ├── App.tsx              # Main app component with routing
-│   ├── main.tsx             # Application entry point
 │   └── index.css            # Global styles
 ├── public/                  # Static assets
-├── index.html               # HTML template
 ├── package.json
 ├── tsconfig.json            # TypeScript configuration
-├── vite.config.ts           # Vite configuration
-└── tailwind.config.js       # Tailwind CSS configuration
+├── next.config.js           # Next.js configuration
+├── tailwind.config.js       # Tailwind CSS configuration
+└── postcss.config.js        # PostCSS configuration
 ```
 
 ## Data Storage
@@ -164,8 +164,8 @@ The project uses:
 
 1. Define types in `src/types/index.d.ts`
 2. Add database tables in `src/db/index.ts` if needed
-3. Create page components in `src/pages/`
-4. Add routes in `src/App.tsx`
+3. Create page components in `src/app/` (Next.js App Router)
+4. Routes are automatically created based on file structure
 5. Update the Header navigation if needed
 
 ## License

@@ -1,3 +1,5 @@
+'use client'
+
 import { Fragment, useEffect, useRef } from 'react';
 
 interface InputDialogProps {

@@ -1,7 +1,10 @@
-import { Link, useLocation } from 'react-router-dom';
+'use client';
+
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 
 export const Header = () => {
-  const location = useLocation();
+  const pathname = usePathname();
 
   const navLinks = [
     { path: '/', label: 'Dashboard' },
@@ -17,7 +20,7 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-gray-900 leading-none">
+            <Link href="/" className="text-xl font-bold text-gray-900 leading-none">
               Elite Performer
             </Link>
           </div>
@@ -25,13 +28,11 @@ export const Header = () => {
             {navLinks.map((link) => {
               // For dashboard, match exactly. For other routes, match if pathname starts with the link path
               const isActive =
-                link.path === '/'
-                  ? location.pathname === '/'
-                  : location.pathname.startsWith(link.path);
+                link.path === '/' ? pathname === '/' : pathname.startsWith(link.path);
               return (
                 <Link
                   key={link.path}
-                  to={link.path}
+                  href={link.path}
                   className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
                       ? 'bg-blue-500 text-white hover:bg-blue-600'

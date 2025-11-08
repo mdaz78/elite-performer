@@ -1,5 +1,7 @@
-import { useRef, useState } from 'react';
-import Papa from 'papaparse';
+'use client'
+
+import { useRef, useState } from 'react'
+import Papa from 'papaparse'
 
 interface CsvImporterProps {
   onImport: (data: any[]) => Promise<void>;

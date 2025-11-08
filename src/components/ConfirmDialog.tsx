@@ -1,4 +1,6 @@
-import { Fragment } from 'react';
+'use client'
+
+import { Fragment } from 'react'
 
 interface ConfirmDialogProps {
   isOpen: boolean;
