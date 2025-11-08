@@ -108,7 +108,7 @@ model Habit {
   endDate            DateTime?
   status             HabitStatus          @default(active)
   createdAt          DateTime             @default(now())
-  updatedAt          DateTime
+  updatedAt          DateTime             @updatedAt
   icon               String?
   User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
   HabitCompletion    HabitCompletion[]
