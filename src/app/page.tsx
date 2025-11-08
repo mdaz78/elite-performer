@@ -30,6 +30,7 @@ function DashboardContent() {
 
   // Load all data
   const { data: courses = [] } = trpc.codingCourses.getAll.useQuery();
+  const { data: tradingCourses = [] } = trpc.tradingCourses.getAll.useQuery();
   const { data: fitnessLogs = [] } = trpc.fitness.getByDateRange.useQuery({
     startDate: new Date(weekStart).toISOString(),
     endDate: new Date(weekEnd).toISOString(),
@@ -43,7 +44,6 @@ function DashboardContent() {
     startDate: new Date(today).toISOString(),
     endDate: new Date(today).toISOString(),
   });
-  const { data: tradingStats } = trpc.trades.getStats.useQuery({});
 
   // Mutations to toggle module completion
   const updateCodingModuleMutation = trpc.courseModules.update.useMutation({
@@ -151,6 +151,16 @@ function DashboardContent() {
   });
   const codingProgress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
 
+  // Calculate trading progress
+  let totalTradingModules = 0;
+  let completedTradingModules = 0;
+  tradingCourses.forEach((course) => {
+    totalTradingModules += course.modules?.length || 0;
+    completedTradingModules += course.modules?.filter((m) => m.completed).length || 0;
+  });
+  const tradingProgress =
+    totalTradingModules > 0 ? (completedTradingModules / totalTradingModules) * 100 : 0;
+
   // Get latest weight
   const sortedLogs = [...fitnessLogs]
     .filter((log) => log.weight != null)
@@ -165,11 +175,6 @@ function DashboardContent() {
   // Calculate habit completion count
   const completedHabitsCount = todayHabits.filter((habit) => habit.completion?.completed).length;
   const totalHabitsCount = todayHabits.length;
-
-  // Trading stats
-  const tradingTotalPnL = tradingStats?.totalPnL ?? 0;
-  const tradingTradesCount = tradingStats?.totalTrades ?? 0;
-  const tradingWinRate = tradingStats?.winRate ?? 0;
 
   return (
     <div className="max-w-[1400px] mx-auto px-6 py-8">
@@ -293,23 +298,23 @@ function DashboardContent() {
         >
           <div className="flex items-start justify-between mb-4">
             <p className="text-[14px] text-neutral-500 dark:text-neutral-500 font-medium uppercase tracking-wider">
-              TRADING
+              TRADING PROGRESS
             </p>
             <div className="w-12 h-12 bg-success-100 dark:bg-success-500/15 text-success-600 dark:text-success-500 rounded-[10px] flex items-center justify-center">
               <DollarSign className="w-6 h-6" />
             </div>
           </div>
           <p className="text-[32px] font-bold text-neutral-900 dark:text-neutral-900 mb-1">
-            ${tradingTotalPnL.toFixed(2)}
+            {Math.round(tradingProgress)}%
           </p>
           <p className="text-[14px] text-neutral-500 dark:text-neutral-500">
-            {tradingTradesCount} trades • {tradingWinRate.toFixed(1)}% win rate
+            {completedTradingModules} of {totalTradingModules} modules complete
           </p>
           <Link
             href="/trading"
             className="text-[14px] text-primary-600 dark:text-primary-500 font-medium inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all duration-[150ms]"
           >
-            View journal
+            View courses
             <svg
               width="16"
               height="16"
