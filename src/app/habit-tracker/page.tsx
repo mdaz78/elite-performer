@@ -33,6 +33,7 @@ function HabitCardWithHistory({
   habit,
   weeklyProgress,
   onToggleComplete,
+  onToggleSubHabit,
   onEdit,
   onDelete,
   onPause,
@@ -50,6 +51,7 @@ function HabitCardWithHistory({
   }
   weeklyProgress: number
   onToggleComplete: () => void
+  onToggleSubHabit?: (subHabitId: number, completed: boolean) => void
   onEdit?: () => void
   onDelete?: () => void
   onPause?: () => void
@@ -72,6 +74,7 @@ function HabitCardWithHistory({
         completionRate={completionRate}
         weeklyProgress={weeklyProgress}
         onToggleComplete={onToggleComplete}
+        onToggleSubHabit={onToggleSubHabit}
         onEdit={onEdit}
         onDelete={onDelete}
         onPause={onPause}
@@ -421,10 +424,10 @@ function HabitTrackerPageContent() {
   const markSubHabitCompleteMutation = trpc.habits.markSubHabitComplete.useMutation({
     onSuccess: () => {
       utils.habits.getToday.invalidate()
+      utils.habits.getAll.invalidate()
       utils.habits.getByDateRange.invalidate()
-      if (selectedHabitId) {
-        utils.habits.getCompletionHistory.invalidate({ habitId: selectedHabitId })
-      }
+      // Invalidate completion history for all habits to refresh streaks
+      utils.habits.getCompletionHistory.invalidate()
     },
   })
 
@@ -689,6 +692,7 @@ function HabitTrackerPageContent() {
                       habit={habit}
                       weeklyProgress={getWeeklyProgress(habit.id)}
                       onToggleComplete={() => handleToggleHabit(habit.id, habit.completion?.completed || false)}
+                      onToggleSubHabit={(subHabitId, completed) => handleToggleSubHabit(subHabitId, completed)}
                     />
                   ))}
                 </motion.div>
@@ -788,6 +792,7 @@ function HabitTrackerPageContent() {
                       habit={habit}
                       weeklyProgress={getWeeklyProgress(habit.id)}
                       onToggleComplete={() => handleToggleHabit(habit.id, habit.completion?.completed || false)}
+                      onToggleSubHabit={(subHabitId, completed) => handleToggleSubHabit(subHabitId, completed)}
                       onEdit={() => handleEditHabit(habit)}
                       onDelete={() => handleDeleteHabit(habit.id)}
                       onPause={() => pauseHabitMutation.mutate({ id: habit.id })}

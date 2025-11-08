@@ -1,8 +1,9 @@
 'use client'
 
+import { useState } from 'react'
 import { motion } from 'framer-motion'
 import * as LucideIcons from 'lucide-react'
-import { Flame, Edit, Trash2, Pause, Play, Check } from 'lucide-react'
+import { Flame, Edit, Trash2, Pause, Play, Check, ChevronDown, ChevronUp } from 'lucide-react'
 
 interface HabitCardProps {
   habit: {
@@ -19,6 +20,7 @@ interface HabitCardProps {
   completionRate?: number
   weeklyProgress?: number
   onToggleComplete: () => void
+  onToggleSubHabit?: (subHabitId: number, completed: boolean) => void
   onEdit?: () => void
   onDelete?: () => void
   onPause?: () => void
@@ -33,12 +35,14 @@ export function HabitCard({
   completionRate = 0,
   weeklyProgress = 0,
   onToggleComplete,
+  onToggleSubHabit,
   onEdit,
   onDelete,
   onPause,
   onResume,
   showActions = false,
 }: HabitCardProps) {
+  const [isSubHabitsExpanded, setIsSubHabitsExpanded] = useState(false)
   const isComplete = habit.completion?.completed || false
   const completedSubHabits = (habit.subHabitCompletions || []).filter((sc) => sc.completed).length
   const totalSubHabits = habit.subHabits?.length || 0
@@ -158,6 +162,70 @@ export function HabitCard({
           transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
         />
       </div>
+
+      {/* Sub-habits List - Collapsible */}
+      {totalSubHabits > 0 && onToggleSubHabit && (
+        <div className="mb-4">
+          <button
+            onClick={() => setIsSubHabitsExpanded(!isSubHabitsExpanded)}
+            className="w-full flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors mb-2"
+          >
+            <span className="text-sm font-medium text-gray-700">
+              Sub-habits ({completedSubHabits}/{totalSubHabits})
+            </span>
+            {isSubHabitsExpanded ? (
+              <ChevronUp className="w-4 h-4 text-gray-500" />
+            ) : (
+              <ChevronDown className="w-4 h-4 text-gray-500" />
+            )}
+          </button>
+          {isSubHabitsExpanded && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-2"
+            >
+              {habit.subHabits
+                ?.sort((a, b) => a.order - b.order)
+                .map((subHabit) => {
+                  const subCompletion = habit.subHabitCompletions?.find(
+                    (sc) => sc.subHabitId === subHabit.id
+                  )
+                  const isSubComplete = subCompletion?.completed || false
+
+                  return (
+                    <div
+                      key={subHabit.id}
+                      className="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                    >
+                      <span
+                        className={`text-sm flex-1 ${
+                          isSubComplete
+                            ? 'line-through text-gray-400'
+                            : 'text-gray-700'
+                        }`}
+                      >
+                        {subHabit.name}
+                      </span>
+                      <button
+                        onClick={() => onToggleSubHabit(subHabit.id, isSubComplete)}
+                        className={`ml-2 w-6 h-6 rounded border-2 flex items-center justify-center transition-all duration-200 ${
+                          isSubComplete
+                            ? 'bg-purple-600 border-purple-600 text-white'
+                            : 'border-gray-300 hover:border-purple-400'
+                        }`}
+                      >
+                        {isSubComplete && <Check className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  )
+                })}
+            </motion.div>
+          )}
+        </div>
+      )}
 
       {/* Metrics - Three Columns */}
       <div className="grid grid-cols-3 gap-2 text-xs text-gray-600 mt-auto">
