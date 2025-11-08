@@ -15,8 +15,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
+import { useParams, useRouter } from 'next/navigation';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CsvImporter, InputDialog, ProgressBar } from '../components';
 import { db } from '../db';
 import type { CodingCourse, CourseModule } from '../types';
@@ -112,8 +112,9 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
 };
 
 export const CourseDetail = () => {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const id = params?.id;
   const [course, setCourse] = useState<CodingCourse | null>(null);
   const [modules, setModules] = useState<CourseModule[]>([]);
   const [progress, setProgress] = useState(0);
@@ -139,7 +140,7 @@ export const CourseDetail = () => {
       setIsLoading(true);
       const courseData = await db.codingCourses.get(courseId);
       if (!courseData) {
-        navigate('/coding');
+        router.push('/coding');
         return;
       }
 
@@ -158,7 +159,7 @@ export const CourseDetail = () => {
 
       setIsLoading(false);
     },
-    [navigate]
+    [router]
   );
 
   useEffect(() => {
@@ -358,7 +359,7 @@ export const CourseDetail = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <button
-          onClick={() => navigate('/coding')}
+          onClick={() => router.push('/coding')}
           className="text-blue-500 hover:underline mb-4 text-sm font-medium"
         >
           ← Back to Courses

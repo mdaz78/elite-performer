@@ -28,7 +28,7 @@ export const Header = () => {
             {navLinks.map((link) => {
               // For dashboard, match exactly. For other routes, match if pathname starts with the link path
               const isActive =
-                link.path === '/' ? pathname === '/' : pathname.startsWith(link.path);
+                link.path === '/' ? pathname === '/' : (pathname?.startsWith(link.path) ?? false);
               return (
                 <Link
                   key={link.path}

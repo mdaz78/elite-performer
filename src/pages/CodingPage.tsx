@@ -1,12 +1,12 @@
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Card, InputDialog, ProgressBar } from '../components';
 import { db } from '../db';
 import type { CodingCourse } from '../types';
 import { formatDisplayDate } from '../utils/date';
 
 export const CodingPage = () => {
-  const navigate = useNavigate();
+  const router = useRouter();
   const [courses, setCourses] = useState<(CodingCourse & { progress: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -98,7 +98,7 @@ export const CodingPage = () => {
             <Card
               key={course.id}
               className="hover:shadow-lg transition-all cursor-pointer group relative"
-              onClick={() => navigate(`/coding/${course.id}`)}
+              onClick={() => router.push(`/coding/${course.id}`)}
             >
               <div className="mb-4 relative z-0">
                 <div className="flex justify-between items-start mb-2">
