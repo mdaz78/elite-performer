@@ -444,13 +444,27 @@ function TasksPageContent() {
           <p className="text-base text-neutral-600 dark:text-neutral-600">Plan your week and manage your tasks</p>
         </div>
         <button
-          onClick={() => setShowTaskForm(!showTaskForm)}
+          onClick={() => {
+            if (activeTab === 'projects') {
+              setShowProjectForm(true)
+              setEditingProjectId(null)
+              setProjectFormData({
+                name: '',
+                description: '',
+                status: 'active',
+                startDate: getToday(),
+                targetDate: addDays(getToday(), 30),
+              })
+            } else {
+              setShowTaskForm(!showTaskForm)
+            }
+          }}
           className="px-6 py-3 bg-primary-500 dark:bg-primary-500 text-white rounded-lg hover:bg-primary-600 dark:hover:bg-primary-600 transition-all duration-150 shadow-sm hover:shadow-md font-semibold text-sm flex items-center gap-2 hover:-translate-y-0.5"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
-          Add Task
+          {activeTab === 'projects' ? 'Add Project' : 'Add Task'}
         </button>
       </div>
 
@@ -468,25 +482,6 @@ function TasksPageContent() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <div className="mb-6 flex justify-end">
-              <button
-                onClick={() => {
-                  setShowProjectForm(true)
-                  setEditingProjectId(null)
-                  setProjectFormData({
-                    name: '',
-                    description: '',
-                    status: 'active',
-                    startDate: getToday(),
-                    targetDate: addDays(getToday(), 30),
-                  })
-                }}
-                className="px-6 py-3 bg-primary-500 dark:bg-primary-500 text-white rounded-lg hover:bg-primary-600 dark:hover:bg-primary-600 transition-all duration-150 shadow-sm hover:shadow-md font-semibold text-sm hover:-translate-y-0.5"
-              >
-                + Add Project
-              </button>
-            </div>
-
             {taskProjects.length === 0 ? (
               <div className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-8">
                 <p className="text-neutral-500 dark:text-neutral-500 text-center">
