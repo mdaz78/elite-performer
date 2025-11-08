@@ -5,6 +5,21 @@ import { usePathname } from 'next/navigation';
 import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from '@/src/lib/use-theme';
 import { useState, useRef, useEffect } from 'react';
+import {
+  Trophy,
+  LayoutDashboard,
+  CheckSquare,
+  Target,
+  BookOpen,
+  Code,
+  FolderKanban,
+  TrendingUp,
+  User,
+  ChevronDown,
+  Sun,
+  Moon,
+  LogOut
+} from 'lucide-react';
 
 export const Header = () => {
   const pathname = usePathname();
@@ -21,15 +36,15 @@ export const Header = () => {
   }
 
   const navLinks = [
-    { path: '/', label: 'Dashboard' },
-    { path: '/tasks', label: 'Tasks' },
-    { path: '/habit-tracker', label: 'Habit Tracker' },
+    { path: '/', label: 'Dashboard', icon: LayoutDashboard },
+    { path: '/tasks', label: 'Tasks', icon: CheckSquare },
+    { path: '/habit-tracker', label: 'Habit Tracker', icon: Target },
   ];
 
   const learningLinks = [
-    { path: '/coding', label: 'Coding' },
-    { path: '/projects', label: 'Projects' },
-    { path: '/trading', label: 'Trading' },
+    { path: '/coding', label: 'Coding', icon: Code },
+    { path: '/projects', label: 'Projects', icon: FolderKanban },
+    { path: '/trading', label: 'Trading', icon: TrendingUp },
   ];
 
   // Handle click outside to close dropdowns
@@ -57,8 +72,9 @@ export const Header = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="text-xl font-bold text-text-primary dark:text-text-primary-dark leading-none transition-colors duration-200">
-              Elite Performer
+            <Link href="/" className="flex items-center space-x-2 text-xl font-bold text-text-primary dark:text-text-primary-dark leading-none transition-colors duration-200">
+              <Trophy className="w-6 h-6 text-accent-blue dark:text-accent-blue-dark" />
+              <span>Elite Performer</span>
             </Link>
           </div>
           <nav className="flex items-center space-x-1">
@@ -66,52 +82,52 @@ export const Header = () => {
               // For dashboard, match exactly. For other routes, match if pathname starts with the link path
               const isActive =
                 link.path === '/' ? pathname === '/' : (pathname?.startsWith(link.path) ?? false);
+              const IconComponent = link.icon;
               return (
                 <Link
                   key={link.path}
                   href={link.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
+                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 ${
                     isActive
                       ? 'bg-accent-blue dark:bg-accent-blue-dark text-white hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90'
                       : 'text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark'
                   }`}
                 >
-                  {link.label}
+                  <IconComponent className="w-4 h-4" />
+                  <span>{link.label}</span>
                 </Link>
               );
             })}
             <div className="relative" ref={learningDropdownRef}>
               <button
                 onClick={() => setIsLearningDropdownOpen(!isLearningDropdownOpen)}
-                className="px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200 flex items-center space-x-1"
+                className="px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200 flex items-center space-x-2"
               >
+                <BookOpen className="w-4 h-4" />
                 <span>Learning</span>
-                <svg
+                <ChevronDown
                   className={`w-4 h-4 transition-transform duration-200 ${isLearningDropdownOpen ? 'rotate-180' : ''}`}
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                />
               </button>
               {isLearningDropdownOpen && (
                 <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-surface dark:bg-surface-dark border border-border dark:border-border-dark z-50">
                   <div className="py-1">
                     {learningLinks.map((link) => {
                       const isActive = pathname?.startsWith(link.path) ?? false;
+                      const IconComponent = link.icon;
                       return (
                         <Link
                           key={link.path}
                           href={link.path}
                           onClick={() => setIsLearningDropdownOpen(false)}
-                          className={`block px-4 py-2 text-sm transition-colors duration-200 ${
+                          className={`flex items-center space-x-3 px-4 py-2 text-sm transition-colors duration-200 ${
                             isActive
                               ? 'bg-accent-blue dark:bg-accent-blue-dark text-white hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90'
                               : 'text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark'
                           }`}
                         >
-                          {link.label}
+                          <IconComponent className="w-4 h-4" />
+                          <span>{link.label}</span>
                         </Link>
                       );
                     })}
@@ -125,15 +141,11 @@ export const Header = () => {
                   onClick={() => setIsDropdownOpen(!isDropdownOpen)}
                   className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
                 >
+                  <User className="w-4 h-4" />
                   <span>{session.user?.name || session.user?.email}</span>
-                  <svg
+                  <ChevronDown
                     className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+                  />
                 </button>
                 {isDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-surface dark:bg-surface-dark border border-border dark:border-border-dark z-50">
@@ -150,16 +162,12 @@ export const Header = () => {
                       >
                         {theme === 'dark' ? (
                           <>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
-                            </svg>
+                            <Sun className="w-5 h-5" />
                             <span>Light Mode</span>
                           </>
                         ) : (
                           <>
-                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
-                            </svg>
+                            <Moon className="w-5 h-5" />
                             <span>Dark Mode</span>
                           </>
                         )}
@@ -171,9 +179,7 @@ export const Header = () => {
                         }}
                         className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                        </svg>
+                        <LogOut className="w-5 h-5" />
                         <span>Sign out</span>
                       </button>
                     </div>

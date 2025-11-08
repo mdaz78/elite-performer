@@ -1,6 +1,7 @@
 'use client'
 
 import { Fragment } from 'react'
+import { X } from 'lucide-react'
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -49,17 +50,18 @@ export const ConfirmDialog = ({
             <div className="bg-background dark:bg-background-dark px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 border-t border-border dark:border-border-dark transition-colors duration-200">
               <button
                 type="button"
-                className={`inline-flex w-full justify-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto transition-colors duration-200 ${confirmButtonClass}`}
+                className={`inline-flex w-full justify-center items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto transition-colors duration-200 ${confirmButtonClass}`}
                 onClick={onConfirm}
               >
                 {confirmLabel}
               </button>
               <button
                 type="button"
-                className="mt-3 inline-flex w-full justify-center rounded-md bg-surface dark:bg-surface-dark px-3 py-2 text-sm font-semibold text-text-primary dark:text-text-primary-dark shadow-sm ring-1 ring-inset ring-border dark:ring-border-dark hover:bg-background dark:hover:bg-background-dark sm:mt-0 sm:w-auto transition-colors duration-200"
+                className="mt-3 inline-flex w-full justify-center items-center space-x-2 rounded-md bg-surface dark:bg-surface-dark px-3 py-2 text-sm font-semibold text-text-primary dark:text-text-primary-dark shadow-sm ring-1 ring-inset ring-border dark:ring-border-dark hover:bg-background dark:hover:bg-background-dark sm:mt-0 sm:w-auto transition-colors duration-200"
                 onClick={onCancel}
               >
-                {cancelLabel}
+                <X className="w-4 h-4" />
+                <span>{cancelLabel}</span>
               </button>
             </div>
           </div>

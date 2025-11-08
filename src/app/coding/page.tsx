@@ -8,6 +8,7 @@ import { Card, InputDialog, ProgressBar } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate } from '@/src/utils/date'
 import { createVariants, staggerContainer } from '@/src/lib/animations'
+import { Plus } from 'lucide-react'
 
 function CodingPageContent() {
   const router = useRouter()
@@ -70,9 +71,10 @@ function CodingPageContent() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowAddDialog(true)}
-            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+            className="flex items-center space-x-2 px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
           >
-            Add Course
+            <Plus className="w-4 h-4" />
+            <span>Add Course</span>
           </button>
         </div>
       </div>
@@ -85,9 +87,10 @@ function CodingPageContent() {
             </p>
             <button
               onClick={() => setShowAddDialog(true)}
-              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+              className="flex items-center space-x-2 px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
-              Add Course
+              <Plus className="w-4 h-4" />
+              <span>Add Course</span>
             </button>
           </div>
         </Card>
