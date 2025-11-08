@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { getToday, formatDisplayDate } from '@/src/utils/date'
+import { createVariants, staggerContainer } from '@/src/lib/animations'
 
 function TradingPageContent() {
   const utils = trpc.useUtils()
@@ -300,43 +302,58 @@ function TradingPageContent() {
                     <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="bg-surface dark:bg-surface-dark divide-y divide-border dark:divide-border-dark">
-                  {trades.map((trade) => (
-                    <tr key={trade.id} className="hover:bg-background dark:hover:bg-background-dark transition-colors duration-200">
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {formatDisplayDate(trade.date.toISOString())}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {trade.symbol}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {trade.setup}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        ${trade.entry.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        ${trade.exit.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {trade.quantity}
-                      </td>
-                      <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium transition-colors duration-200 ${
-                        trade.pnl >= 0 ? 'text-accent-emerald dark:text-accent-emerald-dark' : 'text-red-600 dark:text-red-400'
-                      }`}>
-                        ${trade.pnl.toFixed(2)}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <button
-                          onClick={() => handleDelete(trade.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200"
-                        >
-                          Delete
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
+                <AnimatePresence mode="popLayout">
+                  <motion.tbody
+                    variants={staggerContainer}
+                    initial="initial"
+                    animate="animate"
+                    className="bg-surface dark:bg-surface-dark divide-y divide-border dark:divide-border-dark"
+                  >
+                    {trades.map((trade) => (
+                      <motion.tr
+                        key={trade.id}
+                        variants={createVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        layout
+                        className="hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                          {formatDisplayDate(trade.date.toISOString())}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                          {trade.symbol}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                          {trade.setup}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                          ${trade.entry.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                          ${trade.exit.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                          {trade.quantity}
+                        </td>
+                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium transition-colors duration-200 ${
+                          trade.pnl >= 0 ? 'text-accent-emerald dark:text-accent-emerald-dark' : 'text-red-600 dark:text-red-400'
+                        }`}>
+                          ${trade.pnl.toFixed(2)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <button
+                            onClick={() => handleDelete(trade.id)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200"
+                          >
+                            Delete
+                          </button>
+                        </td>
+                      </motion.tr>
+                    ))}
+                  </motion.tbody>
+                </AnimatePresence>
               </table>
             </div>
           )}

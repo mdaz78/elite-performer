@@ -1,9 +1,11 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
+import { createVariants, updateVariants, staggerContainer } from '@/src/lib/animations'
 import {
   getToday,
   formatDisplayDate,
@@ -122,12 +124,16 @@ function TasksPageContent() {
     })
   }
 
+  const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null)
+
   const handleToggleComplete = async (taskId: number, completed: boolean) => {
+    setAnimatingTaskId(taskId)
     await updateTaskMutation.mutateAsync({
       id: taskId,
       completed: !completed,
       completedAt: !completed ? new Date().toISOString() : null,
     })
+    setTimeout(() => setAnimatingTaskId(null), 200)
   }
 
   const handleDelete = async (taskId: number) => {
@@ -436,75 +442,91 @@ function TasksPageContent() {
                   </div>
                 </div>
                 <div className="p-3 min-h-[350px]">
-                  <div className="space-y-2">
+                  <AnimatePresence mode="popLayout">
                     {dayTasks.length === 0 ? (
                       <div className="flex items-center justify-center h-full min-h-[300px]">
                         <p className="text-sm text-text-tertiary dark:text-text-tertiary-dark">No tasks</p>
                       </div>
                     ) : (
-                      dayTasks.map((task) => {
-                        const project = projects.find((p) => p.id === task.projectId)
-                        const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
-                        return (
-                          <div
-                            key={task.id}
-                            className={`group p-3 border rounded-lg transition-all ${
-                              task.completed
-                                ? 'bg-background dark:bg-background-dark border-border dark:border-border-dark opacity-60'
-                                : 'bg-surface dark:bg-surface-dark border-border dark:border-border-dark hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm'
-                            }`}
-                          >
-                            <div className="flex items-start gap-2">
-                              <input
-                                type="checkbox"
-                                checked={task.completed}
-                                onChange={() => handleToggleComplete(task.id, task.completed)}
-                                className="mt-0.5 h-4 w-4 text-blue-500 focus:ring-blue-500 border-border dark:border-border-dark rounded cursor-pointer transition-colors duration-200"
-                              />
-                              <div className="flex-1 min-w-0">
-                                <p
-                                  className={`text-sm font-medium ${
-                                    task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'
-                                  }`}
-                                >
-                                  {task.title}
-                                </p>
-                                <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                  <span className="text-xs font-medium px-2 py-0.5 bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark rounded-md">
-                                    {taskTypeDisplay}
-                                  </span>
-                                  {project && (
-                                    <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark truncate">• {project.name}</span>
-                                  )}
+                      <motion.div
+                        variants={staggerContainer}
+                        initial="initial"
+                        animate="animate"
+                        className="space-y-2"
+                      >
+                        {dayTasks.map((task) => {
+                          const project = projects.find((p) => p.id === task.projectId)
+                          const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
+                          const isAnimating = animatingTaskId === task.id
+                          return (
+                            <motion.div
+                              key={task.id}
+                              variants={createVariants}
+                              initial="initial"
+                              animate="animate"
+                              exit="exit"
+                              layout
+                              className={`group p-3 border rounded-lg transition-all ${
+                                task.completed
+                                  ? 'bg-background dark:bg-background-dark border-border dark:border-border-dark opacity-60'
+                                  : 'bg-surface dark:bg-surface-dark border-border dark:border-border-dark hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm'
+                              }`}
+                            >
+                              <motion.div
+                                animate={isAnimating ? updateVariants.animate : {}}
+                                className="flex items-start gap-2"
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={task.completed}
+                                  onChange={() => handleToggleComplete(task.id, task.completed)}
+                                  className="mt-0.5 h-4 w-4 text-blue-500 focus:ring-blue-500 border-border dark:border-border-dark rounded cursor-pointer transition-colors duration-200"
+                                />
+                                <div className="flex-1 min-w-0">
+                                  <p
+                                    className={`text-sm font-medium ${
+                                      task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'
+                                    }`}
+                                  >
+                                    {task.title}
+                                  </p>
+                                  <div className="flex items-center gap-2 mt-1.5 flex-wrap">
+                                    <span className="text-xs font-medium px-2 py-0.5 bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark rounded-md">
+                                      {taskTypeDisplay}
+                                    </span>
+                                    {project && (
+                                      <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark truncate">• {project.name}</span>
+                                    )}
+                                  </div>
                                 </div>
-                              </div>
-                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                <select
-                                  value={new Date(task.scheduledDate).toISOString().split('T')[0]}
-                                  onChange={(e) => handleAssignTask(task, e.target.value)}
-                                  className="text-xs border border-border dark:border-border-dark rounded-md px-1.5 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors duration-200"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {weekDays.map((d, i) => (
-                                    <option key={d} value={d}>
-                                      {dayNames[i]}
-                                    </option>
-                                  ))}
-                                </select>
-                                <button
-                                  onClick={() => handleDelete(task.id)}
-                                  className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
-                                  title="Delete task"
-                                >
-                                  ×
-                                </button>
-                              </div>
-                            </div>
-                          </div>
-                        )
-                      })
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                  <select
+                                    value={new Date(task.scheduledDate).toISOString().split('T')[0]}
+                                    onChange={(e) => handleAssignTask(task, e.target.value)}
+                                    className="text-xs border border-border dark:border-border-dark rounded-md px-1.5 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors duration-200"
+                                    onClick={(e) => e.stopPropagation()}
+                                  >
+                                    {weekDays.map((d, i) => (
+                                      <option key={d} value={d}>
+                                        {dayNames[i]}
+                                      </option>
+                                    ))}
+                                  </select>
+                                  <button
+                                    onClick={() => handleDelete(task.id)}
+                                    className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+                                    title="Delete task"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              </motion.div>
+                            </motion.div>
+                          )
+                        })}
+                      </motion.div>
                     )}
-                  </div>
+                  </AnimatePresence>
                 </div>
               </div>
             )

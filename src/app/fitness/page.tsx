@@ -1,11 +1,13 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { getToday, formatDisplayDate } from '@/src/utils/date'
+import { createVariants, staggerContainer } from '@/src/lib/animations'
 
 function FitnessPageContent() {
   const utils = trpc.useUtils()
@@ -231,38 +233,53 @@ function FitnessPageContent() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Actions</th>
                 </tr>
               </thead>
-              <tbody className="bg-surface dark:bg-surface-dark divide-y divide-border dark:divide-border-dark">
-                {logs.map((log) => (
-                  <tr key={log.id} className="hover:bg-background dark:hover:bg-background-dark transition-colors duration-200">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                      {formatDisplayDate(log.date.toISOString())}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                      {log.weight ? `${log.weight} lbs` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                      {log.bodyFat ? `${log.bodyFat}%` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                      {log.waist ? `${log.waist}"` : '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                      {log.calories ?? '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                      {log.workoutType ?? '-'}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                      <button
-                        onClick={() => handleDelete(log.id)}
-                        className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200"
-                      >
-                        Delete
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
+              <AnimatePresence mode="popLayout">
+                <motion.tbody
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="bg-surface dark:bg-surface-dark divide-y divide-border dark:divide-border-dark"
+                >
+                  {logs.map((log) => (
+                    <motion.tr
+                      key={log.id}
+                      variants={createVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      layout
+                      className="hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                    >
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {formatDisplayDate(log.date.toISOString())}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {log.weight ? `${log.weight} lbs` : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {log.bodyFat ? `${log.bodyFat}%` : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {log.waist ? `${log.waist}"` : '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {log.calories ?? '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {log.workoutType ?? '-'}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm">
+                        <button
+                          onClick={() => handleDelete(log.id)}
+                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </motion.tr>
+                  ))}
+                </motion.tbody>
+              </AnimatePresence>
             </table>
           </div>
         )}

@@ -4,3 +4,4 @@ export { ProgressBar } from './ProgressBar';
 export { CsvImporter } from './CsvImporter';
 export { ConfirmDialog } from './ConfirmDialog';
 export { InputDialog } from './InputDialog';
+export { PageTransition } from './PageTransition';

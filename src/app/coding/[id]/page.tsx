@@ -18,19 +18,22 @@ import {
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter, useParams } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card, CsvImporter, InputDialog, ProgressBar } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate } from '@/src/utils/date'
+import { createVariants, updateVariants, staggerContainer } from '@/src/lib/animations'
 
 interface SortableModuleItemProps {
   module: { id: number; name: string; order: number; completed: boolean; completedAt: Date | null }
   onToggle: (moduleId: number, completed: boolean) => void
   onDelete: (moduleId: number) => void
+  isAnimating?: boolean
 }
 
-const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemProps) => {
+const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false }: SortableModuleItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
   })
@@ -42,9 +45,14 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
   }
 
   return (
-    <div
+    <motion.div
       ref={setNodeRef}
       style={style}
+      variants={createVariants}
+      initial="initial"
+      animate={isAnimating ? 'animate' : 'animate'}
+      exit="exit"
+      layout
       className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
         module.completed
           ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
@@ -109,7 +117,7 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
       >
         Delete
       </button>
-    </div>
+    </motion.div>
   )
 }
 
@@ -127,6 +135,7 @@ function CourseDetailContent() {
   const [editedStartDate, setEditedStartDate] = useState('')
   const [editedTargetDate, setEditedTargetDate] = useState('')
   const [showAddModuleDialog, setShowAddModuleDialog] = useState(false)
+  const [animatingModuleId, setAnimatingModuleId] = useState<number | null>(null)
 
   const { data: course, isLoading: courseLoading } = trpc.codingCourses.getById.useQuery(
     { id: courseId! },
@@ -198,6 +207,12 @@ function CourseDetailContent() {
     }
   }, [course])
 
+  useEffect(() => {
+    if (!courseLoading && !modulesLoading && !course && courseId) {
+      router.push('/coding')
+    }
+  }, [course, courseLoading, modulesLoading, courseId, router])
+
   if (!courseId) {
     return null
   }
@@ -211,7 +226,6 @@ function CourseDetailContent() {
   }
 
   if (!course) {
-    router.push('/coding')
     return null
   }
 
@@ -220,11 +234,13 @@ function CourseDetailContent() {
   const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
 
   const handleToggleModule = async (moduleId: number, completed: boolean) => {
+    setAnimatingModuleId(moduleId)
     await updateModuleMutation.mutateAsync({
       id: moduleId,
       completed: !completed,
       completedAt: !completed ? new Date().toISOString() : null,
     })
+    setTimeout(() => setAnimatingModuleId(null), 200)
   }
 
   const handleAddModule = async (name: string) => {
@@ -687,16 +703,28 @@ function CourseDetailContent() {
               items={modules.map((m) => m.id)}
               strategy={verticalListSortingStrategy}
             >
-              <div className="space-y-3">
-                {modules.map((module) => (
-                  <SortableModuleItem
-                    key={module.id}
-                    module={module}
-                    onToggle={handleToggleModule}
-                    onDelete={handleDeleteModule}
-                  />
-                ))}
-              </div>
+              <AnimatePresence mode="popLayout">
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="space-y-3"
+                >
+                  {modules.map((module) => (
+                    <motion.div
+                      key={module.id}
+                      animate={animatingModuleId === module.id ? updateVariants.animate : {}}
+                    >
+                      <SortableModuleItem
+                        module={module}
+                        onToggle={handleToggleModule}
+                        onDelete={handleDeleteModule}
+                        isAnimating={animatingModuleId === module.id}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
             </SortableContext>
           </DndContext>
         )}

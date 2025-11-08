@@ -1,4 +1,4 @@
-import { Header } from '@/src/components';
+import { Header, PageTransition } from '@/src/components';
 import '@/src/index.css';
 import type { Metadata } from 'next';
 import { Providers } from './providers';
@@ -16,7 +16,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <Providers>
           <div className="min-h-screen bg-background dark:bg-background-dark transition-colors duration-200">
             <Header />
-            <main>{children}</main>
+            <PageTransition>{children}</PageTransition>
           </div>
         </Providers>
       </body>

@@ -1,10 +1,12 @@
 'use client'
 
 import { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card, ProgressBar } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate, getToday, addDays } from '@/src/utils/date'
+import { createVariants, staggerContainer } from '@/src/lib/animations'
 
 function ProjectsPageContent() {
   const utils = trpc.useUtils()
@@ -218,69 +220,81 @@ function ProjectsPageContent() {
           {projects.length === 0 ? (
             <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">No projects yet. Add your first project above!</p>
           ) : (
-            <div className="space-y-4">
-              {projects.map((project) => {
-                const projectTasks = getProjectTasks(project.id)
-                const progress = getProjectProgress(project)
-                const statusColors = {
-                  active: 'bg-accent-blue dark:bg-accent-blue-dark',
-                  completed: 'bg-accent-emerald dark:bg-accent-emerald-dark',
-                  paused: 'bg-text-tertiary dark:bg-text-tertiary-dark',
-                }
+            <AnimatePresence mode="popLayout">
+              <motion.div
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+                className="space-y-4"
+              >
+                {projects.map((project) => {
+                  const projectTasks = getProjectTasks(project.id)
+                  const progress = getProjectProgress(project)
+                  const statusColors = {
+                    active: 'bg-accent-blue dark:bg-accent-blue-dark',
+                    completed: 'bg-accent-emerald dark:bg-accent-emerald-dark',
+                    paused: 'bg-text-tertiary dark:bg-text-tertiary-dark',
+                  }
 
-                return (
-                  <div
-                    key={project.id}
-                    className="p-4 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
-                  >
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-1">
-                          <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">{project.name}</h3>
-                          <span
-                            className={`px-2 py-1 text-xs font-medium text-white rounded transition-colors duration-200 ${statusColors[project.status]}`}
-                          >
-                            {project.status}
-                          </span>
+                  return (
+                    <motion.div
+                      key={project.id}
+                      variants={createVariants}
+                      initial="initial"
+                      animate="animate"
+                      exit="exit"
+                      layout
+                      className="p-4 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+                    >
+                      <div className="flex justify-between items-start mb-3">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">{project.name}</h3>
+                            <span
+                              className={`px-2 py-1 text-xs font-medium text-white rounded transition-colors duration-200 ${statusColors[project.status]}`}
+                            >
+                              {project.status}
+                            </span>
+                          </div>
+                          {project.description && (
+                            <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">{project.description}</p>
+                          )}
+                          {project.startDate && project.targetDate && (
+                            <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
+                              {formatDisplayDate(project.startDate.toISOString())} - {formatDisplayDate(project.targetDate.toISOString())}
+                            </p>
+                          )}
                         </div>
-                        {project.description && (
-                          <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">{project.description}</p>
-                        )}
-                        {project.startDate && project.targetDate && (
-                          <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
-                            {formatDisplayDate(project.startDate.toISOString())} - {formatDisplayDate(project.targetDate.toISOString())}
-                          </p>
-                        )}
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleEdit(project)}
+                            className="text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 text-sm transition-colors duration-200"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDelete(project.id)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm transition-colors duration-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
-                      <div className="flex gap-2">
-                        <button
-                          onClick={() => handleEdit(project)}
-                          className="text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 text-sm transition-colors duration-200"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(project.id)}
-                          className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm transition-colors duration-200"
-                        >
-                          Delete
-                        </button>
-                      </div>
-                    </div>
 
-                    <div className="mb-2">
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
-                          {projectTasks.filter((t) => t.completed).length} of {projectTasks.length} tasks completed
-                        </span>
-                        <span className="text-sm font-semibold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">{Math.round(progress)}%</span>
+                      <div className="mb-2">
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                            {projectTasks.filter((t) => t.completed).length} of {projectTasks.length} tasks completed
+                          </span>
+                          <span className="text-sm font-semibold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">{Math.round(progress)}%</span>
+                        </div>
+                        <ProgressBar progress={progress} color="career" showPercentage={false} />
                       </div>
-                      <ProgressBar progress={progress} color="career" showPercentage={false} />
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
+                    </motion.div>
+                  )
+                })}
+              </motion.div>
+            </AnimatePresence>
           )}
         </Card>
       </div>
