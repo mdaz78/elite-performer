@@ -618,13 +618,13 @@ function TasksPageContent() {
                             className={`group p-4 border-2 rounded-xl transition-all duration-200 ${
                                 task.completed
                                 ? 'bg-gradient-to-br from-gray-50 to-gray-50/50 dark:from-gray-900/30 dark:to-gray-900/10 border-gray-300 dark:border-gray-700 opacity-60'
-                                : 'bg-gradient-to-br from-slate-50 to-slate-50/50 dark:from-slate-900/30 dark:to-slate-900/10 border-slate-300 dark:border-slate-600 hover:border-slate-400 dark:hover:border-slate-500 hover:shadow-md'
+                                : 'bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/30 dark:to-blue-900/10 border-blue-300 dark:border-blue-600 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md'
                               }`}
                             >
                               <div className="flex flex-col gap-3">
                               <div className="flex items-center gap-2 justify-between">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-medium px-2 py-1 bg-slate-200 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-md">
+                                  <span className="text-xs font-semibold px-2 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
                                     {taskTypeDisplay}
                                   </span>
                                   {task.completed && (
@@ -635,10 +635,13 @@ function TasksPageContent() {
                                 </div>
                                 <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
                                   <button
-                                    onClick={() => handleToggleComplete(task.id, task.completed)}
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleToggleComplete(task.id, task.completed)
+                                    }}
                                     className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
                                       task.completed
-                                        ? 'border-slate-300 dark:border-slate-600 text-slate-600 dark:text-slate-400 hover:border-slate-400 dark:hover:border-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800'
+                                        ? 'border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-400 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-800'
                                         : 'border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
                                     }`}
                                     title={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
@@ -648,7 +651,7 @@ function TasksPageContent() {
                                   <select
                                     value={new Date(task.scheduledDate).toISOString().split('T')[0]}
                                     onChange={(e) => handleAssignTask(task, e.target.value)}
-                                    className="text-xs border border-slate-300 dark:border-slate-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-slate-900/50 text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
+                                    className="text-xs border border-blue-300 dark:border-blue-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-blue-900/50 text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {weekDays.map((d, i) => (
@@ -668,14 +671,14 @@ function TasksPageContent() {
                               </div>
                               <motion.div animate={isAnimating ? updateVariants.animate : {}}>
                                 {project && (
-                                  <p className="text-xs font-medium text-slate-900 dark:text-slate-100 mb-1 opacity-90">
+                                  <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1 opacity-90">
                                     {project.name}
                                   </p>
                                 )}
                                 <p
                                   className={`text-sm font-semibold leading-tight ${
                                     task.completed
-                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
+                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
                                       : 'text-text-primary dark:text-text-primary-dark'
                                   }`}
                                 >

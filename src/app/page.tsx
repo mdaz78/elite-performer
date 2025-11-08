@@ -64,6 +64,13 @@ function DashboardContent() {
     },
   })
 
+  // Mutation to toggle task completion
+  const updateTaskMutation = trpc.tasks.update.useMutation({
+    onSuccess: () => {
+      utils.tasks.getByDate.invalidate()
+    },
+  })
+
   const toggleSubHabit = async (subHabitId: number, completed: boolean) => {
     await markSubHabitCompleteMutation.mutateAsync({
       subHabitId,
@@ -98,6 +105,14 @@ function DashboardContent() {
         completedAt: !completed ? new Date().toISOString() : null,
       })
     }
+  }
+
+  const toggleTaskCompletion = async (taskId: number, completed: boolean) => {
+    await updateTaskMutation.mutateAsync({
+      id: taskId,
+      completed: !completed,
+      completedAt: !completed ? new Date().toISOString() : null,
+    })
   }
 
   // Calculate transformation progress
@@ -265,22 +280,50 @@ function DashboardContent() {
               })}
 
               {/* Regular Tasks */}
-              {todayTasks.map((task) => (
-                <li key={`task-${task.id}`} className="flex items-center justify-between p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
-                  <div className="flex items-center">
-                    <input
-                      type="checkbox"
-                      checked={task.completed}
-                      readOnly
-                      className="mr-3 h-4 w-4 text-accent-blue dark:text-accent-blue-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark border-border dark:border-border-dark rounded transition-colors duration-200"
-                    />
-                    <span className={task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark transition-colors duration-200'}>
-                      {task.title}
-                    </span>
-                  </div>
-                  <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">{task.type}</span>
-                </li>
-              ))}
+              {todayTasks.map((task) => {
+                const isUpdating = updateTaskMutation.isPending
+                const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
+                return (
+                  <li key={`task-${task.id}`} className="p-3 bg-surface dark:bg-surface-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start flex-1">
+                        <button
+                          onClick={() => toggleTaskCompletion(task.id, task.completed)}
+                          disabled={isUpdating}
+                          className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                            task.completed
+                              ? 'bg-accent-blue dark:bg-accent-blue-dark border-accent-blue dark:border-accent-blue-dark text-white'
+                              : 'border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark'
+                          } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          {task.completed && <Check className="w-3 h-3" />}
+                        </button>
+                        <div className="flex-1">
+                          <div className={`font-medium ${task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'} transition-colors duration-200`}>
+                            {task.title}
+                          </div>
+                          {task.project && (
+                            <div className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
+                              {task.project.name}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2">
+                        <span className="text-xs px-2 py-1 rounded bg-accent-blue/10 dark:bg-accent-blue-dark/10 text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
+                          {taskTypeDisplay}
+                        </span>
+                        <Link
+                          href="/tasks"
+                          className="text-xs text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200"
+                        >
+                          View →
+                        </Link>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
             </ul>
           )}
           <div className="mt-4">
