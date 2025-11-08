@@ -16,8 +16,6 @@ function FitnessPageContent() {
     weight: '',
     bodyFat: '',
     waist: '',
-    calories: '',
-    workoutType: '',
     notes: '',
   })
 
@@ -30,8 +28,6 @@ function FitnessPageContent() {
         weight: '',
         bodyFat: '',
         waist: '',
-        calories: '',
-        workoutType: '',
         notes: '',
       })
     },
@@ -50,8 +46,6 @@ function FitnessPageContent() {
       weight: formData.weight ? Number(formData.weight) : undefined,
       bodyFat: formData.bodyFat ? Number(formData.bodyFat) : undefined,
       waist: formData.waist ? Number(formData.waist) : undefined,
-      calories: formData.calories ? Number(formData.calories) : undefined,
-      workoutType: formData.workoutType || undefined,
       notes: formData.notes || undefined,
     })
   }
@@ -101,14 +95,14 @@ function FitnessPageContent() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Weight (lbs)</label>
+              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Weight (KG)</label>
               <input
                 type="number"
                 step="0.1"
                 value={formData.weight}
                 onChange={(e) => setFormData({ ...formData, weight: e.target.value })}
                 className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
-                placeholder="e.g., 180.5"
+                placeholder="e.g., 82.0"
               />
             </div>
 
@@ -133,28 +127,6 @@ function FitnessPageContent() {
                 onChange={(e) => setFormData({ ...formData, waist: e.target.value })}
                 className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
                 placeholder="e.g., 32.5"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Calories</label>
-              <input
-                type="number"
-                value={formData.calories}
-                onChange={(e) => setFormData({ ...formData, calories: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
-                placeholder="e.g., 2500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Workout Type</label>
-              <input
-                type="text"
-                value={formData.workoutType}
-                onChange={(e) => setFormData({ ...formData, workoutType: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-amber dark:focus:ring-accent-amber-dark focus:border-accent-amber dark:focus:border-accent-amber-dark transition-colors duration-200"
-                placeholder="e.g., Upper Body, Cardio"
               />
             </div>
 
@@ -198,7 +170,7 @@ function FitnessPageContent() {
                   dataKey="weight"
                   stroke="#F59E0B"
                   strokeWidth={2}
-                  name="Weight (lbs)"
+                  name="Weight (KG)"
                   dot={{ r: 4 }}
                 />
                 <Line
@@ -228,8 +200,7 @@ function FitnessPageContent() {
                   <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Weight</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Body Fat</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Waist</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Calories</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Workout</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Notes</th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Actions</th>
                 </tr>
               </thead>
@@ -254,7 +225,7 @@ function FitnessPageContent() {
                         {formatDisplayDate(log.date.toISOString())}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {log.weight ? `${log.weight} lbs` : '-'}
+                        {log.weight ? `${log.weight} KG` : '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
                         {log.bodyFat ? `${log.bodyFat}%` : '-'}
@@ -262,11 +233,8 @@ function FitnessPageContent() {
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
                         {log.waist ? `${log.waist}"` : '-'}
                       </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {log.calories ?? '-'}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                        {log.workoutType ?? '-'}
+                      <td className="px-6 py-4 text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                        {log.notes ?? '-'}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm">
                         <button
