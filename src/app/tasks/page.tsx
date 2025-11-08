@@ -425,8 +425,8 @@ function TasksPageContent() {
 
   if (isLoading) {
     return (
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading...</p>
+      <div className="max-w-[1400px] mx-auto px-6 py-8">
+        <p className="text-neutral-500 dark:text-neutral-500">Loading...</p>
       </div>
     )
   }
@@ -436,10 +436,21 @@ function TasksPageContent() {
   const hasReview = reviewData.wins || reviewData.mistakes || reviewData.nextWeekGoals
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Tasks</h1>
-        <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Plan your week and manage your tasks</p>
+    <div className="max-w-[1400px] mx-auto px-6 py-8">
+      <div className="mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-[36px] font-bold text-neutral-900 dark:text-neutral-900 mb-1">Tasks</h1>
+          <p className="text-base text-neutral-600 dark:text-neutral-600">Plan your week and manage your tasks</p>
+        </div>
+        <button
+          onClick={() => setShowTaskForm(!showTaskForm)}
+          className="px-6 py-3 bg-primary-500 dark:bg-primary-500 text-white rounded-lg hover:bg-primary-600 dark:hover:bg-primary-600 transition-all duration-150 shadow-sm hover:shadow-md font-semibold text-sm flex items-center gap-2 hover:-translate-y-0.5"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Add Task
+        </button>
       </div>
 
       {/* Tab Navigation */}
@@ -469,59 +480,59 @@ function TasksPageContent() {
                     targetDate: addDays(getToday(), 30),
                   })
                 }}
-                className="px-5 py-2.5 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm"
+                className="px-6 py-3 bg-primary-500 dark:bg-primary-500 text-white rounded-lg hover:bg-primary-600 dark:hover:bg-primary-600 transition-all duration-150 shadow-sm hover:shadow-md font-semibold text-sm hover:-translate-y-0.5"
               >
                 + Add Project
               </button>
             </div>
 
             {taskProjects.length === 0 ? (
-              <Card className="mb-6">
-                <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">
+              <div className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-8">
+                <p className="text-neutral-500 dark:text-neutral-500 text-center">
                   No task projects yet. Add your first task project above!
                 </p>
-              </Card>
+              </div>
             ) : (
               <motion.div
                 variants={staggerContainer}
                 initial="initial"
                 animate="animate"
-                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {taskProjects.map((taskProject) => {
                   const projectTasks = getProjectTasks(taskProject.id)
                   const progress = getProjectProgress(taskProject)
                   const statusColors = {
-                    active: 'bg-accent-blue dark:bg-accent-blue-dark',
-                    completed: 'bg-accent-emerald dark:bg-accent-emerald-dark',
-                    paused: 'bg-text-tertiary dark:bg-text-tertiary-dark',
+                    active: 'bg-success-100 dark:bg-success-500/15 text-success-600 dark:text-success-500',
+                    completed: 'bg-success-100 dark:bg-success-500/15 text-success-600 dark:text-success-500',
+                    paused: 'bg-neutral-200 dark:bg-neutral-200 text-neutral-600 dark:text-neutral-600',
                   }
 
                   return (
                     <motion.div
                       key={taskProject.id}
                       variants={createVariants}
-                      className="p-6 border-2 border-border dark:border-border-dark rounded-xl hover:bg-background dark:hover:bg-background-dark transition-all duration-200 shadow-sm hover:shadow-md"
+                      className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-200 cursor-pointer"
                     >
                       <div className="flex justify-between items-start mb-4">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                            <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-900">
                               {taskProject.name}
                             </h3>
                             <span
-                              className={`px-3 py-1 text-xs font-semibold text-white rounded-full transition-colors duration-200 ${statusColors[taskProject.status]}`}
+                              className={`px-3 py-1 text-[11px] font-semibold rounded-full uppercase tracking-wide ${statusColors[taskProject.status]}`}
                             >
                               {taskProject.status}
                             </span>
                           </div>
                           {taskProject.description && (
-                            <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-3 transition-colors duration-200">
+                            <p className="text-sm text-neutral-600 dark:text-neutral-600 mb-3">
                               {taskProject.description}
                             </p>
                           )}
                           {taskProject.startDate && taskProject.targetDate && (
-                            <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
+                            <p className="text-[13px] text-neutral-500 dark:text-neutral-500">
                               {formatDisplayDate(taskProject.startDate.toISOString())} - {formatDisplayDate(taskProject.targetDate.toISOString())}
                             </p>
                           )}
@@ -529,13 +540,13 @@ function TasksPageContent() {
                         <div className="flex gap-2 ml-4">
                           <button
                             onClick={() => handleEditProject(taskProject)}
-                            className="text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 text-sm font-medium transition-colors duration-200"
+                            className="text-primary-600 dark:text-primary-500 hover:text-primary-700 dark:hover:text-primary-600 text-sm font-medium transition-colors duration-150"
                           >
                             Edit
                           </button>
                           <button
                             onClick={() => handleDeleteProject(taskProject.id)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
+                            className="text-error-600 dark:text-error-500 hover:text-error-700 dark:hover:text-error-600 text-sm font-medium transition-colors duration-150"
                           >
                             Delete
                           </button>
@@ -544,14 +555,19 @@ function TasksPageContent() {
 
                       <div>
                         <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                          <span className="text-[12px] text-neutral-500 dark:text-neutral-500">
                             {projectTasks.filter((t) => t.completed).length} of {projectTasks.length} tasks completed
                           </span>
-                          <span className="text-sm font-bold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
+                          <span className="text-sm font-bold text-primary-600 dark:text-primary-500">
                             {Math.round(progress)}%
                           </span>
                         </div>
-                        <ProgressBar progress={progress} color="career" showPercentage={false} />
+                        <div className="h-[6px] bg-neutral-200 dark:bg-neutral-200 rounded-full overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-500 dark:to-primary-600 rounded-full transition-all duration-300"
+                            style={{ width: `${progress}%` }}
+                          />
+                        </div>
                       </div>
                     </motion.div>
                   )
@@ -687,11 +703,17 @@ function TasksPageContent() {
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.2 }}
           >
-            <Card title="Backlog Tasks" className="mb-6">
+            <div className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6">
               {backlogTasks.length === 0 ? (
-                <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">
-                  No tasks in backlog. Tasks without assigned dates will appear here.
-                </p>
+                <div className="text-center py-20">
+                  <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-neutral-100 dark:bg-neutral-50 flex items-center justify-center text-neutral-500 dark:text-neutral-500">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-semibold text-neutral-900 dark:text-neutral-900 mb-2">No tasks in backlog</h3>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-500">Tasks without assigned dates will appear here.</p>
+                </div>
               ) : (
                 <motion.div
                   variants={staggerContainer}
@@ -708,45 +730,43 @@ function TasksPageContent() {
                       <motion.div
                         key={task.id}
                         variants={createVariants}
-                        className="p-4 border-2 border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-all duration-200"
+                        className="flex items-start justify-between p-4 border border-neutral-200 dark:border-neutral-200 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-150"
                       >
-                        <div className="flex justify-between items-start">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <span className="text-xs font-semibold px-2 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
-                                {taskTypeDisplay}
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2 flex-wrap">
+                            <span className="text-[10px] font-semibold px-2 py-1 bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-500 rounded uppercase tracking-wide">
+                              {taskTypeDisplay}
+                            </span>
+                            {taskProject && (
+                              <span className="text-xs font-medium text-neutral-500 dark:text-neutral-500">
+                                {taskProject.name}
                               </span>
-                              {taskProject && (
-                                <span className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark">
-                                  {taskProject.name}
-                                </span>
-                              )}
-                            </div>
-                            <h4 className="text-sm font-semibold text-text-primary dark:text-text-primary-dark">
-                              {task.title}
-                            </h4>
+                            )}
                           </div>
-                          <div className="flex gap-2">
-                            <DatePicker
-                              value={task.scheduledDate ? new Date(task.scheduledDate).toISOString().split('T')[0] : undefined}
-                              onChange={(date) => handleAssignTask(task, date)}
-                              placeholder="Assign date"
-                              variant="icon"
-                            />
-                            <button
-                              onClick={() => handleDelete(task.id)}
-                              className="text-xs px-2 py-1 rounded-md border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium"
-                            >
-                              Delete
-                            </button>
-                          </div>
+                          <h4 className="text-sm font-semibold text-neutral-900 dark:text-neutral-900">
+                            {task.title}
+                          </h4>
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <DatePicker
+                            value={task.scheduledDate ? new Date(task.scheduledDate).toISOString().split('T')[0] : undefined}
+                            onChange={(date) => handleAssignTask(task, date)}
+                            placeholder="Assign date"
+                            variant="icon"
+                          />
+                          <button
+                            onClick={() => handleDelete(task.id)}
+                            className="text-xs px-3 py-1.5 rounded-md border border-error-500 dark:border-error-500 text-error-600 dark:text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10 transition-colors font-medium"
+                          >
+                            Delete
+                          </button>
                         </div>
                       </motion.div>
                     )
                   })}
                 </motion.div>
               )}
-            </Card>
+            </div>
           </motion.div>
         )}
 
@@ -760,53 +780,47 @@ function TasksPageContent() {
             transition={{ duration: 0.2 }}
           >
             {/* Week Selector */}
-            <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-2 flex-wrap">
-          <button
-            onClick={() => navigateWeek('prev')}
-            className="inline-flex items-center justify-center px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue dark:hover:border-accent-blue-dark transition-all duration-200 shadow-sm hover:shadow-md h-10 text-sm whitespace-nowrap"
-          >
-            ← Previous
-          </button>
-          <div className="inline-flex items-center gap-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg px-3 shadow-sm hover:shadow-md transition-all duration-200 h-10">
-            <input
-              type="date"
-              value={selectedWeekStart}
-              onChange={(e) => setSelectedWeekStart(getWeekStartSunday(e.target.value))}
-              className="border-0 bg-transparent text-text-primary dark:text-text-primary-dark font-medium focus:outline-none focus:ring-0 cursor-pointer text-sm transition-colors duration-200 w-auto"
-            />
-            <span className="text-text-primary dark:text-text-primary-dark font-semibold text-sm whitespace-nowrap">{formatWeekRange(selectedWeekStart)}</span>
-          </div>
-          <button
-            onClick={() => navigateWeek('next')}
-            className="inline-flex items-center justify-center px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-accent-blue dark:hover:border-accent-blue-dark transition-all duration-200 shadow-sm hover:shadow-md h-10 text-sm whitespace-nowrap"
-          >
-            Next →
-          </button>
-          <button
-            onClick={() => setSelectedWeekStart(getWeekStartSunday())}
-            className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 rounded-lg transition-all duration-200 h-10 border border-transparent hover:border-accent-blue/20 dark:hover:border-accent-blue-dark/20 whitespace-nowrap"
-          >
-            This Week
-          </button>
-        </div>
-        <div className="flex items-center gap-3 flex-wrap">
-          {incompleteTasks.length > 0 && (
-            <button
-              onClick={() => setShowRolloverDialog(true)}
-              className="px-4 py-2.5 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-all shadow-sm hover:shadow-md font-medium text-sm h-10"
-            >
-              Rollover Incomplete ({incompleteTasks.length})
-            </button>
-          )}
-          <button
-            onClick={() => setShowTaskForm(!showTaskForm)}
-            className="px-5 py-2.5 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm h-10"
-          >
-            {showTaskForm ? 'Cancel' : '+ Add Task'}
-          </button>
-        </div>
-      </div>
+            <div className="mb-6 bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-4 flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3 flex-wrap">
+                <button
+                  onClick={() => navigateWeek('prev')}
+                  className="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-200 bg-transparent text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-50 hover:text-neutral-900 dark:hover:text-neutral-900 transition-all duration-150 flex items-center justify-center"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                  </svg>
+                </button>
+                <span className="text-base font-semibold text-neutral-900 dark:text-neutral-900">{formatWeekRange(selectedWeekStart)}</span>
+                <button
+                  onClick={() => navigateWeek('next')}
+                  className="w-9 h-9 rounded-lg border border-neutral-200 dark:border-neutral-200 bg-transparent text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-50 hover:text-neutral-900 dark:hover:text-neutral-900 transition-all duration-150 flex items-center justify-center"
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                  </svg>
+                </button>
+                <button
+                  onClick={() => setSelectedWeekStart(getWeekStartSunday())}
+                  className="px-4 py-2 bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-500 rounded-md text-[13px] font-semibold hover:bg-primary-100 dark:hover:bg-primary-500/25 transition-all duration-150"
+                >
+                  This Week
+                </button>
+              </div>
+              <div className="flex items-center gap-3">
+                {incompleteTasks.length > 0 && (
+                  <button
+                    onClick={() => setShowRolloverDialog(true)}
+                    className="px-4 py-2 bg-accent-100 dark:bg-accent-500/15 text-[#B45309] dark:text-accent-500 rounded-md text-[13px] font-semibold hover:bg-accent-50 dark:hover:bg-accent-500/25 transition-all duration-150 flex items-center gap-2"
+                  >
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                      <polyline points="23 4 23 10 17 10"/>
+                      <path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/>
+                    </svg>
+                    Rollover Incomplete ({incompleteTasks.length})
+                  </button>
+                )}
+              </div>
+            </div>
 
       {/* Task Creation Form */}
       {showTaskForm && (
@@ -922,29 +936,29 @@ function TasksPageContent() {
               variants={createVariants}
               initial="initial"
               animate="animate"
-              className={`p-5 rounded-xl border-2 transition-all duration-200 ${
+              className={`p-6 rounded-xl border transition-all duration-200 ${
                   isToday
-                  ? 'border-blue-500 dark:border-blue-400 bg-gradient-to-r from-blue-50/30 to-transparent dark:from-blue-900/20 dark:to-transparent shadow-md'
+                  ? 'border-primary-500 dark:border-primary-500 bg-primary-50/30 dark:bg-primary-500/10 shadow-md'
                     : isSunday
-                  ? 'border-blue-200 dark:border-blue-800 bg-gradient-to-r from-blue-50/50 to-transparent dark:from-blue-900/30 dark:to-transparent shadow-sm'
-                  : 'border-border dark:border-border-dark bg-surface/30 dark:bg-surface-dark/30 shadow-sm hover:shadow-md'
+                  ? 'border-primary-200 dark:border-primary-200 bg-primary-50/50 dark:bg-primary-500/5 shadow-sm'
+                  : 'border-neutral-200 dark:border-neutral-200 bg-neutral-0 dark:bg-neutral-100 shadow-sm hover:shadow-md'
               }`}
             >
               {/* Date Header */}
               <div className="flex items-center gap-4 mb-4">
                 <div className={`flex items-baseline gap-2 ${
-                  isToday ? 'text-blue-600 dark:text-blue-400' : 'text-text-primary dark:text-text-primary-dark'
+                  isToday ? 'text-primary-600 dark:text-primary-500' : 'text-neutral-900 dark:text-neutral-900'
                 }`}>
                   <span className="text-2xl font-bold">{dayjs(date).format('D')}</span>
-                  <span className="text-sm font-semibold uppercase tracking-wide">{dayNames[idx]}</span>
+                  <span className="text-xs font-semibold uppercase tracking-wider">{dayNames[idx]}</span>
                     </div>
                     {isSunday && (
-                  <span className="text-xs font-bold bg-gradient-to-r from-blue-500 to-blue-600 dark:from-blue-600 dark:to-blue-700 text-white px-3 py-1 rounded-full shadow-sm">
+                  <span className="text-[10px] font-bold bg-gradient-to-r from-primary-500 to-primary-600 dark:from-primary-500 dark:to-primary-600 text-white px-2.5 py-1 rounded-full shadow-sm uppercase tracking-wider">
                         Planning
                       </span>
                     )}
                 {isToday && (
-                  <span className="text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white px-3 py-1 rounded-full shadow-sm">
+                  <span className="text-[10px] font-bold bg-primary-500 dark:bg-primary-500 text-white px-2.5 py-1 rounded-full shadow-sm uppercase tracking-wider">
                     Today
                   </span>
                 )}
@@ -953,7 +967,7 @@ function TasksPageContent() {
               {/* Cards Container */}
               {!hasItems ? (
                 <div className="py-4">
-                  <p className="text-sm text-text-tertiary dark:text-text-tertiary-dark">No tasks</p>
+                  <p className="text-sm text-neutral-500 dark:text-neutral-500">No tasks</p>
                 </div>
               ) : (
                 <div>
@@ -970,17 +984,17 @@ function TasksPageContent() {
                             animate="animate"
                             exit="exit"
                             layout
-                          className="group p-4 border-2 border-purple-300 dark:border-purple-600 rounded-xl transition-all duration-200 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/30 dark:to-purple-900/10 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md cursor-pointer"
+                          className="group p-4 border border-[#9333EA] dark:border-[#9333EA] rounded-lg transition-all duration-200 bg-gradient-to-br from-purple-50 to-purple-50/50 dark:from-purple-900/20 dark:to-purple-900/5 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-md cursor-pointer hover:-translate-y-0.5"
                             onClick={() => handleNavigateToCourse(module)}
                           >
                           <div className="flex flex-col gap-3">
                               <div className="flex items-center gap-2 justify-between">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                <span className="text-xs font-semibold px-2 py-1 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-md">
+                                <span className="text-[10px] font-semibold px-2 py-1 bg-purple-200 dark:bg-purple-800/50 text-purple-800 dark:text-purple-200 rounded uppercase tracking-wide">
                                   {module.courseType === 'coding' ? '💻 Coding' : '📈 Trading'}
                                   </span>
                                   {module.completed && (
-                                  <span className="text-xs font-medium px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
+                                  <span className="text-[10px] font-medium px-2 py-1 bg-success-100 dark:bg-success-500/20 text-success-600 dark:text-success-500 rounded uppercase tracking-wide">
                                       ✓ Done
                                     </span>
                                   )}
@@ -993,8 +1007,8 @@ function TasksPageContent() {
                                     }}
                                     className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
                                       module.completed
-                                        ? 'border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-100 dark:hover:bg-purple-800'
-                                        : 'border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                        ? 'border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-100 dark:hover:bg-purple-800/50'
+                                        : 'border-success-500 dark:border-success-500 text-success-600 dark:text-success-500 hover:border-success-600 dark:hover:border-success-600 hover:bg-success-50 dark:hover:bg-success-500/10'
                                     }`}
                                     title={module.completed ? 'Mark as incomplete' : 'Mark as complete'}
                                   >
@@ -1003,7 +1017,7 @@ function TasksPageContent() {
                                 <select
                                   value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
                                   onChange={(e) => handleRescheduleModule(module, e.target.value)}
-                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200"
+                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/30 text-neutral-900 dark:text-neutral-900 focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {weekDays.map((d, i) => (
@@ -1021,8 +1035,8 @@ function TasksPageContent() {
                                 <p
                                 className={`text-sm font-semibold leading-tight ${
                                     module.completed
-                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
-                                      : 'text-text-primary dark:text-text-primary-dark'
+                                      ? 'line-through text-neutral-500 dark:text-neutral-500 opacity-60'
+                                      : 'text-neutral-900 dark:text-neutral-900'
                                   }`}
                                 >
                                   {module.name}
@@ -1046,20 +1060,20 @@ function TasksPageContent() {
                               animate="animate"
                               exit="exit"
                               layout
-                            className={`group p-4 border-2 rounded-xl transition-all duration-200 ${
+                            className={`group p-4 border rounded-lg transition-all duration-200 ${
                                 task.completed
-                                ? 'bg-gradient-to-br from-gray-50 to-gray-50/50 dark:from-gray-900/30 dark:to-gray-900/10 border-gray-300 dark:border-gray-700 opacity-60'
-                                : 'bg-gradient-to-br from-blue-50 to-blue-50/50 dark:from-blue-900/30 dark:to-blue-900/10 border-blue-300 dark:border-blue-600 hover:border-blue-400 dark:hover:border-blue-500 hover:shadow-md'
+                                ? 'bg-gradient-to-br from-neutral-50 to-neutral-50/50 dark:from-neutral-50 dark:to-neutral-50/50 border-neutral-300 dark:border-neutral-300 opacity-60'
+                                : 'bg-gradient-to-br from-primary-50 to-primary-50/50 dark:from-primary-900/20 dark:to-primary-900/5 border-primary-300 dark:border-primary-600 hover:border-primary-400 dark:hover:border-primary-500 hover:shadow-md hover:-translate-y-0.5'
                               }`}
                             >
                               <div className="flex flex-col gap-3">
                               <div className="flex items-center gap-2 justify-between">
                                 <div className="flex items-center gap-2 flex-wrap">
-                                  <span className="text-xs font-semibold px-2 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
+                                  <span className="text-[10px] font-semibold px-2 py-1 bg-primary-200 dark:bg-primary-800/50 text-primary-800 dark:text-primary-200 rounded uppercase tracking-wide">
                                     {taskTypeDisplay}
                                   </span>
                                   {task.completed && (
-                                    <span className="text-xs font-medium px-2 py-1 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
+                                    <span className="text-[10px] font-medium px-2 py-1 bg-success-100 dark:bg-success-500/20 text-success-600 dark:text-success-500 rounded uppercase tracking-wide">
                                       ✓ Done
                                     </span>
                                   )}
@@ -1072,8 +1086,8 @@ function TasksPageContent() {
                                     }}
                                     className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
                                       task.completed
-                                        ? 'border-blue-300 dark:border-blue-600 text-blue-600 dark:text-blue-400 hover:border-blue-400 dark:hover:border-blue-500 hover:bg-blue-100 dark:hover:bg-blue-800'
-                                        : 'border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                        ? 'border-primary-300 dark:border-primary-600 text-primary-600 dark:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-100 dark:hover:bg-primary-800/50'
+                                        : 'border-success-500 dark:border-success-500 text-success-600 dark:text-success-500 hover:border-success-600 dark:hover:border-success-600 hover:bg-success-50 dark:hover:bg-success-500/10'
                                     }`}
                                     title={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                                   >
@@ -1082,7 +1096,7 @@ function TasksPageContent() {
                                   <select
                                     value={new Date(task.scheduledDate).toISOString().split('T')[0]}
                                     onChange={(e) => handleAssignTask(task, e.target.value)}
-                                    className="text-xs border border-blue-300 dark:border-blue-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-blue-900/50 text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-all duration-200"
+                                    className="text-xs border border-primary-300 dark:border-primary-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-primary-900/30 text-neutral-900 dark:text-neutral-900 focus:ring-primary-500 focus:border-primary-500 cursor-pointer transition-all duration-200"
                                     onClick={(e) => e.stopPropagation()}
                                   >
                                     {weekDays.map((d, i) => (
@@ -1093,7 +1107,7 @@ function TasksPageContent() {
                                   </select>
                                   <button
                                     onClick={() => handleDelete(task.id)}
-                                    className="text-xs px-2 py-0.5 rounded-md border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 hover:border-red-400 dark:hover:border-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all duration-200 font-medium"
+                                    className="text-xs px-2 py-0.5 rounded-md border border-error-500 dark:border-error-500 text-error-600 dark:text-error-500 hover:border-error-600 dark:hover:border-error-600 hover:bg-error-50 dark:hover:bg-error-500/10 transition-all duration-200 font-medium"
                                     title="Delete task"
                                   >
                                     Delete
@@ -1102,15 +1116,15 @@ function TasksPageContent() {
                               </div>
                               <motion.div animate={isAnimating ? updateVariants.animate : {}}>
                                 {taskProject && (
-                                  <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1 opacity-90">
+                                  <p className="text-xs font-medium text-primary-900 dark:text-primary-100 mb-1 opacity-90">
                                     {taskProject.name}
                                   </p>
                                 )}
                                 <p
                                   className={`text-sm font-semibold leading-tight ${
                                     task.completed
-                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark opacity-60'
-                                      : 'text-text-primary dark:text-text-primary-dark'
+                                      ? 'line-through text-neutral-500 dark:text-neutral-500 opacity-60'
+                                      : 'text-neutral-900 dark:text-neutral-900'
                                   }`}
                                 >
                                   {task.title}
