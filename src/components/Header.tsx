@@ -3,9 +3,11 @@
 import { useTheme } from '@/src/lib/use-theme';
 import {
   Activity,
+  Bell,
   BookOpen,
   CheckSquare,
   ChevronDown,
+  Clock,
   Code,
   FolderKanban,
   LayoutDashboard,
@@ -14,7 +16,6 @@ import {
   Sun,
   Target,
   TrendingUp,
-  Trophy,
   User,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
@@ -72,19 +73,35 @@ export const Header = () => {
     { path: '/trading', label: 'Trading', icon: TrendingUp },
   ];
 
+  // Get user initial for avatar
+  const getUserInitial = () => {
+    if (session?.user?.name) {
+      return session.user.name.charAt(0).toUpperCase();
+    }
+    if (session?.user?.email) {
+      return session.user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
     <header className="bg-neutral-0 dark:bg-neutral-100 border-b border-neutral-200 dark:border-neutral-200 transition-colors duration-[150ms]">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
+          {/* Logo */}
           <div className="flex items-center">
             <Link
               href="/"
               className="flex items-center space-x-2 text-h4 font-bold text-neutral-800 dark:text-neutral-800 leading-none"
             >
-              <Trophy className="w-6 h-6 text-primary-500 dark:text-primary-500" />
+              <div className="w-8 h-8 bg-primary-500 dark:bg-primary-500 rounded flex items-center justify-center">
+                <span className="text-white text-body-sm font-bold">EP</span>
+              </div>
               <span>Elite Performer</span>
             </Link>
           </div>
+
+          {/* Navigation */}
           <nav className="flex items-center space-x-1">
             {navLinks.map((link) => {
               // For dashboard, match exactly. For other routes, match if pathname starts with the link path
@@ -97,7 +114,7 @@ export const Header = () => {
                   href={link.path}
                   className={`px-3 py-2 rounded text-body-sm font-medium transition-all duration-[150ms] flex items-center space-x-2 ${
                     isActive
-                      ? 'bg-primary-500 dark:bg-primary-500 text-white hover:bg-primary-600 dark:hover:bg-primary-600'
+                      ? 'text-primary-500 dark:text-primary-500'
                       : 'text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50'
                   }`}
                 >
@@ -143,58 +160,77 @@ export const Header = () => {
                 </div>
               )}
             </div>
-            {session && (
-              <div className="ml-4 relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded text-body-sm font-medium text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
-                >
-                  <User className="w-4 h-4" />
-                  <span>{session.user?.name || session.user?.email}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-[150ms] ${isDropdownOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
-                    <div className="py-1">
-                      <div className="px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 border-b border-neutral-200 dark:border-neutral-200">
-                        {session.user?.name || session.user?.email}
+
+            {/* Right side utilities */}
+            <div className="ml-4 flex items-center space-x-2">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="p-2 rounded text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
+                aria-label="Toggle theme"
+              >
+                <Moon className="w-5 h-5" />
+              </button>
+
+              {/* Notifications */}
+              <button
+                className="p-2 rounded text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
+                aria-label="Notifications"
+              >
+                <Bell className="w-5 h-5" />
+              </button>
+
+              {/* User Avatar */}
+              {session && (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-8 h-8 rounded-full bg-primary-500 dark:bg-primary-500 flex items-center justify-center text-white text-body-sm font-medium hover:bg-primary-600 dark:hover:bg-primary-600 transition-all duration-[150ms]"
+                    aria-label="User menu"
+                  >
+                    {getUserInitial()}
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 rounded shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
+                      <div className="py-1">
+                        <div className="px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 border-b border-neutral-200 dark:border-neutral-200">
+                          {session.user?.name || session.user?.email}
+                        </div>
+                        <button
+                          onClick={() => {
+                            toggleTheme();
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center space-x-3 px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
+                        >
+                          {theme === 'dark' ? (
+                            <>
+                              <Sun className="w-5 h-5" />
+                              <span>Light Mode</span>
+                            </>
+                          ) : (
+                            <>
+                              <Moon className="w-5 h-5" />
+                              <span>Dark Mode</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            signOut({ callbackUrl: '/auth/login' });
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center space-x-3 px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          <span>Sign out</span>
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          toggleTheme();
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
-                      >
-                        {theme === 'dark' ? (
-                          <>
-                            <Sun className="w-5 h-5" />
-                            <span>Light Mode</span>
-                          </>
-                        ) : (
-                          <>
-                            <Moon className="w-5 h-5" />
-                            <span>Dark Mode</span>
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => {
-                          signOut({ callbackUrl: '/auth/login' });
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-body-sm text-neutral-600 dark:text-neutral-600 hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span>Sign out</span>
-                      </button>
                     </div>
-                  </div>
-                )}
-              </div>
-            )}
+                  )}
+                </div>
+              )}
+            </div>
           </nav>
         </div>
       </div>
