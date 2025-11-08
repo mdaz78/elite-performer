@@ -166,4 +166,76 @@ export const tasksRouter = router({
 
       return { success: true }
     }),
+
+  getScheduledModules: protectedProcedure
+    .input(getTasksByDateSchema.pick({ startDate: true, endDate: true }))
+    .query(async ({ ctx, input }) => {
+      const userId = ctx.session.user.id
+
+      const [codingModules, tradingModules] = await Promise.all([
+        ctx.prisma.courseModule.findMany({
+          where: {
+            scheduledDate: {
+              gte: new Date(input.startDate),
+              lte: new Date(input.endDate),
+            },
+            course: {
+              userId,
+            },
+          },
+          include: {
+            course: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+          orderBy: { scheduledDate: 'asc' },
+        }),
+        ctx.prisma.tradingCourseModule.findMany({
+          where: {
+            scheduledDate: {
+              gte: new Date(input.startDate),
+              lte: new Date(input.endDate),
+            },
+            course: {
+              userId,
+            },
+          },
+          include: {
+            course: {
+              select: {
+                id: true,
+                name: true,
+              },
+            },
+          },
+          orderBy: { scheduledDate: 'asc' },
+        }),
+      ])
+
+      return [
+        ...codingModules.map((module) => ({
+          id: module.id,
+          name: module.name,
+          scheduledDate: module.scheduledDate,
+          courseId: module.courseId,
+          courseName: module.course.name,
+          courseType: 'coding' as const,
+          completed: module.completed,
+          order: module.order,
+        })),
+        ...tradingModules.map((module) => ({
+          id: module.id,
+          name: module.name,
+          scheduledDate: module.scheduledDate,
+          courseId: module.courseId,
+          courseName: module.course.name,
+          courseType: 'trading' as const,
+          completed: module.completed,
+          order: module.order,
+        })),
+      ]
+    }),
 })

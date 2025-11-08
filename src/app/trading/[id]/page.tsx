@@ -27,9 +27,17 @@ import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 
 interface SortableModuleItemProps {
-  module: { id: number; name: string; order: number; completed: boolean; completedAt: Date | null };
+  module: {
+    id: number;
+    name: string;
+    order: number;
+    completed: boolean;
+    completedAt: Date | null;
+    scheduledDate: Date | null;
+  };
   onToggle: (moduleId: number, completed: boolean) => void;
   onDelete: (moduleId: number) => void;
+  onSchedule: (moduleId: number, date: string | null) => void;
   isAnimating?: boolean;
   isFirstMount?: boolean;
 }
@@ -38,17 +46,38 @@ const SortableModuleItem = ({
   module,
   onToggle,
   onDelete,
+  onSchedule,
   isAnimating = false,
   isFirstMount = false,
 }: SortableModuleItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
   });
+  const dateInputRef = useRef<HTMLInputElement>(null);
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    onSchedule(module.id, e.target.value || null);
+  };
+
+  const handleOpenDatePicker = () => {
+    if (dateInputRef.current) {
+      if (typeof dateInputRef.current.showPicker === 'function') {
+        dateInputRef.current.showPicker();
+      } else {
+        dateInputRef.current.click();
+      }
+    }
+  };
+
+  const handleClearSchedule = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSchedule(module.id, null);
   };
 
   return (
@@ -119,15 +148,72 @@ const SortableModuleItem = ({
               Completed on {formatDisplayDate(module.completedAt.toISOString())}
             </p>
           )}
+          {module.scheduledDate && (
+            <p className="text-xs text-blue-600 dark:text-blue-400 mt-1 flex items-center gap-1">
+              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+              Scheduled: {formatDisplayDate(module.scheduledDate.toISOString())}
+            </p>
+          )}
         </div>
       </div>
-      <button
-        onClick={() => onDelete(module.id)}
-        className="ml-4 px-3 py-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-sm font-medium transition-colors"
-        title="Delete module"
-      >
-        Delete
-      </button>
+      <div className="flex items-center gap-2">
+        <div className="relative">
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={
+              module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''
+            }
+            onChange={handleDateChange}
+            className="absolute opacity-0 pointer-events-none w-0 h-0"
+            onClick={(e) => e.stopPropagation()}
+          />
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleOpenDatePicker();
+            }}
+            className={`px-2 py-1 text-xs rounded transition-colors ${
+              module.scheduledDate
+                ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900/50'
+                : 'bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark hover:bg-surface dark:hover:bg-surface-dark'
+            }`}
+            title={module.scheduledDate ? 'Change scheduled date' : 'Schedule module'}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
+          </button>
+          {module.scheduledDate && (
+            <button
+              onClick={handleClearSchedule}
+              className="ml-1 px-2 py-1 text-xs text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
+              title="Remove schedule"
+            >
+              ×
+            </button>
+          )}
+        </div>
+        <button
+          onClick={() => onDelete(module.id)}
+          className="px-3 py-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-sm font-medium transition-colors"
+          title="Delete module"
+        >
+          Delete
+        </button>
+      </div>
     </motion.div>
   );
 };
@@ -262,6 +348,13 @@ function TradingCourseDetailContent() {
       completedAt: !completed ? new Date().toISOString() : null,
     });
     setTimeout(() => setAnimatingModuleId(null), 200);
+  };
+
+  const handleScheduleModule = async (moduleId: number, date: string | null) => {
+    await updateModuleMutation.mutateAsync({
+      id: moduleId,
+      scheduledDate: date ? new Date(date).toISOString() : null,
+    });
   };
 
   const handleAddModule = async (name: string) => {
@@ -784,9 +877,15 @@ function TradingCourseDetailContent() {
                       animate={animatingModuleId === module.id ? 'animate' : undefined}
                     >
                       <SortableModuleItem
-                        module={module}
+                        module={{
+                          ...module,
+                          scheduledDate: module.scheduledDate
+                            ? new Date(module.scheduledDate)
+                            : null,
+                        }}
                         onToggle={handleToggleModule}
                         onDelete={handleDeleteModule}
+                        onSchedule={handleScheduleModule}
                         isAnimating={animatingModuleId === module.id}
                         isFirstMount={isFirstMount.current}
                       />

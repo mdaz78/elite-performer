@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
 import { Card } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
@@ -19,6 +20,7 @@ import {
 import dayjs from 'dayjs'
 
 function TasksPageContent() {
+  const router = useRouter()
   const utils = trpc.useUtils()
   const [selectedWeekStart, setSelectedWeekStart] = useState<string>(getWeekStartSunday())
   const [showTaskForm, setShowTaskForm] = useState(false)
@@ -52,6 +54,14 @@ function TasksPageContent() {
     { enabled: !!selectedWeekStart }
   )
 
+  const { data: scheduledModules = [], isLoading: scheduledModulesLoading } = trpc.tasks.getScheduledModules.useQuery(
+    {
+      startDate: new Date(selectedWeekStart).toISOString(),
+      endDate: new Date(weekEnd).toISOString(),
+    },
+    { enabled: !!selectedWeekStart }
+  )
+
   const { data: projects = [], isLoading: projectsLoading } = trpc.projects.getAll.useQuery()
   const { data: weekReview } = trpc.reviews.getByWeek.useQuery(
     {
@@ -76,6 +86,18 @@ function TasksPageContent() {
   const updateTaskMutation = trpc.tasks.update.useMutation({
     onSuccess: () => {
       utils.tasks.getByDate.invalidate()
+    },
+  })
+
+  const updateModuleScheduleMutation = trpc.courseModules.update.useMutation({
+    onSuccess: () => {
+      utils.tasks.getScheduledModules.invalidate()
+    },
+  })
+
+  const updateTradingModuleScheduleMutation = trpc.tradingCourseModules.update.useMutation({
+    onSuccess: () => {
+      utils.tasks.getScheduledModules.invalidate()
     },
   })
 
@@ -222,6 +244,36 @@ function TasksPageContent() {
     })
   }
 
+  const getScheduledModulesForDay = (date: string) => {
+    return scheduledModules.filter((m) => {
+      if (!m.scheduledDate) return false
+      const moduleDate = new Date(m.scheduledDate).toISOString().split('T')[0]
+      return isSameDay(moduleDate, date)
+    })
+  }
+
+  const handleRescheduleModule = async (module: typeof scheduledModules[0], newDate: string) => {
+    if (module.courseType === 'coding') {
+      await updateModuleScheduleMutation.mutateAsync({
+        id: module.id,
+        scheduledDate: new Date(newDate).toISOString(),
+      })
+    } else {
+      await updateTradingModuleScheduleMutation.mutateAsync({
+        id: module.id,
+        scheduledDate: new Date(newDate).toISOString(),
+      })
+    }
+  }
+
+  const handleNavigateToCourse = (module: typeof scheduledModules[0]) => {
+    if (module.courseType === 'coding') {
+      router.push(`/coding/${module.courseId}`)
+    } else {
+      router.push(`/trading/${module.courseId}`)
+    }
+  }
+
   const getIncompleteTasks = () => {
     return tasks.filter((t) => !t.completed)
   }
@@ -233,7 +285,7 @@ function TasksPageContent() {
     setSelectedWeekStart(newWeekStart)
   }
 
-  const isLoading = tasksLoading || projectsLoading
+  const isLoading = tasksLoading || projectsLoading || scheduledModulesLoading
 
   if (isLoading) {
     return (
@@ -406,6 +458,7 @@ function TasksPageContent() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-7 gap-3">
           {weekDays.map((date, idx) => {
             const dayTasks = getTasksForDay(date)
+            const dayModules = getScheduledModulesForDay(date)
             const isToday = isSameDay(date, today)
             const isSunday = idx === 0
 
@@ -443,7 +496,7 @@ function TasksPageContent() {
                 </div>
                 <div className="p-3 min-h-[350px]">
                   <AnimatePresence mode="popLayout">
-                    {dayTasks.length === 0 ? (
+                    {dayTasks.length === 0 && dayModules.length === 0 ? (
                       <div className="flex items-center justify-center h-full min-h-[300px]">
                         <p className="text-sm text-text-tertiary dark:text-text-tertiary-dark">No tasks</p>
                       </div>
@@ -454,6 +507,59 @@ function TasksPageContent() {
                         animate="animate"
                         className="space-y-2"
                       >
+                        {dayModules.map((module) => (
+                          <motion.div
+                            key={`module-${module.id}`}
+                            variants={createVariants}
+                            initial="initial"
+                            animate="animate"
+                            exit="exit"
+                            layout
+                            className="group p-3 border-2 border-purple-300 dark:border-purple-600 rounded-lg transition-all bg-purple-50 dark:bg-purple-900/20 hover:border-purple-400 dark:hover:border-purple-500 hover:shadow-sm cursor-pointer"
+                            onClick={() => handleNavigateToCourse(module)}
+                          >
+                            <div className="flex items-start gap-2">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1">
+                                  <span className="text-xs font-semibold px-2 py-0.5 bg-purple-200 dark:bg-purple-800 text-purple-800 dark:text-purple-200 rounded-md">
+                                    {module.courseType === 'coding' ? 'Coding' : 'Trading'}
+                                  </span>
+                                  {module.completed && (
+                                    <span className="text-xs font-medium px-2 py-0.5 bg-green-200 dark:bg-green-800 text-green-800 dark:text-green-200 rounded-md">
+                                      Completed
+                                    </span>
+                                  )}
+                                </div>
+                                <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-0.5">
+                                  {module.courseName}
+                                </p>
+                                <p
+                                  className={`text-sm font-medium ${
+                                    module.completed
+                                      ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
+                                      : 'text-text-primary dark:text-text-primary-dark'
+                                  }`}
+                                >
+                                  {module.name}
+                                </p>
+                              </div>
+                              <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <select
+                                  value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
+                                  onChange={(e) => handleRescheduleModule(module, e.target.value)}
+                                  className="text-xs border border-border dark:border-border-dark rounded-md px-1.5 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors duration-200"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {weekDays.map((d, i) => (
+                                    <option key={d} value={d}>
+                                      {dayNames[i]}
+                                    </option>
+                                  ))}
+                                </select>
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
                         {dayTasks.map((task) => {
                           const project = projects.find((p) => p.id === task.projectId)
                           const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
