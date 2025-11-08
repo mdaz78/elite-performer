@@ -25,7 +25,7 @@ function DashboardContent() {
   const utils = trpc.useUtils();
 
   // Hardcoded transformation dates
-  const TRANSFORMATION_START_DATE = '2024-11-10'; // Update this to your desired start date
+  const TRANSFORMATION_START_DATE = '2025-11-10'; // Update this to your desired start date
   const TRANSFORMATION_END_DATE = '2026-05-09'; // Update this to your desired end date (180 days later)
 
   // Load all data
@@ -184,9 +184,6 @@ function DashboardContent() {
         <h1 className="text-[36px] font-bold text-neutral-900 dark:text-neutral-900 leading-tight">
           Dashboard
         </h1>
-        <p className="mt-2 text-[16px] text-neutral-600 dark:text-neutral-600">
-          180-Day Transformation Overview
-        </p>
       </div>
 
       {/* Transformation Progress Card */}
