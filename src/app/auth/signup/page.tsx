@@ -48,7 +48,7 @@ export default function SignupPage() {
         router.push('/')
         router.refresh()
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred during registration')
     } finally {
       setIsLoading(false)

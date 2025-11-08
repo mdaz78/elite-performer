@@ -4,7 +4,7 @@ import { useRef, useState } from 'react'
 import Papa from 'papaparse'
 
 interface CsvImporterProps {
-  onImport: (data: any[]) => Promise<void>;
+  onImport: (data: Record<string, unknown>[]) => Promise<void>;
   accept?: string;
   label?: string;
   className?: string;
