@@ -12,6 +12,10 @@ A full-stack application for tracking personal development across coding, fitnes
 - **State Management**: TanStack React Query v5
 - **Styling**: Tailwind CSS
 - **Language**: TypeScript (strict mode, no `any` types)
+- **UI Libraries**:
+  - `@dnd-kit` for drag & drop functionality
+  - `recharts` for data visualization
+  - `papaparse` for CSV import/export
 - **Deployment**: Netlify
 
 ## ✨ Features
@@ -23,13 +27,13 @@ A full-stack application for tracking personal development across coding, fitnes
 - Multi-user support with data isolation
 
 ### Core Modules
-- **Coding Tracker**: Manage courses and modules with progress tracking
-- **Fitness Logger**: Track weight, body fat, workouts, and calories
-- **Trading Journal**: Log trades with P&L statistics and analytics
-- **Task Manager**: Schedule and track tasks across different categories
-- **Project Management**: Organize projects with linked tasks
-- **Weekly Reviews**: Reflect on wins, mistakes, and goals
-- **Settings**: Customizable user preferences
+- **Coding Tracker**: Manage courses and modules with progress tracking, drag & drop reordering, and CSV import
+- **Fitness Logger**: Track weight, body fat, workouts, and calories with statistics
+- **Trading Journal**: Log trades with P&L statistics, analytics, and performance metrics
+- **Task Manager**: Schedule and track tasks across different categories with calendar view
+- **Project Management**: Organize projects with linked tasks and progress tracking
+- **Weekly Reviews**: Reflect on wins, mistakes, and goals integrated with task management
+- **Settings**: Customizable user preferences and transformation date configuration
 
 ### Dashboard
 - 180-day transformation progress tracking
@@ -174,15 +178,29 @@ Navigate to `/auth/login` to authenticate with:
 
 ## 🚢 Deployment
 
+### Prerequisites
+
+Before deploying, ensure you have:
+1. ✅ All environment variables configured (see Setup Instructions)
+2. ✅ PostgreSQL database set up and accessible
+3. ✅ Database migrations run: `npx prisma migrate deploy`
+4. ✅ Prisma client generated: `npx prisma generate`
+
 ### Netlify
 
 1. Connect your repository to Netlify
 2. Configure build settings:
-   - Build command: `npm run build`
+   - Build command: `npm run build` (includes Prisma generate)
    - Publish directory: `.next`
-3. Add environment variables in Netlify dashboard
+   - Node version: 20.x or higher
+3. Add environment variables in Netlify dashboard:
+   - `DATABASE_URL` - Your PostgreSQL connection string
+   - `NEXTAUTH_URL` - Your production URL
+   - `NEXTAUTH_SECRET` - Random secret (generate with `openssl rand -base64 32`)
+   - OAuth provider credentials (if using)
 4. Configure PostgreSQL database (Neon, Supabase, or Railway)
-5. Deploy!
+5. Run migrations: `npx prisma migrate deploy`
+6. Deploy!
 
 ### Database Providers
 
@@ -213,25 +231,51 @@ npx prettier --write .
 # Create a new migration
 npx prisma migrate dev --name <migration-name>
 
-# Reset database
+# Apply migrations (production)
+npx prisma migrate deploy
+
+# Reset database (development only)
 npx prisma migrate reset
 
 # View database in browser
 npx prisma studio
+
+# Seed database (optional)
+npm run seed
 ```
 
-## ⚠️ Current Status
+## ✅ Current Status
 
-The backend infrastructure is **100% complete** with:
-- ✅ Full authentication system
-- ✅ All 8 tRPC routers implemented
-- ✅ Prisma schema with all models
-- ✅ Type-safe API layer
-- ✅ Validation schemas
+The project is **fully migrated and production-ready**:
 
-**Frontend pages need migration** from client-side Dexie to server-side tRPC. See [MIGRATION_STATUS.md](./MIGRATION_STATUS.md) for details and migration guide.
+### Backend Infrastructure (100% Complete)
+- ✅ Full authentication system with NextAuth v5
+- ✅ All 8 tRPC routers implemented with end-to-end type safety
+- ✅ Prisma schema with all models and relations
+- ✅ Type-safe API layer with Zod validation
+- ✅ Protected procedures with session-based authorization
 
-The **Dashboard page** has been successfully migrated and serves as a reference implementation.
+### Frontend Pages (100% Complete)
+All pages have been successfully migrated from client-side Dexie to server-side tRPC:
+- ✅ **Dashboard** (`/`) - Overview with 180-day progress tracking
+- ✅ **Coding Courses** (`/coding`) - Course management with drag & drop module reordering
+- ✅ **Course Detail** (`/coding/[id]`) - Module management with CSV import
+- ✅ **Fitness Tracker** (`/fitness`) - Weight, body fat, workouts, and calories logging
+- ✅ **Trading Journal** (`/trading`) - Trade logging with P&L statistics and analytics
+- ✅ **Task Manager** (`/tasks`) - Calendar view with weekly review integration
+- ✅ **Projects** (`/projects`) - Project management with linked tasks
+- ✅ **Weekly Reviews** (`/review`) - Reflection and goal tracking
+
+### Additional Features
+- ✅ Drag & drop module reordering using `@dnd-kit`
+- ✅ CSV import functionality for bulk data entry
+- ✅ Protected routes with authentication checks
+- ✅ Responsive UI with Tailwind CSS
+- ✅ Full type safety (no `any` types)
+- ✅ Date handling with proper serialization
+- ✅ Real-time data updates with React Query
+
+See [MIGRATION_STATUS.md](./MIGRATION_STATUS.md) for detailed migration information.
 
 ## 🤝 Contributing
 
