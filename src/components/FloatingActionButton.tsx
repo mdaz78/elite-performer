@@ -19,7 +19,7 @@ export function FloatingActionButton({ onClick }: FloatingActionButtonProps) {
       transition={{ type: 'spring', stiffness: 200, damping: 20 }}
       aria-label="Add habit"
     >
-      <Plus className="w-6 h-6" />
+      <Plus className="w-6 h-6 text-white" />
     </motion.button>
   )
 }

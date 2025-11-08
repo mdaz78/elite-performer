@@ -65,7 +65,11 @@ export function HabitCard({
           ? 'bg-accent-emerald/20 dark:bg-accent-emerald-dark/20 text-accent-emerald dark:text-accent-emerald-dark'
           : 'bg-accent-blue/10 dark:bg-accent-blue-dark/20 text-accent-blue dark:text-accent-blue-dark'
       } transition-colors duration-200`}>
-        <IconComponent className="w-6 h-6" />
+        <IconComponent className={`w-6 h-6 ${
+          isComplete
+            ? 'text-accent-emerald dark:text-accent-emerald-dark'
+            : 'text-accent-blue dark:text-accent-blue-dark'
+        }`} />
       </div>
     )
   }
@@ -101,7 +105,7 @@ export function HabitCard({
                 </h3>
                 {currentStreak > 0 && (
                   <div className="flex items-center gap-1 text-accent-amber dark:text-accent-amber-dark">
-                    <Flame className="w-4 h-4" />
+                    <Flame className="w-4 h-4 text-accent-amber dark:text-accent-amber-dark" />
                     <span className="text-sm font-medium">{currentStreak}</span>
                   </div>
                 )}
@@ -192,7 +196,7 @@ export function HabitCard({
                   className="p-2 hover:bg-background dark:hover:bg-background-dark rounded-lg transition-colors"
                   title="Edit habit"
                 >
-                  <Edit className="w-4 h-4" />
+                  <Edit className="w-4 h-4 text-text-primary dark:text-text-primary-dark" />
                 </button>
               )}
               {habit.status === 'active' ? (
@@ -202,7 +206,7 @@ export function HabitCard({
                     className="p-2 hover:bg-background dark:hover:bg-background-dark rounded-lg transition-colors"
                     title="Pause habit"
                   >
-                    <Pause className="w-4 h-4" />
+                    <Pause className="w-4 h-4 text-text-primary dark:text-text-primary-dark" />
                   </button>
                 )
               ) : (
@@ -212,7 +216,7 @@ export function HabitCard({
                     className="p-2 hover:bg-background dark:hover:bg-background-dark rounded-lg transition-colors"
                     title="Resume habit"
                   >
-                    <Play className="w-4 h-4" />
+                    <Play className="w-4 h-4 text-text-primary dark:text-text-primary-dark" />
                   </button>
                 )
               )}

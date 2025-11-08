@@ -75,7 +75,7 @@ export function IconPicker({ selectedIcon, onSelect, onClose }: IconPickerProps)
             onClick={onClose}
             className="p-2 hover:bg-background dark:hover:bg-background-dark rounded-lg transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-text-primary dark:text-text-primary-dark" />
           </button>
         )}
       </div>

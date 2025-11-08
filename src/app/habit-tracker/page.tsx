@@ -113,7 +113,7 @@ function HabitAnalyticsCard({ habitId, habitName, icon }: { habitId: number; hab
     if (!icon) return null
     const IconComponent = (LucideIcons as any)[icon] as React.ComponentType<{ className?: string }>
     if (!IconComponent) return null
-    return <IconComponent className="w-5 h-5" />
+    return <IconComponent className="w-5 h-5 text-text-primary dark:text-text-primary-dark" />
   }
 
   return (
@@ -535,7 +535,7 @@ function HabitTrackerPageContent() {
                     }}
                     className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200 shadow-sm font-medium text-sm flex items-center gap-2 mx-auto"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 text-white" />
                     Create Your First Habit
                   </button>
                 </div>
@@ -567,7 +567,7 @@ function HabitTrackerPageContent() {
                       onClick={() => navigateMonth('prev')}
                       className="p-2 hover:bg-background dark:hover:bg-background-dark rounded-lg transition-colors"
                     >
-                      <ChevronLeft className="w-5 h-5" />
+                      <ChevronLeft className="w-5 h-5 text-text-primary dark:text-text-primary-dark" />
                     </button>
                     <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
                       {dayjs(selectedMonth).format('MMMM YYYY')}
@@ -576,7 +576,7 @@ function HabitTrackerPageContent() {
                       onClick={() => navigateMonth('next')}
                       className="p-2 hover:bg-background dark:hover:bg-background-dark rounded-lg transition-colors"
                     >
-                      <ChevronRight className="w-5 h-5" />
+                      <ChevronRight className="w-5 h-5 text-text-primary dark:text-text-primary-dark" />
                     </button>
                     <button
                       onClick={() => setSelectedMonth(dayjs().format('YYYY-MM'))}
@@ -625,7 +625,7 @@ function HabitTrackerPageContent() {
                     }}
                     className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200 shadow-sm font-medium text-sm flex items-center gap-2 mx-auto"
                   >
-                    <Plus className="w-4 h-4" />
+                    <Plus className="w-4 h-4 text-white" />
                     Create Your First Habit
                   </button>
                 </div>
@@ -732,7 +732,7 @@ function HabitTrackerPageContent() {
                           <>
                             {(LucideIcons as any)[habitFormData.icon] && (
                               <>
-                                {React.createElement((LucideIcons as any)[habitFormData.icon], { className: 'w-5 h-5' })}
+                                {React.createElement((LucideIcons as any)[habitFormData.icon], { className: 'w-5 h-5 text-text-primary dark:text-text-primary-dark' })}
                                 <span>{habitFormData.icon}</span>
                               </>
                             )}
@@ -861,7 +861,7 @@ function HabitTrackerPageContent() {
                           }}
                           className="text-xs px-2 py-1 bg-accent-blue dark:bg-accent-blue-dark text-white rounded hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors flex items-center gap-1"
                         >
-                          <Plus className="w-3 h-3" />
+                          <Plus className="w-3 h-3 text-white" />
                           Add Sub-habit
                         </button>
                       </div>
@@ -998,7 +998,7 @@ function HabitTrackerPageContent() {
                                   : 'bg-surface dark:bg-surface-dark border border-border dark:border-border-dark hover:bg-background dark:hover:bg-background-dark'
                               }`}
                             >
-                              {habitData.completed ? <Check className="w-4 h-4" /> : <X className="w-4 h-4" />}
+                              {habitData.completed ? <Check className="w-4 h-4 text-white" /> : <X className="w-4 h-4 text-text-primary dark:text-text-primary-dark" />}
                             </button>
                           </div>
                           {habit.subHabits.length > 0 && (
@@ -1033,7 +1033,7 @@ function HabitTrackerPageContent() {
                                           : 'bg-surface dark:bg-surface-dark border border-border dark:border-border-dark hover:bg-background dark:hover:bg-background-dark'
                                       }`}
                                     >
-                                      {isSubComplete ? <Check className="w-3 h-3" /> : <X className="w-3 h-3" />}
+                                      {isSubComplete ? <Check className="w-3 h-3 text-white" /> : <X className="w-3 h-3 text-text-primary dark:text-text-primary-dark" />}
                                     </button>
                                   </div>
                                 )
