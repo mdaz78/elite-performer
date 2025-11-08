@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { Card, InputDialog, ProgressBar } from '../components';
 import { db } from '../db';
-import { Card, ProgressBar, CsvImporter } from '../components';
+import type { CodingCourse } from '../types';
 import { formatDisplayDate } from '../utils/date';
-import type { CodingCourse, CourseModule } from '../types';
 
 export const CodingPage = () => {
   const navigate = useNavigate();
   const [courses, setCourses] = useState<(CodingCourse & { progress: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showAddDialog, setShowAddDialog] = useState(false);
 
   useEffect(() => {
     loadCourses();
@@ -30,17 +31,17 @@ export const CodingPage = () => {
     setIsLoading(false);
   };
 
-  const handleAddCourse = async () => {
-    const name = prompt('Enter course name:');
-    if (!name) return;
+  const handleAddCourse = async (name: string) => {
+    if (!name.trim()) return;
 
     const newCourse: Omit<CodingCourse, 'id'> = {
-      name,
+      name: name.trim(),
       description: '',
       createdAt: new Date().toISOString().split('T')[0],
     };
 
     await db.codingCourses.add(newCourse);
+    setShowAddDialog(false);
     loadCourses();
   };
 
@@ -69,7 +70,7 @@ export const CodingPage = () => {
         </div>
         <div className="flex gap-3">
           <button
-            onClick={handleAddCourse}
+            onClick={() => setShowAddDialog(true)}
             className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
           >
             Add Course
@@ -80,9 +81,11 @@ export const CodingPage = () => {
       {courses.length === 0 ? (
         <Card>
           <div className="text-center py-12">
-            <p className="text-gray-500 mb-4">No courses yet. Add your first course to get started!</p>
+            <p className="text-gray-500 mb-4">
+              No courses yet. Add your first course to get started!
+            </p>
             <button
-              onClick={handleAddCourse}
+              onClick={() => setShowAddDialog(true)}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Course
@@ -112,7 +115,12 @@ export const CodingPage = () => {
                     title="Delete course"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
                     </svg>
                   </button>
                 </div>
@@ -136,6 +144,18 @@ export const CodingPage = () => {
           ))}
         </div>
       )}
+
+      <InputDialog
+        isOpen={showAddDialog}
+        title="Add New Course"
+        message="Enter a name for your new course"
+        inputLabel="Course Name"
+        inputPlaceholder="e.g., React Advanced Patterns"
+        confirmLabel="Add Course"
+        cancelLabel="Cancel"
+        onConfirm={handleAddCourse}
+        onCancel={() => setShowAddDialog(false)}
+      />
     </div>
   );
 };

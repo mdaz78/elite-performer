@@ -17,7 +17,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Card, CsvImporter, ProgressBar } from '../components';
+import { Card, CsvImporter, InputDialog, ProgressBar } from '../components';
 import { db } from '../db';
 import type { CodingCourse, CourseModule } from '../types';
 import { formatDisplayDate } from '../utils/date';
@@ -125,6 +125,7 @@ export const CourseDetail = () => {
   const [editedDescription, setEditedDescription] = useState('');
   const [editedStartDate, setEditedStartDate] = useState('');
   const [editedTargetDate, setEditedTargetDate] = useState('');
+  const [showAddModuleDialog, setShowAddModuleDialog] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -191,9 +192,8 @@ export const CourseDetail = () => {
     setProgress(prog);
   };
 
-  const handleAddModule = async () => {
-    const name = prompt('Enter module name:');
-    if (!name || !id) return;
+  const handleAddModule = async (name: string) => {
+    if (!name.trim() || !id) return;
 
     const courseModules = await db.courseModules
       .where('courseId')
@@ -204,12 +204,13 @@ export const CourseDetail = () => {
 
     const newModule: Omit<CourseModule, 'id'> = {
       courseId: parseInt(id, 10),
-      name,
+      name: name.trim(),
       order: maxOrder + 1,
       completed: false,
     };
 
     await db.courseModules.add(newModule);
+    setShowAddModuleDialog(false);
     loadCourse(parseInt(id, 10));
   };
 
@@ -509,7 +510,7 @@ export const CourseDetail = () => {
           <div className="flex gap-3">
             <CsvImporter onImport={handleCSVImport} label="Import CSV" />
             <button
-              onClick={handleAddModule}
+              onClick={() => setShowAddModuleDialog(true)}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Module
@@ -687,7 +688,7 @@ export const CourseDetail = () => {
               Add modules to start tracking your course progress
             </p>
             <button
-              onClick={handleAddModule}
+              onClick={() => setShowAddModuleDialog(true)}
               className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
             >
               Add Your First Module
@@ -717,6 +718,18 @@ export const CourseDetail = () => {
           </DndContext>
         )}
       </Card>
+
+      <InputDialog
+        isOpen={showAddModuleDialog}
+        title="Add New Module"
+        message="Enter a name for the new module"
+        inputLabel="Module Name"
+        inputPlaceholder="e.g., Introduction to React Hooks"
+        confirmLabel="Add Module"
+        cancelLabel="Cancel"
+        onConfirm={handleAddModule}
+        onCancel={() => setShowAddModuleDialog(false)}
+      />
     </div>
   );
 };
