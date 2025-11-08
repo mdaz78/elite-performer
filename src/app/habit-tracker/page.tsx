@@ -742,7 +742,7 @@ function HabitTrackerPageContent() {
               </Card>
             ) : (
               <>
-                <h2 className="text-2xl font-bold text-gray-900 mb-6">Today's Habits</h2>
+                <h2 className="text-2xl font-bold text-text-primary dark:text-text-primary-dark mb-6 transition-colors duration-200">Today's Habits</h2>
                 <motion.div
                   variants={staggerContainer}
                   initial="initial"
