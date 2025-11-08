@@ -42,6 +42,8 @@ function TasksPageContent() {
     targetDate: addDays(getToday(), 30),
   })
 
+  // Task form state
+  const [editingTaskId, setEditingTaskId] = useState<number | null>(null)
   const [formData, setFormData] = useState({
     title: '',
     type: 'DeepWork' as const,
@@ -97,6 +99,7 @@ function TasksPageContent() {
         taskProjectId: undefined,
         scheduledDate: 'unassigned',
       })
+      setEditingTaskId(null)
       setShowTaskForm(false)
     },
   })
@@ -105,6 +108,17 @@ function TasksPageContent() {
     onSuccess: () => {
       utils.tasks.getByDate.invalidate()
       utils.tasks.getAll.invalidate()
+      // Only reset form if we were editing via the form modal
+      if (editingTaskId) {
+        setFormData({
+          title: '',
+          type: 'DeepWork',
+          taskProjectId: undefined,
+          scheduledDate: 'unassigned',
+        })
+        setEditingTaskId(null)
+        setShowTaskForm(false)
+      }
     },
   })
 
@@ -193,14 +207,26 @@ function TasksPageContent() {
     e.preventDefault()
 
     try {
-      await createTaskMutation.mutateAsync({
-        title: formData.title,
-        type: formData.type,
-        taskProjectId: formData.taskProjectId || null,
-        scheduledDate: formData.scheduledDate === 'unassigned' ? null : dayjs(formData.scheduledDate).startOf('day').toDate().toISOString(),
-      })
+      if (editingTaskId) {
+        // Update existing task
+        await updateTaskMutation.mutateAsync({
+          id: editingTaskId,
+          title: formData.title,
+          type: formData.type,
+          taskProjectId: formData.taskProjectId || null,
+          scheduledDate: formData.scheduledDate === 'unassigned' ? null : dayjs(formData.scheduledDate).startOf('day').toDate().toISOString(),
+        })
+      } else {
+        // Create new task
+        await createTaskMutation.mutateAsync({
+          title: formData.title,
+          type: formData.type,
+          taskProjectId: formData.taskProjectId || null,
+          scheduledDate: formData.scheduledDate === 'unassigned' ? null : dayjs(formData.scheduledDate).startOf('day').toDate().toISOString(),
+        })
+      }
     } catch (error) {
-      console.error('Error creating task:', error)
+      console.error('Error saving task:', error)
     }
   }
 
@@ -390,6 +416,17 @@ function TasksPageContent() {
     setShowProjectForm(true)
   }
 
+  const handleEditTask = (task: typeof tasks[0]) => {
+    setFormData({
+      title: task.title,
+      type: task.type,
+      taskProjectId: task.taskProjectId || undefined,
+      scheduledDate: task.scheduledDate ? new Date(task.scheduledDate).toISOString().split('T')[0] : 'unassigned',
+    })
+    setEditingTaskId(task.id)
+    setShowTaskForm(true)
+  }
+
   const handleDeleteProject = async (id: number) => {
     if (!confirm('Delete this task project? Tasks linked to it will remain but lose the link.')) return
     await deleteTaskProjectMutation.mutateAsync({ id })
@@ -456,6 +493,13 @@ function TasksPageContent() {
                 targetDate: addDays(getToday(), 30),
               })
             } else {
+              setEditingTaskId(null)
+              setFormData({
+                title: '',
+                type: 'DeepWork',
+                taskProjectId: undefined,
+                scheduledDate: 'unassigned',
+              })
               setShowTaskForm(!showTaskForm)
             }
           }}
@@ -637,6 +681,13 @@ function TasksPageContent() {
                           </h4>
                         </div>
                         <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handleEditTask(task)}
+                            className="text-xs px-3 py-1.5 rounded-md border border-primary-500 dark:border-primary-500 text-primary-600 dark:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/10 transition-colors font-medium"
+                            title="Edit task"
+                          >
+                            Edit
+                          </button>
                           <DatePicker
                             value={task.scheduledDate ? new Date(task.scheduledDate).toISOString().split('T')[0] : undefined}
                             onChange={(date) => handleAssignTask(task, date)}
@@ -872,6 +923,16 @@ function TasksPageContent() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation()
+                                      handleEditTask(task)
+                                    }}
+                                    className="text-xs px-2 py-0.5 rounded-md border border-primary-300 dark:border-primary-600 text-primary-600 dark:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-all duration-200 font-medium"
+                                    title="Edit task"
+                                  >
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
                                       handleToggleComplete(task.id, task.completed)
                                     }}
                                     className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
@@ -1053,7 +1114,16 @@ function TasksPageContent() {
 
       {/* Task Creation Form Modal - Available on all tabs */}
       {showTaskForm && (
-        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowTaskForm(false)}>
+        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity" onClick={() => {
+          setShowTaskForm(false)
+          setEditingTaskId(null)
+          setFormData({
+            title: '',
+            type: 'DeepWork',
+            taskProjectId: undefined,
+            scheduledDate: 'unassigned',
+          })
+        }}>
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
               <motion.div
@@ -1063,7 +1133,7 @@ function TasksPageContent() {
                 onClick={(e) => e.stopPropagation()}
               >
                 <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-4">
-                  Create New Task
+                  {editingTaskId ? 'Edit Task' : 'Create New Task'}
                 </h3>
                 <form onSubmit={handleTaskSubmit} className="space-y-4">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -1139,6 +1209,7 @@ function TasksPageContent() {
                       type="button"
                       onClick={() => {
                         setShowTaskForm(false)
+                        setEditingTaskId(null)
                         setFormData({
                           title: '',
                           type: 'DeepWork',
@@ -1154,7 +1225,7 @@ function TasksPageContent() {
                       type="submit"
                       className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors font-medium shadow-sm"
                     >
-                      Add Task
+                      {editingTaskId ? 'Update Task' : 'Add Task'}
                     </button>
                   </div>
                 </form>
