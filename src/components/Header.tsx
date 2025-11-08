@@ -1,25 +1,25 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useSession, signOut } from 'next-auth/react';
 import { useTheme } from '@/src/lib/use-theme';
-import { useState, useRef, useEffect } from 'react';
 import {
-  Trophy,
-  LayoutDashboard,
-  CheckSquare,
-  Target,
   BookOpen,
+  CheckSquare,
+  ChevronDown,
   Code,
   FolderKanban,
-  TrendingUp,
-  User,
-  ChevronDown,
-  Sun,
+  LayoutDashboard,
+  LogOut,
   Moon,
-  LogOut
+  Sun,
+  Target,
+  TrendingUp,
+  Trophy,
+  User,
 } from 'lucide-react';
+import { signOut, useSession } from 'next-auth/react';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 export const Header = () => {
   const pathname = usePathname();
@@ -29,6 +29,29 @@ export const Header = () => {
   const [isLearningDropdownOpen, setIsLearningDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const learningDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Handle click outside to close dropdowns
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsDropdownOpen(false);
+      }
+      if (
+        learningDropdownRef.current &&
+        !learningDropdownRef.current.contains(event.target as Node)
+      ) {
+        setIsLearningDropdownOpen(false);
+      }
+    };
+
+    if (isDropdownOpen || isLearningDropdownOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isDropdownOpen, isLearningDropdownOpen]);
 
   // Don't show header on auth pages
   if (pathname?.startsWith('/auth')) {
@@ -47,32 +70,15 @@ export const Header = () => {
     { path: '/trading', label: 'Trading', icon: TrendingUp },
   ];
 
-  // Handle click outside to close dropdowns
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsDropdownOpen(false);
-      }
-      if (learningDropdownRef.current && !learningDropdownRef.current.contains(event.target as Node)) {
-        setIsLearningDropdownOpen(false);
-      }
-    };
-
-    if (isDropdownOpen || isLearningDropdownOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [isDropdownOpen, isLearningDropdownOpen]);
-
   return (
     <header className="bg-surface dark:bg-surface-dark border-b border-border dark:border-border-dark transition-colors duration-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
-            <Link href="/" className="flex items-center space-x-2 text-xl font-bold text-text-primary dark:text-text-primary-dark leading-none transition-colors duration-200">
+            <Link
+              href="/"
+              className="flex items-center space-x-2 text-xl font-bold text-text-primary dark:text-text-primary-dark leading-none transition-colors duration-200"
+            >
               <Trophy className="w-6 h-6 text-accent-blue dark:text-accent-blue-dark" />
               <span>Elite Performer</span>
             </Link>

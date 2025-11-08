@@ -1,7 +1,7 @@
-'use client'
+'use client';
 
-import { useRef, useState } from 'react'
-import Papa from 'papaparse'
+import Papa from 'papaparse';
+import { useRef, useState } from 'react';
 
 interface CsvImporterProps {
   onImport: (data: Record<string, unknown>[]) => Promise<void>;
@@ -32,7 +32,7 @@ export const CsvImporter = ({
       skipEmptyLines: true,
       complete: async (results) => {
         try {
-          await onImport(results.data);
+          await onImport(results.data as Record<string, unknown>[]);
           if (fileInputRef.current) {
             fileInputRef.current.value = '';
           }
@@ -62,7 +62,7 @@ export const CsvImporter = ({
       />
       <label
         htmlFor="csv-import"
-        className={`inline-flex items-center px-4 py-2 border border-border dark:border-border-dark rounded-md shadow-sm text-sm font-medium text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark hover:bg-background dark:hover:bg-background-dark cursor-pointer transition-colors duration-200 ${
+        className={`inline-flex items-center justify-center px-4 py-2 h-[35px] border border-border dark:border-border-dark rounded-md shadow-sm text-sm font-medium text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark hover:bg-background dark:hover:bg-background-dark cursor-pointer transition-colors duration-200 ${
           isImporting ? 'opacity-50 cursor-not-allowed' : ''
         }`}
       >

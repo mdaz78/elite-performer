@@ -1,5 +1,10 @@
-'use client'
+'use client';
 
+import { Card, CsvImporter, InputDialog, ProgressBar } from '@/src/components';
+import { ProtectedRoute } from '@/src/components/ProtectedRoute';
+import { createVariants, staggerContainer, updateVariants } from '@/src/lib/animations';
+import { trpc } from '@/src/lib/trpc-client';
+import { formatDisplayDate } from '@/src/utils/date';
 import {
   DndContext,
   KeyboardSensor,
@@ -8,49 +13,50 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
-} from '@dnd-kit/core'
+} from '@dnd-kit/core';
 import {
   SortableContext,
   arrayMove,
   sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
-} from '@dnd-kit/sortable'
-import { CSS } from '@dnd-kit/utilities'
-import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useRouter, useParams } from 'next/navigation'
-import { trpc } from '@/src/lib/trpc-client'
-import { Card, CsvImporter, InputDialog, ProgressBar } from '@/src/components'
-import { ProtectedRoute } from '@/src/components/ProtectedRoute'
-import { formatDisplayDate } from '@/src/utils/date'
-import { createVariants, updateVariants, staggerContainer } from '@/src/lib/animations'
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { AnimatePresence, motion } from 'framer-motion';
+import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useRef, useState } from 'react';
 
 interface SortableModuleItemProps {
-  module: { id: number; name: string; order: number; completed: boolean; completedAt: Date | null }
-  onToggle: (moduleId: number, completed: boolean) => void
-  onDelete: (moduleId: number) => void
-  isAnimating?: boolean
-  isFirstMount?: boolean
+  module: { id: number; name: string; order: number; completed: boolean; completedAt: Date | null };
+  onToggle: (moduleId: number, completed: boolean) => void;
+  onDelete: (moduleId: number) => void;
+  isAnimating?: boolean;
+  isFirstMount?: boolean;
 }
 
-const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false, isFirstMount = false }: SortableModuleItemProps) => {
+const SortableModuleItem = ({
+  module,
+  onToggle,
+  onDelete,
+  isAnimating = false,
+  isFirstMount = false,
+}: SortableModuleItemProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
     id: module.id,
-  })
+  });
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
     opacity: isDragging ? 0.5 : 1,
-  }
+  };
 
   return (
     <motion.div
       ref={setNodeRef}
       style={style}
       variants={createVariants}
-      initial={isFirstMount ? false : "initial"}
+      initial={isFirstMount ? false : 'initial'}
       animate={isAnimating ? 'animate' : 'animate'}
       exit="exit"
       layout
@@ -84,7 +90,9 @@ const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false, i
         <div className="shrink-0 mr-4">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-              module.completed ? 'bg-green-500 text-white' : 'bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark'
+              module.completed
+                ? 'bg-green-500 text-white'
+                : 'bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark'
             }`}
           >
             {module.order}
@@ -99,7 +107,9 @@ const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false, i
         <div className="flex-1 min-w-0">
           <p
             className={`font-medium text-lg ${
-              module.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'
+              module.completed
+                ? 'line-through text-text-tertiary dark:text-text-tertiary-dark'
+                : 'text-text-primary dark:text-text-primary-dark'
             }`}
           >
             {module.name}
@@ -119,108 +129,113 @@ const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false, i
         Delete
       </button>
     </motion.div>
-  )
-}
+  );
+};
 
 function TradingCourseDetailContent() {
-  const params = useParams<{ id: string }>()
-  const router = useRouter()
-  const courseId = params?.id ? parseInt(params.id, 10) : null
+  const params = useParams<{ id: string }>();
+  const router = useRouter();
+  const courseId = params?.id ? parseInt(params.id, 10) : null;
 
-  const utils = trpc.useUtils()
-  const [editingName, setEditingName] = useState(false)
-  const [editingDescription, setEditingDescription] = useState(false)
-  const [editingDates, setEditingDates] = useState(false)
-  const [editedName, setEditedName] = useState('')
-  const [editedDescription, setEditedDescription] = useState('')
-  const [editedStartDate, setEditedStartDate] = useState('')
-  const [editedTargetDate, setEditedTargetDate] = useState('')
-  const [showAddModuleDialog, setShowAddModuleDialog] = useState(false)
-  const [animatingModuleId, setAnimatingModuleId] = useState<number | null>(null)
-  const isFirstMount = useRef(true)
+  const utils = trpc.useUtils();
+  const [editingName, setEditingName] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [editingDates, setEditingDates] = useState(false);
+  const [editedName, setEditedName] = useState('');
+  const [editedDescription, setEditedDescription] = useState('');
+  const [editedStartDate, setEditedStartDate] = useState('');
+  const [editedTargetDate, setEditedTargetDate] = useState('');
+  const [showAddModuleDialog, setShowAddModuleDialog] = useState(false);
+  const [animatingModuleId, setAnimatingModuleId] = useState<number | null>(null);
+  const isFirstMount = useRef(true);
 
   useEffect(() => {
-    isFirstMount.current = false
-  }, [])
+    isFirstMount.current = false;
+  }, []);
 
   const { data: course, isLoading: courseLoading } = trpc.tradingCourses.getById.useQuery(
     { id: courseId! },
     { enabled: !!courseId }
-  )
+  );
 
-  const { data: modules = [], isLoading: modulesLoading } = trpc.tradingCourseModules.getByCourseId.useQuery(
-    { courseId: courseId! },
-    { enabled: !!courseId }
-  )
+  const { data: modules = [], isLoading: modulesLoading } =
+    trpc.tradingCourseModules.getByCourseId.useQuery(
+      { courseId: courseId! },
+      { enabled: !!courseId }
+    );
 
   const updateCourseMutation = trpc.tradingCourses.update.useMutation({
     onSuccess: () => {
-      utils.tradingCourses.getById.invalidate({ id: courseId! })
-      utils.tradingCourses.getAll.invalidate()
-      setEditingName(false)
-      setEditingDescription(false)
-      setEditingDates(false)
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
+      utils.tradingCourses.getAll.invalidate();
+      setEditingName(false);
+      setEditingDescription(false);
+      setEditingDates(false);
     },
-  })
+  });
 
   const createModuleMutation = trpc.tradingCourseModules.create.useMutation({
     onSuccess: () => {
-      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
-      utils.tradingCourses.getById.invalidate({ id: courseId! })
-      setShowAddModuleDialog(false)
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
+      setShowAddModuleDialog(false);
     },
-  })
+  });
 
   const updateModuleMutation = trpc.tradingCourseModules.update.useMutation({
     onSuccess: () => {
-      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
-      utils.tradingCourses.getById.invalidate({ id: courseId! })
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
     },
-  })
+  });
 
   const deleteModuleMutation = trpc.tradingCourseModules.delete.useMutation({
     onSuccess: () => {
-      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
-      utils.tradingCourses.getById.invalidate({ id: courseId! })
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
     },
-  })
+  });
 
   const reorderModuleMutation = trpc.tradingCourseModules.reorder.useMutation({
     onSuccess: () => {
-      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
     },
-  })
+  });
 
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
-  )
+  );
 
   useEffect(() => {
     if (!courseId) {
-      router.push('/trading')
+      router.push('/trading');
     }
-  }, [courseId, router])
+  }, [courseId, router]);
 
   useEffect(() => {
     if (course) {
-      setEditedName(course.name)
-      setEditedDescription(course.description || '')
-      setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
-      setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
+      setEditedName(course.name);
+      setEditedDescription(course.description || '');
+      setEditedStartDate(
+        course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : ''
+      );
+      setEditedTargetDate(
+        course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : ''
+      );
     }
-  }, [course])
+  }, [course]);
 
   useEffect(() => {
     if (!courseLoading && !modulesLoading && !course && courseId) {
-      router.push('/trading')
+      router.push('/trading');
     }
-  }, [course, courseLoading, modulesLoading, courseId, router])
+  }, [course, courseLoading, modulesLoading, courseId, router]);
 
   if (!courseId) {
-    return null
+    return null;
   }
 
   if (courseLoading || modulesLoading) {
@@ -228,59 +243,59 @@ function TradingCourseDetailContent() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <p className="text-text-tertiary dark:text-text-tertiary-dark">Loading course...</p>
       </div>
-    )
+    );
   }
 
   if (!course) {
-    return null
+    return null;
   }
 
-  const completedModules = modules.filter((m) => m.completed).length
-  const totalModules = modules.length
-  const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
+  const completedModules = modules.filter((m) => m.completed).length;
+  const totalModules = modules.length;
+  const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0;
 
   const handleToggleModule = async (moduleId: number, completed: boolean) => {
-    setAnimatingModuleId(moduleId)
+    setAnimatingModuleId(moduleId);
     await updateModuleMutation.mutateAsync({
       id: moduleId,
       completed: !completed,
       completedAt: !completed ? new Date().toISOString() : null,
-    })
-    setTimeout(() => setAnimatingModuleId(null), 200)
-  }
+    });
+    setTimeout(() => setAnimatingModuleId(null), 200);
+  };
 
   const handleAddModule = async (name: string) => {
-    if (!name.trim() || !courseId) return
+    if (!name.trim() || !courseId) return;
 
-    const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0
+    const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0;
 
     await createModuleMutation.mutateAsync({
       courseId,
       name: name.trim(),
       order: maxOrder + 1,
-    })
-  }
+    });
+  };
 
   const handleDeleteModule = async (moduleId: number) => {
-    if (!confirm('Delete this module?')) return
-    await deleteModuleMutation.mutateAsync({ id: moduleId })
-  }
+    if (!confirm('Delete this module?')) return;
+    await deleteModuleMutation.mutateAsync({ id: moduleId });
+  };
 
   const handleDragEnd = async (event: DragEndEvent) => {
-    const { active, over } = event
+    const { active, over } = event;
 
     if (!over || active.id === over.id || !courseId) {
-      return
+      return;
     }
 
-    const oldIndex = modules.findIndex((m) => m.id === active.id)
-    const newIndex = modules.findIndex((m) => m.id === over.id)
+    const oldIndex = modules.findIndex((m) => m.id === active.id);
+    const newIndex = modules.findIndex((m) => m.id === over.id);
 
     if (oldIndex === -1 || newIndex === -1) {
-      return
+      return;
     }
 
-    const newModules = arrayMove(modules, oldIndex, newIndex)
+    const newModules = arrayMove(modules, oldIndex, newIndex);
 
     // Update order values in database
     await Promise.all(
@@ -290,54 +305,58 @@ function TradingCourseDetailContent() {
           newOrder: index + 1,
         })
       )
-    )
-  }
+    );
+  };
 
   const handleSaveCourseName = async () => {
-    if (!courseId || !editedName.trim()) return
+    if (!courseId || !editedName.trim()) return;
     await updateCourseMutation.mutateAsync({
       id: courseId,
       name: editedName.trim(),
-    })
-  }
+    });
+  };
 
   const handleSaveDescription = async () => {
-    if (!courseId) return
+    if (!courseId) return;
     await updateCourseMutation.mutateAsync({
       id: courseId,
       description: editedDescription.trim() || undefined,
-    })
-  }
+    });
+  };
 
   const handleSaveDates = async () => {
-    if (!courseId) return
+    if (!courseId) return;
     await updateCourseMutation.mutateAsync({
       id: courseId,
       startDate: editedStartDate ? new Date(editedStartDate).toISOString() : undefined,
       targetDate: editedTargetDate ? new Date(editedTargetDate).toISOString() : undefined,
-    })
-  }
+    });
+  };
 
   const handleEditName = () => {
-    setEditedName(course.name)
-    setEditingName(true)
-  }
+    setEditedName(course.name);
+    setEditingName(true);
+  };
 
   const handleEditDescription = () => {
-    setEditedDescription(course.description || '')
-    setEditingDescription(true)
-  }
+    setEditedDescription(course.description || '');
+    setEditingDescription(true);
+  };
 
   const handleEditDates = () => {
-    setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
-    setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
-    setEditingDates(true)
-  }
+    setEditedStartDate(
+      course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : ''
+    );
+    setEditedTargetDate(
+      course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : ''
+    );
+    setEditingDates(true);
+  };
 
   const handleCSVImport = async (data: Record<string, unknown>[]) => {
-    if (!courseId) return
+    if (!courseId) return;
     try {
-      const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0
+      const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0;
 
       await Promise.all(
         data.map((row: Record<string, unknown>, index: number) =>
@@ -351,13 +370,13 @@ function TradingCourseDetailContent() {
             order: row.order ? parseInt(String(row.order), 10) : maxOrder + index + 1,
           })
         )
-      )
+      );
     } catch (error) {
       alert(
         'Failed to import modules: ' + (error instanceof Error ? error.message : 'Unknown error')
-      )
+      );
     }
-  }
+  };
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -380,10 +399,10 @@ function TradingCourseDetailContent() {
                     className="text-3xl font-bold text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark border-2 border-blue-500 rounded px-3 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     autoFocus
                     onKeyDown={(e) => {
-                      if (e.key === 'Enter') handleSaveCourseName()
+                      if (e.key === 'Enter') handleSaveCourseName();
                       if (e.key === 'Escape') {
-                        setEditingName(false)
-                        setEditedName(course.name)
+                        setEditingName(false);
+                        setEditedName(course.name);
                       }
                     }}
                   />
@@ -403,8 +422,8 @@ function TradingCourseDetailContent() {
                   </button>
                   <button
                     onClick={() => {
-                      setEditingName(false)
-                      setEditedName(course.name)
+                      setEditingName(false);
+                      setEditedName(course.name);
                     }}
                     className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                     aria-label="Cancel editing"
@@ -421,7 +440,9 @@ function TradingCourseDetailContent() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2 group">
-                  <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark">{course.name}</h1>
+                  <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark">
+                    {course.name}
+                  </h1>
                   <button
                     onClick={handleEditName}
                     className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity"
@@ -449,8 +470,8 @@ function TradingCourseDetailContent() {
                   autoFocus
                   onKeyDown={(e) => {
                     if (e.key === 'Escape') {
-                      setEditingDescription(false)
-                      setEditedDescription(course.description || '')
+                      setEditingDescription(false);
+                      setEditedDescription(course.description || '');
                     }
                   }}
                 />
@@ -471,8 +492,8 @@ function TradingCourseDetailContent() {
                   </button>
                   <button
                     onClick={() => {
-                      setEditingDescription(false)
-                      setEditedDescription(course.description || '')
+                      setEditingDescription(false);
+                      setEditedDescription(course.description || '');
                     }}
                     className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                     aria-label="Cancel editing"
@@ -491,9 +512,13 @@ function TradingCourseDetailContent() {
             ) : (
               <div className="mt-2 flex items-start gap-2 group">
                 {course.description ? (
-                  <p className="text-text-secondary dark:text-text-secondary-dark text-lg">{course.description}</p>
+                  <p className="text-text-secondary dark:text-text-secondary-dark text-lg">
+                    {course.description}
+                  </p>
                 ) : (
-                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-lg italic">No description</p>
+                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-lg italic">
+                    No description
+                  </p>
                 )}
                 <button
                   onClick={handleEditDescription}
@@ -512,11 +537,11 @@ function TradingCourseDetailContent() {
               </div>
             )}
           </div>
-          <div className="flex gap-3">
+          <div className="flex gap-3 items-center">
             <CsvImporter onImport={handleCSVImport} label="Import CSV" />
             <button
               onClick={() => setShowAddModuleDialog(true)}
-              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+              className="inline-flex items-center justify-center px-4 py-2 h-[35px] text-sm font-medium bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
               Add Module
             </button>
@@ -528,20 +553,32 @@ function TradingCourseDetailContent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-text-primary dark:text-text-primary-dark mb-1">{totalModules}</div>
-            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Modules</div>
+            <div className="text-3xl font-bold text-text-primary dark:text-text-primary-dark mb-1">
+              {totalModules}
+            </div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">
+              Total Modules
+            </div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{completedModules}</div>
-            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Completed</div>
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">
+              {completedModules}
+            </div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">
+              Completed
+            </div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-accent-blue dark:text-accent-blue-dark mb-1">{Math.round(progress)}%</div>
-            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Progress</div>
+            <div className="text-3xl font-bold text-accent-blue dark:text-accent-blue-dark mb-1">
+              {Math.round(progress)}%
+            </div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">
+              Progress
+            </div>
           </div>
         </Card>
       </div>
@@ -573,7 +610,9 @@ function TradingCourseDetailContent() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Start Date:</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                  Start Date:
+                </label>
                 <input
                   type="date"
                   value={editedStartDate}
@@ -582,7 +621,9 @@ function TradingCourseDetailContent() {
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Target Date:</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                  Target Date:
+                </label>
                 <input
                   type="date"
                   value={editedTargetDate}
@@ -608,9 +649,13 @@ function TradingCourseDetailContent() {
               </button>
               <button
                 onClick={() => {
-                  setEditingDates(false)
-                  setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
-                  setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
+                  setEditingDates(false);
+                  setEditedStartDate(
+                    course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : ''
+                  );
+                  setEditedTargetDate(
+                    course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : ''
+                  );
                 }}
                 className="px-4 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark rounded-md hover:bg-background/80 dark:hover:bg-background-dark/80 transition-colors flex items-center gap-2"
               >
@@ -630,14 +675,22 @@ function TradingCourseDetailContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {course.startDate && (
               <div>
-                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Start Date:</span>
-                <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.startDate.toISOString())}</p>
+                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">
+                  Start Date:
+                </span>
+                <p className="text-text-primary dark:text-text-primary-dark">
+                  {formatDisplayDate(course.startDate.toISOString())}
+                </p>
               </div>
             )}
             {course.targetDate && (
               <div>
-                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Target Date:</span>
-                <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.targetDate.toISOString())}</p>
+                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">
+                  Target Date:
+                </span>
+                <p className="text-text-primary dark:text-text-primary-dark">
+                  {formatDisplayDate(course.targetDate.toISOString())}
+                </p>
               </div>
             )}
             {!course.startDate && !course.targetDate && (
@@ -646,8 +699,12 @@ function TradingCourseDetailContent() {
               </div>
             )}
             <div>
-              <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Created:</span>
-              <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.createdAt.toISOString())}</p>
+              <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">
+                Created:
+              </span>
+              <p className="text-text-primary dark:text-text-primary-dark">
+                {formatDisplayDate(course.createdAt.toISOString())}
+              </p>
             </div>
           </div>
         )}
@@ -656,7 +713,9 @@ function TradingCourseDetailContent() {
       {/* Progress Bar */}
       <Card className="mb-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark mb-3">Overall Progress</h2>
+          <h2 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark mb-3">
+            Overall Progress
+          </h2>
           <ProgressBar progress={progress} color="career" showPercentage={true} />
           <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-3">
             {completedModules} of {totalModules} modules completed
@@ -688,7 +747,9 @@ function TradingCourseDetailContent() {
                 />
               </svg>
             </div>
-            <p className="text-text-secondary dark:text-text-secondary-dark mb-2 font-medium">No modules yet</p>
+            <p className="text-text-secondary dark:text-text-secondary-dark mb-2 font-medium">
+              No modules yet
+            </p>
             <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm mb-4">
               Add modules to start tracking your course progress
             </p>
@@ -712,14 +773,15 @@ function TradingCourseDetailContent() {
               <AnimatePresence mode="popLayout">
                 <motion.div
                   variants={staggerContainer}
-                  initial={isFirstMount.current ? false : "initial"}
+                  initial={isFirstMount.current ? false : 'initial'}
                   animate="animate"
                   className="space-y-3"
                 >
                   {modules.map((module) => (
                     <motion.div
                       key={module.id}
-                      animate={animatingModuleId === module.id ? updateVariants.animate : {}}
+                      variants={updateVariants}
+                      animate={animatingModuleId === module.id ? 'animate' : undefined}
                     >
                       <SortableModuleItem
                         module={module}
@@ -749,7 +811,7 @@ function TradingCourseDetailContent() {
         onCancel={() => setShowAddModuleDialog(false)}
       />
     </div>
-  )
+  );
 }
 
 export default function TradingCourseDetail() {
@@ -757,5 +819,5 @@ export default function TradingCourseDetail() {
     <ProtectedRoute>
       <TradingCourseDetailContent />
     </ProtectedRoute>
-  )
+  );
 }
