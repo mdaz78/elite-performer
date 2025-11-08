@@ -10,18 +10,18 @@ export const tasksRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
 
-    return await ctx.prisma.task.findMany({
-      where: { userId },
-      include: {
-        project: {
-          select: {
-            id: true,
-            name: true,
+      return await ctx.prisma.task.findMany({
+        where: { userId },
+        include: {
+          taskProject: {
+            select: {
+              id: true,
+              name: true,
+            },
           },
         },
-      },
-      orderBy: { scheduledDate: 'desc' },
-    })
+        orderBy: { scheduledDate: 'desc' },
+      })
   }),
 
   getById: protectedProcedure
@@ -35,7 +35,7 @@ export const tasksRouter = router({
           userId,
         },
         include: {
-          project: true,
+          taskProject: true,
         },
       })
 
@@ -59,10 +59,10 @@ export const tasksRouter = router({
             lte: new Date(input.endDate),
           },
           ...(input.type && { type: input.type }),
-          ...(input.projectId && { projectId: input.projectId }),
+          ...(input.taskProjectId && { taskProjectId: input.taskProjectId }),
         },
         include: {
-          project: {
+          taskProject: {
             select: {
               id: true,
               name: true,
@@ -78,14 +78,14 @@ export const tasksRouter = router({
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
 
-      // If projectId is provided, verify ownership
-      if (input.projectId) {
-        const project = await ctx.prisma.project.findFirst({
-          where: { id: input.projectId, userId },
+      // If taskProjectId is provided, verify ownership
+      if (input.taskProjectId) {
+        const taskProject = await ctx.prisma.taskProject.findFirst({
+          where: { id: input.taskProjectId, userId },
         })
 
-        if (!project) {
-          throw new Error('Project not found')
+        if (!taskProject) {
+          throw new Error('Task project not found')
         }
       }
 
@@ -93,12 +93,12 @@ export const tasksRouter = router({
         data: {
           title: input.title,
           type: input.type,
-          projectId: input.projectId,
+          taskProjectId: input.taskProjectId,
           userId,
           scheduledDate: input.scheduledDate ? new Date(input.scheduledDate) : null,
         },
         include: {
-          project: true,
+          taskProject: true,
         },
       })
     }),
@@ -118,14 +118,14 @@ export const tasksRouter = router({
         throw new Error('Task not found')
       }
 
-      // If updating projectId, verify new project ownership
-      if (data.projectId) {
-        const project = await ctx.prisma.project.findFirst({
-          where: { id: data.projectId, userId },
+      // If updating taskProjectId, verify new task project ownership
+      if (data.taskProjectId) {
+        const taskProject = await ctx.prisma.taskProject.findFirst({
+          where: { id: data.taskProjectId, userId },
         })
 
-        if (!project) {
-          throw new Error('Project not found')
+        if (!taskProject) {
+          throw new Error('Task project not found')
         }
       }
 
@@ -143,7 +143,7 @@ export const tasksRouter = router({
             : undefined,
         },
         include: {
-          project: true,
+          taskProject: true,
         },
       })
     }),

@@ -150,9 +150,24 @@ model Project {
   targetDate     DateTime?
   createdAt      DateTime        @default(now())
   User            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks           Task[]
   CodingCourse    CodingCourse[]
   TradingCourse   TradingCourse[]
+
+  @@index([status])
+  @@index([userId])
+}
+
+model TaskProject {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  name        String
+  description String?
+  status      ProjectStatus @default(active)
+  startDate   DateTime?
+  targetDate  DateTime?
+  createdAt   DateTime  @default(now())
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
 
   @@index([status])
   @@index([userId])
@@ -232,20 +247,20 @@ model SubHabitCompletion {
 }
 
 model Task {
-  id            Int       @id @default(autoincrement())
+  id            Int         @id @default(autoincrement())
   userId        String
   title         String
   type          TaskType
-  projectId     Int?
-  completed     Boolean   @default(false)
+  taskProjectId Int?
+  completed     Boolean     @default(false)
   scheduledDate DateTime?
   completedAt   DateTime?
-  createdAt     DateTime  @default(now())
-  project       Project?  @relation(fields: [projectId], references: [id])
-  User          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime    @default(now())
+  taskProject   TaskProject? @relation(fields: [taskProjectId], references: [id])
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([completed])
-  @@index([projectId])
+  @@index([taskProjectId])
   @@index([scheduledDate])
   @@index([type])
   @@index([userId])
@@ -320,6 +335,7 @@ model User {
   Habit              Habit[]
   HabitCompletion    HabitCompletion[]
   Project            Project[]
+  TaskProject        TaskProject[]
   Review             Review[]
   Session            Session[]
   Settings           Settings[]

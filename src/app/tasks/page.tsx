@@ -44,7 +44,7 @@ function TasksPageContent() {
   const [formData, setFormData] = useState({
     title: '',
     type: 'DeepWork' as const,
-    projectId: undefined as number | undefined,
+    taskProjectId: undefined as number | undefined,
     scheduledDate: 'unassigned' as string,
   })
 
@@ -78,7 +78,7 @@ function TasksPageContent() {
     { enabled: !!selectedWeekStart }
   )
 
-  const { data: projects = [], isLoading: projectsLoading } = trpc.projects.getAll.useQuery()
+  const { data: taskProjects = [], isLoading: taskProjectsLoading } = trpc.taskProjects.getAll.useQuery()
   const { data: weekReview } = trpc.reviews.getByWeek.useQuery(
     {
       weekStartDate: new Date(selectedWeekStart).toISOString(),
@@ -93,7 +93,7 @@ function TasksPageContent() {
       setFormData({
         title: '',
         type: 'DeepWork',
-        projectId: undefined,
+        taskProjectId: undefined,
         scheduledDate: 'unassigned',
       })
       setShowTaskForm(false)
@@ -137,9 +137,9 @@ function TasksPageContent() {
     },
   })
 
-  const createProjectMutation = trpc.projects.create.useMutation({
+  const createTaskProjectMutation = trpc.taskProjects.create.useMutation({
     onSuccess: () => {
-      utils.projects.getAll.invalidate()
+      utils.taskProjects.getAll.invalidate()
       setProjectFormData({
         name: '',
         description: '',
@@ -151,9 +151,9 @@ function TasksPageContent() {
     },
   })
 
-  const updateProjectMutation = trpc.projects.update.useMutation({
+  const updateTaskProjectMutation = trpc.taskProjects.update.useMutation({
     onSuccess: () => {
-      utils.projects.getAll.invalidate()
+      utils.taskProjects.getAll.invalidate()
       setEditingProjectId(null)
       setProjectFormData({
         name: '',
@@ -166,9 +166,9 @@ function TasksPageContent() {
     },
   })
 
-  const deleteProjectMutation = trpc.projects.delete.useMutation({
+  const deleteTaskProjectMutation = trpc.taskProjects.delete.useMutation({
     onSuccess: () => {
-      utils.projects.getAll.invalidate()
+      utils.taskProjects.getAll.invalidate()
     },
   })
 
@@ -195,7 +195,7 @@ function TasksPageContent() {
       await createTaskMutation.mutateAsync({
         title: formData.title,
         type: formData.type,
-        projectId: formData.projectId || null,
+        taskProjectId: formData.taskProjectId || null,
         scheduledDate: formData.scheduledDate === 'unassigned' ? null : dayjs(formData.scheduledDate).startOf('day').toDate().toISOString(),
       })
     } catch (error) {
@@ -358,7 +358,7 @@ function TasksPageContent() {
     e.preventDefault()
 
     if (editingProjectId) {
-      await updateProjectMutation.mutateAsync({
+      await updateTaskProjectMutation.mutateAsync({
         id: editingProjectId,
         name: projectFormData.name,
         description: projectFormData.description || undefined,
@@ -367,7 +367,7 @@ function TasksPageContent() {
         targetDate: projectFormData.targetDate ? new Date(projectFormData.targetDate).toISOString() : undefined,
       })
     } else {
-      await createProjectMutation.mutateAsync({
+      await createTaskProjectMutation.mutateAsync({
         name: projectFormData.name,
         description: projectFormData.description || undefined,
         status: projectFormData.status,
@@ -377,29 +377,29 @@ function TasksPageContent() {
     }
   }
 
-  const handleEditProject = (project: typeof projects[0]) => {
+  const handleEditProject = (taskProject: typeof taskProjects[0]) => {
     setProjectFormData({
-      name: project.name,
-      description: project.description || '',
-      status: project.status,
-      startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : getToday(),
-      targetDate: project.targetDate ? new Date(project.targetDate).toISOString().split('T')[0] : addDays(getToday(), 30),
+      name: taskProject.name,
+      description: taskProject.description || '',
+      status: taskProject.status,
+      startDate: taskProject.startDate ? new Date(taskProject.startDate).toISOString().split('T')[0] : getToday(),
+      targetDate: taskProject.targetDate ? new Date(taskProject.targetDate).toISOString().split('T')[0] : addDays(getToday(), 30),
     })
-    setEditingProjectId(project.id)
+    setEditingProjectId(taskProject.id)
     setShowProjectForm(true)
   }
 
   const handleDeleteProject = async (id: number) => {
-    if (!confirm('Delete this project? Tasks linked to it will remain but lose the link.')) return
-    await deleteProjectMutation.mutateAsync({ id })
+    if (!confirm('Delete this task project? Tasks linked to it will remain but lose the link.')) return
+    await deleteTaskProjectMutation.mutateAsync({ id })
   }
 
-  const getProjectTasks = (projectId: number) => {
-    return allTasks.filter((t) => t.projectId === projectId)
+  const getProjectTasks = (taskProjectId: number) => {
+    return allTasks.filter((t) => t.taskProjectId === taskProjectId)
   }
 
-  const getProjectProgress = (project: typeof projects[0]): number => {
-    const projectTasks = getProjectTasks(project.id)
+  const getProjectProgress = (taskProject: typeof taskProjects[0]): number => {
+    const projectTasks = getProjectTasks(taskProject.id)
     if (projectTasks.length === 0) return 0
     const completed = projectTasks.filter((t) => t.completed).length
     return (completed / projectTasks.length) * 100
@@ -421,7 +421,7 @@ function TasksPageContent() {
     setSelectedWeekStart(newWeekStart)
   }
 
-  const isLoading = tasksLoading || projectsLoading || scheduledModulesLoading || allTasksLoading
+  const isLoading = tasksLoading || taskProjectsLoading || scheduledModulesLoading || allTasksLoading
 
   if (isLoading) {
     return (
@@ -475,10 +475,10 @@ function TasksPageContent() {
               </button>
             </div>
 
-            {projects.length === 0 ? (
+            {taskProjects.length === 0 ? (
               <Card className="mb-6">
                 <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">
-                  No projects yet. Add your first project above!
+                  No task projects yet. Add your first task project above!
                 </p>
               </Card>
             ) : (
@@ -488,9 +488,9 @@ function TasksPageContent() {
                 animate="animate"
                 className="grid grid-cols-1 md:grid-cols-2 gap-6"
               >
-                {projects.map((project) => {
-                  const projectTasks = getProjectTasks(project.id)
-                  const progress = getProjectProgress(project)
+                {taskProjects.map((taskProject) => {
+                  const projectTasks = getProjectTasks(taskProject.id)
+                  const progress = getProjectProgress(taskProject)
                   const statusColors = {
                     active: 'bg-accent-blue dark:bg-accent-blue-dark',
                     completed: 'bg-accent-emerald dark:bg-accent-emerald-dark',
@@ -499,7 +499,7 @@ function TasksPageContent() {
 
                   return (
                     <motion.div
-                      key={project.id}
+                      key={taskProject.id}
                       variants={createVariants}
                       className="p-6 border-2 border-border dark:border-border-dark rounded-xl hover:bg-background dark:hover:bg-background-dark transition-all duration-200 shadow-sm hover:shadow-md"
                     >
@@ -507,34 +507,34 @@ function TasksPageContent() {
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-2">
                             <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                              {project.name}
+                              {taskProject.name}
                             </h3>
                             <span
-                              className={`px-3 py-1 text-xs font-semibold text-white rounded-full transition-colors duration-200 ${statusColors[project.status]}`}
+                              className={`px-3 py-1 text-xs font-semibold text-white rounded-full transition-colors duration-200 ${statusColors[taskProject.status]}`}
                             >
-                              {project.status}
+                              {taskProject.status}
                             </span>
                           </div>
-                          {project.description && (
+                          {taskProject.description && (
                             <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-3 transition-colors duration-200">
-                              {project.description}
+                              {taskProject.description}
                             </p>
                           )}
-                          {project.startDate && project.targetDate && (
+                          {taskProject.startDate && taskProject.targetDate && (
                             <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
-                              {formatDisplayDate(project.startDate.toISOString())} - {formatDisplayDate(project.targetDate.toISOString())}
+                              {formatDisplayDate(taskProject.startDate.toISOString())} - {formatDisplayDate(taskProject.targetDate.toISOString())}
                             </p>
                           )}
                         </div>
                         <div className="flex gap-2 ml-4">
                           <button
-                            onClick={() => handleEditProject(project)}
+                            onClick={() => handleEditProject(taskProject)}
                             className="text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 text-sm font-medium transition-colors duration-200"
                           >
                             Edit
                           </button>
                           <button
-                            onClick={() => handleDeleteProject(project.id)}
+                            onClick={() => handleDeleteProject(taskProject.id)}
                             className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
                           >
                             Delete
@@ -700,7 +700,7 @@ function TasksPageContent() {
                   className="space-y-3"
                 >
                   {backlogTasks.map((task) => {
-                    const project = projects.find((p) => p.id === task.projectId)
+                    const taskProject = taskProjects.find((p) => p.id === task.taskProjectId)
                     const taskTypeDisplay =
                       task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
 
@@ -716,9 +716,9 @@ function TasksPageContent() {
                               <span className="text-xs font-semibold px-2 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
                                 {taskTypeDisplay}
                               </span>
-                              {project && (
+                              {taskProject && (
                                 <span className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark">
-                                  {project.name}
+                                  {taskProject.name}
                                 </span>
                               )}
                             </div>
@@ -841,23 +841,23 @@ function TasksPageContent() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Project (Optional)</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Task Project (Optional)</label>
                 <select
-                  value={formData.projectId || ''}
+                  value={formData.taskProjectId || ''}
                   onChange={(e) =>
                     setFormData({
                       ...formData,
-                      projectId: e.target.value ? parseInt(e.target.value, 10) : undefined,
+                      taskProjectId: e.target.value ? parseInt(e.target.value, 10) : undefined,
                     })
                   }
                   className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 >
                   <option value="">None</option>
-                  {projects
+                  {taskProjects
                     .filter((p) => p.status === 'active')
-                    .map((project) => (
-                      <option key={project.id} value={project.id}>
-                        {project.name}
+                    .map((taskProject) => (
+                      <option key={taskProject.id} value={taskProject.id}>
+                        {taskProject.name}
                       </option>
                     ))}
                 </select>
@@ -1035,7 +1035,7 @@ function TasksPageContent() {
 
                       {/* Regular Tasks */}
                         {dayTasks.map((task) => {
-                          const project = projects.find((p) => p.id === task.projectId)
+                          const taskProject = taskProjects.find((p) => p.id === task.taskProjectId)
                           const taskTypeDisplay = task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
                           const isAnimating = animatingTaskId === task.id
                           return (
@@ -1101,9 +1101,9 @@ function TasksPageContent() {
                                 </div>
                               </div>
                               <motion.div animate={isAnimating ? updateVariants.animate : {}}>
-                                {project && (
+                                {taskProject && (
                                   <p className="text-xs font-medium text-blue-900 dark:text-blue-100 mb-1 opacity-90">
-                                    {project.name}
+                                    {taskProject.name}
                                   </p>
                                 )}
                                 <p

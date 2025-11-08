@@ -1,27 +1,21 @@
 import { z } from 'zod'
 import { router, protectedProcedure } from '../trpc'
 import {
-  createProjectSchema,
-  updateProjectSchema,
-} from '@/src/lib/validations/project'
+  createTaskProjectSchema,
+  updateTaskProjectSchema,
+} from '@/src/lib/validations/task-project'
 
-export const projectsRouter = router({
+export const taskProjectsRouter = router({
   getAll: protectedProcedure.query(async ({ ctx }) => {
     const userId = ctx.session.user.id
 
-    return await ctx.prisma.project.findMany({
+    return await ctx.prisma.taskProject.findMany({
       where: { userId },
       include: {
-        CodingCourse: {
+        tasks: {
           select: {
             id: true,
-            name: true,
-          },
-        },
-        TradingCourse: {
-          select: {
-            id: true,
-            name: true,
+            completed: true,
           },
         },
       },
@@ -34,30 +28,31 @@ export const projectsRouter = router({
     .query(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
 
-      const project = await ctx.prisma.project.findFirst({
+      const taskProject = await ctx.prisma.taskProject.findFirst({
         where: {
           id: input.id,
           userId,
         },
         include: {
-          CodingCourse: true,
-          TradingCourse: true,
+          tasks: {
+            orderBy: { scheduledDate: 'desc' },
+          },
         },
       })
 
-      if (!project) {
-        throw new Error('Project not found')
+      if (!taskProject) {
+        throw new Error('Task project not found')
       }
 
-      return project
+      return taskProject
     }),
 
   create: protectedProcedure
-    .input(createProjectSchema)
+    .input(createTaskProjectSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
 
-      return await ctx.prisma.project.create({
+      return await ctx.prisma.taskProject.create({
         data: {
           ...input,
           userId,
@@ -65,28 +60,27 @@ export const projectsRouter = router({
           targetDate: input.targetDate ? new Date(input.targetDate) : null,
         },
         include: {
-          CodingCourse: true,
-          TradingCourse: true,
+          tasks: true,
         },
       })
     }),
 
   update: protectedProcedure
-    .input(updateProjectSchema)
+    .input(updateTaskProjectSchema)
     .mutation(async ({ ctx, input }) => {
       const userId = ctx.session.user.id
       const { id, ...data } = input
 
       // Verify ownership
-      const project = await ctx.prisma.project.findFirst({
+      const taskProject = await ctx.prisma.taskProject.findFirst({
         where: { id, userId },
       })
 
-      if (!project) {
-        throw new Error('Project not found')
+      if (!taskProject) {
+        throw new Error('Task project not found')
       }
 
-      return await ctx.prisma.project.update({
+      return await ctx.prisma.taskProject.update({
         where: { id },
         data: {
           ...data,
@@ -102,8 +96,7 @@ export const projectsRouter = router({
             : undefined,
         },
         include: {
-          CodingCourse: true,
-          TradingCourse: true,
+          tasks: true,
         },
       })
     }),
@@ -114,15 +107,15 @@ export const projectsRouter = router({
       const userId = ctx.session.user.id
 
       // Verify ownership
-      const project = await ctx.prisma.project.findFirst({
+      const taskProject = await ctx.prisma.taskProject.findFirst({
         where: { id: input.id, userId },
       })
 
-      if (!project) {
-        throw new Error('Project not found')
+      if (!taskProject) {
+        throw new Error('Task project not found')
       }
 
-      await ctx.prisma.project.delete({
+      await ctx.prisma.taskProject.delete({
         where: { id: input.id },
       })
 
