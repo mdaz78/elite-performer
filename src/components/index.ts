@@ -10,5 +10,6 @@ export { HabitProgressRing } from './HabitProgressRing';
 export { HabitCard } from './HabitCard';
 export { ContributionGraph } from './ContributionGraph';
 export { HabitTabs } from './HabitTabs';
+export { TasksTabs } from './TasksTabs';
 export { FloatingActionButton } from './FloatingActionButton';
 export { IconPicker } from './IconPicker';

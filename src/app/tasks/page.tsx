@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useRouter } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
-import { Card } from '@/src/components'
+import { Card, ProgressBar, TasksTabs } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { createVariants, updateVariants, staggerContainer } from '@/src/lib/animations'
 import {
@@ -19,13 +19,27 @@ import {
 } from '@/src/utils/date'
 import dayjs from 'dayjs'
 
+type TabType = 'projects' | 'backlog' | 'tasks'
+
 function TasksPageContent() {
   const router = useRouter()
   const utils = trpc.useUtils()
+  const [activeTab, setActiveTab] = useState<TabType>('tasks')
   const [selectedWeekStart, setSelectedWeekStart] = useState<string>(getWeekStartSunday())
   const [showTaskForm, setShowTaskForm] = useState(false)
   const [showReviewSection, setShowReviewSection] = useState(false)
   const [showRolloverDialog, setShowRolloverDialog] = useState(false)
+
+  // Project form state
+  const [showProjectForm, setShowProjectForm] = useState(false)
+  const [editingProjectId, setEditingProjectId] = useState<number | null>(null)
+  const [projectFormData, setProjectFormData] = useState({
+    name: '',
+    description: '',
+    status: 'active' as 'active' | 'completed' | 'paused',
+    startDate: getToday(),
+    targetDate: addDays(getToday(), 30),
+  })
 
   const [formData, setFormData] = useState({
     title: '',
@@ -53,6 +67,8 @@ function TasksPageContent() {
     },
     { enabled: !!selectedWeekStart }
   )
+
+  const { data: allTasks = [], isLoading: allTasksLoading } = trpc.tasks.getAll.useQuery()
 
   const { data: scheduledModules = [], isLoading: scheduledModulesLoading } = trpc.tasks.getScheduledModules.useQuery(
     {
@@ -116,6 +132,41 @@ function TasksPageContent() {
   const updateReviewMutation = trpc.reviews.update.useMutation({
     onSuccess: () => {
       utils.reviews.getByWeek.invalidate()
+    },
+  })
+
+  const createProjectMutation = trpc.projects.create.useMutation({
+    onSuccess: () => {
+      utils.projects.getAll.invalidate()
+      setProjectFormData({
+        name: '',
+        description: '',
+        status: 'active',
+        startDate: getToday(),
+        targetDate: addDays(getToday(), 30),
+      })
+      setShowProjectForm(false)
+    },
+  })
+
+  const updateProjectMutation = trpc.projects.update.useMutation({
+    onSuccess: () => {
+      utils.projects.getAll.invalidate()
+      setEditingProjectId(null)
+      setProjectFormData({
+        name: '',
+        description: '',
+        status: 'active',
+        startDate: getToday(),
+        targetDate: addDays(getToday(), 30),
+      })
+      setShowProjectForm(false)
+    },
+  })
+
+  const deleteProjectMutation = trpc.projects.delete.useMutation({
+    onSuccess: () => {
+      utils.projects.getAll.invalidate()
     },
   })
 
@@ -297,6 +348,62 @@ function TasksPageContent() {
     }
   }
 
+  const handleProjectSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (editingProjectId) {
+      await updateProjectMutation.mutateAsync({
+        id: editingProjectId,
+        name: projectFormData.name,
+        description: projectFormData.description || undefined,
+        status: projectFormData.status,
+        startDate: projectFormData.startDate ? new Date(projectFormData.startDate).toISOString() : undefined,
+        targetDate: projectFormData.targetDate ? new Date(projectFormData.targetDate).toISOString() : undefined,
+      })
+    } else {
+      await createProjectMutation.mutateAsync({
+        name: projectFormData.name,
+        description: projectFormData.description || undefined,
+        status: projectFormData.status,
+        startDate: projectFormData.startDate ? new Date(projectFormData.startDate).toISOString() : undefined,
+        targetDate: projectFormData.targetDate ? new Date(projectFormData.targetDate).toISOString() : undefined,
+      })
+    }
+  }
+
+  const handleEditProject = (project: typeof projects[0]) => {
+    setProjectFormData({
+      name: project.name,
+      description: project.description || '',
+      status: project.status,
+      startDate: project.startDate ? new Date(project.startDate).toISOString().split('T')[0] : getToday(),
+      targetDate: project.targetDate ? new Date(project.targetDate).toISOString().split('T')[0] : addDays(getToday(), 30),
+    })
+    setEditingProjectId(project.id)
+    setShowProjectForm(true)
+  }
+
+  const handleDeleteProject = async (id: number) => {
+    if (!confirm('Delete this project? Tasks linked to it will remain but lose the link.')) return
+    await deleteProjectMutation.mutateAsync({ id })
+  }
+
+  const getProjectTasks = (projectId: number) => {
+    return allTasks.filter((t) => t.projectId === projectId)
+  }
+
+  const getProjectProgress = (project: typeof projects[0]): number => {
+    const projectTasks = getProjectTasks(project.id)
+    if (projectTasks.length === 0) return 0
+    const completed = projectTasks.filter((t) => t.completed).length
+    return (completed / projectTasks.length) * 100
+  }
+
+  const getBacklogTasks = () => {
+    // Tasks without a scheduled date or scheduled for the default week start (considered unassigned)
+    return allTasks.filter((t) => !t.scheduledDate || new Date(t.scheduledDate).toISOString().split('T')[0] === selectedWeekStart)
+  }
+
   const getIncompleteTasks = () => {
     return tasks.filter((t) => !t.completed)
   }
@@ -308,17 +415,18 @@ function TasksPageContent() {
     setSelectedWeekStart(newWeekStart)
   }
 
-  const isLoading = tasksLoading || projectsLoading || scheduledModulesLoading
+  const isLoading = tasksLoading || projectsLoading || scheduledModulesLoading || allTasksLoading
 
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading tasks...</p>
+        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading...</p>
       </div>
     )
   }
 
   const incompleteTasks = getIncompleteTasks()
+  const backlogTasks = getBacklogTasks()
   const hasReview = reviewData.wins || reviewData.mistakes || reviewData.nextWeekGoals
 
   return (
@@ -328,8 +436,331 @@ function TasksPageContent() {
         <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Plan your week and manage your tasks</p>
       </div>
 
-      {/* Week Selector */}
-      <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      {/* Tab Navigation */}
+      <TasksTabs activeTab={activeTab} onTabChange={setActiveTab} />
+
+      {/* Tab Content */}
+      <AnimatePresence mode="wait">
+        {/* Projects Tab */}
+        {activeTab === 'projects' && (
+          <motion.div
+            key="projects"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="mb-6 flex justify-end">
+              <button
+                onClick={() => {
+                  setShowProjectForm(true)
+                  setEditingProjectId(null)
+                  setProjectFormData({
+                    name: '',
+                    description: '',
+                    status: 'active',
+                    startDate: getToday(),
+                    targetDate: addDays(getToday(), 30),
+                  })
+                }}
+                className="px-5 py-2.5 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-all duration-200 shadow-sm hover:shadow-md font-medium text-sm"
+              >
+                + Add Project
+              </button>
+            </div>
+
+            {projects.length === 0 ? (
+              <Card className="mb-6">
+                <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">
+                  No projects yet. Add your first project above!
+                </p>
+              </Card>
+            ) : (
+              <motion.div
+                variants={staggerContainer}
+                initial="initial"
+                animate="animate"
+                className="grid grid-cols-1 md:grid-cols-2 gap-6"
+              >
+                {projects.map((project) => {
+                  const projectTasks = getProjectTasks(project.id)
+                  const progress = getProjectProgress(project)
+                  const statusColors = {
+                    active: 'bg-accent-blue dark:bg-accent-blue-dark',
+                    completed: 'bg-accent-emerald dark:bg-accent-emerald-dark',
+                    paused: 'bg-text-tertiary dark:bg-text-tertiary-dark',
+                  }
+
+                  return (
+                    <motion.div
+                      key={project.id}
+                      variants={createVariants}
+                      className="p-6 border-2 border-border dark:border-border-dark rounded-xl hover:bg-background dark:hover:bg-background-dark transition-all duration-200 shadow-sm hover:shadow-md"
+                    >
+                      <div className="flex justify-between items-start mb-4">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-2">
+                            <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">
+                              {project.name}
+                            </h3>
+                            <span
+                              className={`px-3 py-1 text-xs font-semibold text-white rounded-full transition-colors duration-200 ${statusColors[project.status]}`}
+                            >
+                              {project.status}
+                            </span>
+                          </div>
+                          {project.description && (
+                            <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-3 transition-colors duration-200">
+                              {project.description}
+                            </p>
+                          )}
+                          {project.startDate && project.targetDate && (
+                            <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
+                              {formatDisplayDate(project.startDate.toISOString())} - {formatDisplayDate(project.targetDate.toISOString())}
+                            </p>
+                          )}
+                        </div>
+                        <div className="flex gap-2 ml-4">
+                          <button
+                            onClick={() => handleEditProject(project)}
+                            className="text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 text-sm font-medium transition-colors duration-200"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProject(project.id)}
+                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-sm font-medium transition-colors duration-200"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      </div>
+
+                      <div>
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                            {projectTasks.filter((t) => t.completed).length} of {projectTasks.length} tasks completed
+                          </span>
+                          <span className="text-sm font-bold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
+                            {Math.round(progress)}%
+                          </span>
+                        </div>
+                        <ProgressBar progress={progress} color="career" showPercentage={false} />
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </motion.div>
+            )}
+
+            {/* Project Form Modal */}
+            {showProjectForm && (
+              <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity">
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                  <div className="flex min-h-full items-center justify-center p-4">
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.95 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      className="bg-surface dark:bg-surface-dark rounded-xl shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-4">
+                        {editingProjectId ? 'Edit Project' : 'Add Project'}
+                      </h3>
+                      <form onSubmit={handleProjectSubmit} className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                            Name
+                          </label>
+                          <input
+                            type="text"
+                            value={projectFormData.name}
+                            onChange={(e) => setProjectFormData({ ...projectFormData, name: e.target.value })}
+                            className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                            placeholder="e.g., Build Portfolio App"
+                            required
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                            Description
+                          </label>
+                          <textarea
+                            value={projectFormData.description}
+                            onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
+                            rows={3}
+                            className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                            placeholder="Project description..."
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                            Status
+                          </label>
+                          <select
+                            value={projectFormData.status}
+                            onChange={(e) =>
+                              setProjectFormData({ ...projectFormData, status: e.target.value as 'active' | 'completed' | 'paused' })
+                            }
+                            className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                          >
+                            <option value="active">Active</option>
+                            <option value="completed">Completed</option>
+                            <option value="paused">Paused</option>
+                          </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                              Start Date
+                            </label>
+                            <input
+                              type="date"
+                              value={projectFormData.startDate}
+                              onChange={(e) => setProjectFormData({ ...projectFormData, startDate: e.target.value })}
+                              className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                            />
+                          </div>
+
+                          <div>
+                            <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                              Target Date
+                            </label>
+                            <input
+                              type="date"
+                              value={projectFormData.targetDate}
+                              onChange={(e) => setProjectFormData({ ...projectFormData, targetDate: e.target.value })}
+                              className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setShowProjectForm(false)
+                              setEditingProjectId(null)
+                              setProjectFormData({
+                                name: '',
+                                description: '',
+                                status: 'active',
+                                startDate: getToday(),
+                                targetDate: addDays(getToday(), 30),
+                              })
+                            }}
+                            className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="submit"
+                            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors font-medium shadow-sm"
+                          >
+                            {editingProjectId ? 'Update' : 'Add'} Project
+                          </button>
+                        </div>
+                      </form>
+                    </motion.div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </motion.div>
+        )}
+
+        {/* Backlog Tab */}
+        {activeTab === 'backlog' && (
+          <motion.div
+            key="backlog"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Card title="Backlog Tasks" className="mb-6">
+              {backlogTasks.length === 0 ? (
+                <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">
+                  No tasks in backlog. Tasks without assigned dates will appear here.
+                </p>
+              ) : (
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="space-y-3"
+                >
+                  {backlogTasks.map((task) => {
+                    const project = projects.find((p) => p.id === task.projectId)
+                    const taskTypeDisplay =
+                      task.type === 'DeepWork' ? 'Deep Work' : task.type === 'TradingPractice' ? 'Trading Practice' : task.type
+
+                    return (
+                      <motion.div
+                        key={task.id}
+                        variants={createVariants}
+                        className="p-4 border-2 border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-all duration-200"
+                      >
+                        <div className="flex justify-between items-start">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <span className="text-xs font-semibold px-2 py-1 bg-blue-200 dark:bg-blue-800 text-blue-800 dark:text-blue-200 rounded-md">
+                                {taskTypeDisplay}
+                              </span>
+                              {project && (
+                                <span className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark">
+                                  {project.name}
+                                </span>
+                              )}
+                            </div>
+                            <h4 className="text-sm font-semibold text-text-primary dark:text-text-primary-dark">
+                              {task.title}
+                            </h4>
+                          </div>
+                          <div className="flex gap-2">
+                            <select
+                              value=""
+                              onChange={(e) => handleAssignTask(task, e.target.value)}
+                              className="text-xs border border-border dark:border-border-dark rounded-md px-2 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark cursor-pointer"
+                            >
+                              <option value="">Assign to...</option>
+                              {weekDays.map((d, i) => (
+                                <option key={d} value={d}>
+                                  {dayNames[i]} - {formatDisplayDate(d)}
+                                </option>
+                              ))}
+                            </select>
+                            <button
+                              onClick={() => handleDelete(task.id)}
+                              className="text-xs px-2 py-1 rounded-md border border-red-300 dark:border-red-600 text-red-700 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors font-medium"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )
+                  })}
+                </motion.div>
+              )}
+            </Card>
+          </motion.div>
+        )}
+
+        {/* Tasks Tab */}
+        {activeTab === 'tasks' && (
+          <motion.div
+            key="tasks"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.2 }}
+          >
+            {/* Week Selector */}
+            <div className="mb-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="flex items-center gap-2 flex-wrap">
           <button
             onClick={() => navigateWeek('prev')}
@@ -698,120 +1129,123 @@ function TasksPageContent() {
           })}
       </div>
 
-      {/* Weekly Review Section */}
-      <Card
-        title="Weekly Review"
-        action={
-          <button
-            onClick={() => setShowReviewSection(!showReviewSection)}
-            className="text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 px-3 py-1 rounded-md transition-colors duration-200"
-          >
-            {showReviewSection ? 'Collapse' : 'Expand'}
-          </button>
-        }
-      >
-        {showReviewSection && (
-          <form onSubmit={handleReviewSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Wins</label>
-              <textarea
-                value={reviewData.wins}
-                onChange={(e) => setReviewData({ ...reviewData, wins: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="What went well this week?"
-              />
-            </div>
+            {/* Weekly Review Section */}
+            <Card
+              title="Weekly Review"
+              action={
+                <button
+                  onClick={() => setShowReviewSection(!showReviewSection)}
+                  className="text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 px-3 py-1 rounded-md transition-colors duration-200"
+                >
+                  {showReviewSection ? 'Collapse' : 'Expand'}
+                </button>
+              }
+            >
+              {showReviewSection && (
+                <form onSubmit={handleReviewSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Wins</label>
+                    <textarea
+                      value={reviewData.wins}
+                      onChange={(e) => setReviewData({ ...reviewData, wins: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                      placeholder="What went well this week?"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Mistakes & Learnings</label>
-              <textarea
-                value={reviewData.mistakes}
-                onChange={(e) => setReviewData({ ...reviewData, mistakes: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="What could be improved?"
-              />
-            </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Mistakes & Learnings</label>
+                    <textarea
+                      value={reviewData.mistakes}
+                      onChange={(e) => setReviewData({ ...reviewData, mistakes: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                      placeholder="What could be improved?"
+                    />
+                  </div>
 
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Next Week Goals</label>
-              <textarea
-                value={reviewData.nextWeekGoals}
-                onChange={(e) => setReviewData({ ...reviewData, nextWeekGoals: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                placeholder="What are your goals for next week?"
-              />
-            </div>
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Next Week Goals</label>
+                    <textarea
+                      value={reviewData.nextWeekGoals}
+                      onChange={(e) => setReviewData({ ...reviewData, nextWeekGoals: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
+                      placeholder="What are your goals for next week?"
+                    />
+                  </div>
 
-            <div className="flex justify-end pt-2">
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
-              >
-                Save Review
-              </button>
-            </div>
-          </form>
-        )}
-        {!showReviewSection && hasReview && (
-          <div className="space-y-3 text-sm">
-            <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <span className="font-semibold text-text-primary dark:text-text-primary-dark">Wins: </span>
-              <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.wins}</span>
-            </div>
-            <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <span className="font-semibold text-text-primary dark:text-text-primary-dark">Mistakes & Learnings: </span>
-              <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.mistakes}</span>
-            </div>
-            <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <span className="font-semibold text-text-primary dark:text-text-primary-dark">Next Week Goals: </span>
-              <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.nextWeekGoals}</span>
-            </div>
-          </div>
-        )}
-      </Card>
-
-      {/* Rollover Dialog */}
-      {showRolloverDialog && (
-        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowRolloverDialog(false)}>
-          <div className="fixed inset-0 z-50 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
-              <div
-                className="bg-surface dark:bg-surface-dark rounded-lg shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-2">Rollover Incomplete Tasks</h3>
-                <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-4">
-                  Move {incompleteTasks.length} incomplete task{incompleteTasks.length !== 1 ? 's' : ''} to next week?
-                </p>
-                <div className="space-y-2 mb-6 max-h-48 overflow-y-auto border border-border dark:border-border-dark rounded-lg p-3 bg-background dark:bg-background-dark">
-                  {incompleteTasks.map((task) => (
-                    <div key={task.id} className="text-sm text-text-primary dark:text-text-primary-dark p-2 bg-surface dark:bg-surface-dark rounded-md border border-border dark:border-border-dark">
-                      {task.title}
-                    </div>
-                  ))}
+                  <div className="flex justify-end pt-2">
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
+                    >
+                      Save Review
+                    </button>
+                  </div>
+                </form>
+              )}
+              {!showReviewSection && hasReview && (
+                <div className="space-y-3 text-sm">
+                  <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
+                    <span className="font-semibold text-text-primary dark:text-text-primary-dark">Wins: </span>
+                    <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.wins}</span>
+                  </div>
+                  <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                    <span className="font-semibold text-text-primary dark:text-text-primary-dark">Mistakes & Learnings: </span>
+                    <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.mistakes}</span>
+                  </div>
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <span className="font-semibold text-text-primary dark:text-text-primary-dark">Next Week Goals: </span>
+                    <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.nextWeekGoals}</span>
+                  </div>
                 </div>
-                <div className="flex justify-end gap-2">
-                  <button
-                    onClick={() => setShowRolloverDialog(false)}
-                    className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={handleRollover}
-                    className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 font-medium shadow-sm transition-colors duration-200"
-                  >
-                    Rollover
-                  </button>
+              )}
+            </Card>
+
+            {/* Rollover Dialog */}
+            {showRolloverDialog && (
+              <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowRolloverDialog(false)}>
+                <div className="fixed inset-0 z-50 overflow-y-auto">
+                  <div className="flex min-h-full items-center justify-center p-4">
+                    <div
+                      className="bg-surface dark:bg-surface-dark rounded-lg shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-2">Rollover Incomplete Tasks</h3>
+                      <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-4">
+                        Move {incompleteTasks.length} incomplete task{incompleteTasks.length !== 1 ? 's' : ''} to next week?
+                      </p>
+                      <div className="space-y-2 mb-6 max-h-48 overflow-y-auto border border-border dark:border-border-dark rounded-lg p-3 bg-background dark:bg-background-dark">
+                        {incompleteTasks.map((task) => (
+                          <div key={task.id} className="text-sm text-text-primary dark:text-text-primary-dark p-2 bg-surface dark:bg-surface-dark rounded-md border border-border dark:border-border-dark">
+                            {task.title}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex justify-end gap-2">
+                        <button
+                          onClick={() => setShowRolloverDialog(false)}
+                          className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
+                        >
+                          Cancel
+                        </button>
+                        <button
+                          onClick={handleRollover}
+                          className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 font-medium shadow-sm transition-colors duration-200"
+                        >
+                          Rollover
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
-        </div>
-      )}
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 }
