@@ -12,6 +12,7 @@ interface ConfirmDialogProps {
   onConfirm: () => void;
   onCancel: () => void;
   variant?: 'danger' | 'default';
+  disabled?: boolean;
 }
 
 export const ConfirmDialog = ({
@@ -23,12 +24,17 @@ export const ConfirmDialog = ({
   onConfirm,
   onCancel,
   variant = 'default',
+  disabled = false,
 }: ConfirmDialogProps) => {
   if (!isOpen) return null;
 
   const confirmButtonClass =
     variant === 'danger'
-      ? 'bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 focus:ring-red-500 dark:focus:ring-red-400'
+      ? disabled
+        ? 'bg-red-400 dark:bg-red-600 cursor-not-allowed opacity-50'
+        : 'bg-red-600 dark:bg-red-500 hover:bg-red-700 dark:hover:bg-red-600 focus:ring-red-500 dark:focus:ring-red-400'
+      : disabled
+      ? 'bg-accent-blue/50 dark:bg-accent-blue-dark/50 cursor-not-allowed opacity-50'
       : 'bg-accent-blue dark:bg-accent-blue-dark hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 focus:ring-accent-blue dark:focus:ring-accent-blue-dark';
 
   return (
@@ -52,6 +58,7 @@ export const ConfirmDialog = ({
                 type="button"
                 className={`inline-flex w-full justify-center items-center rounded-md px-3 py-2 text-sm font-semibold text-white shadow-sm sm:ml-3 sm:w-auto transition-colors duration-200 ${confirmButtonClass}`}
                 onClick={onConfirm}
+                disabled={disabled}
               >
                 {confirmLabel}
               </button>

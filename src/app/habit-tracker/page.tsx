@@ -221,6 +221,7 @@ function HabitTrackerPageContent() {
   const [showSubHabitDialog, setShowSubHabitDialog] = useState(false)
   const [editingSubHabit, setEditingSubHabit] = useState<number | null>(null)
   const [backfillDate, setBackfillDate] = useState<string | null>(null)
+  const [backfillHabitId, setBackfillHabitId] = useState<number | null>(null)
   const [showDeleteDialog, setShowDeleteDialog] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<{ type: 'habit' | 'subHabit'; id: number } | null>(null)
 
@@ -255,17 +256,77 @@ function HabitTrackerPageContent() {
     endDate: new Date(weekEnd).toISOString(),
   })
 
+  // Query 30-day range for streak calculation
+  const { data: streakCalendarData } = trpc.habits.getByDateRange.useQuery({
+    startDate: new Date(dayjs().subtract(30, 'day').format('YYYY-MM-DD')).toISOString(),
+    endDate: new Date().toISOString(),
+  })
+
   // Calculate overall streak - get the longest current streak from active habits
   const overallStreak = useMemo(() => {
-    if (!allHabits.length) return 0
-    // For now, return a placeholder. In production, you'd query streak for each habit
-    // and return the maximum or average
-    return 0 // This would be calculated from habit completion history
-  }, [allHabits])
+    if (!allHabits.length || !streakCalendarData?.calendarData) return 0
+
+    // Calculate streak by checking consecutive days from today backwards
+    let streak = 0
+    let currentDate = dayjs().startOf('day')
+    const startDate = dayjs().subtract(30, 'day').startOf('day')
+
+    while (currentDate.isAfter(startDate) || currentDate.isSame(startDate, 'day')) {
+      const dateStr = currentDate.format('YYYY-MM-DD')
+      const dayHabits = streakCalendarData.calendarData[dateStr] || []
+
+      // If no habits for this day, break the streak
+      if (dayHabits.length === 0) {
+        // Only break if we've already started counting
+        if (streak > 0) break
+        currentDate = currentDate.subtract(1, 'day')
+        continue
+      }
+
+      const allCompleted = dayHabits.every((h: any) => h.completed)
+      if (allCompleted) {
+        streak++
+      } else {
+        break
+      }
+
+      currentDate = currentDate.subtract(1, 'day')
+    }
+
+    return streak
+  }, [allHabits, streakCalendarData])
 
   // Calculate today's progress
   const todayCompleted = todayHabits.filter((h) => h.completion?.completed).length
   const todayTotal = todayHabits.length
+
+  // Calculate week progress
+  const weekProgress = useMemo(() => {
+    if (!weekCalendarData?.calendarData) return 0
+    let totalHabits = 0
+    let completedHabits = 0
+
+    Object.values(weekCalendarData.calendarData).forEach((habits: any) => {
+      totalHabits += habits.length
+      completedHabits += habits.filter((h: any) => h.completed).length
+    })
+
+    return totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0
+  }, [weekCalendarData])
+
+  // Calculate month progress
+  const monthProgress = useMemo(() => {
+    if (!calendarData?.calendarData) return 0
+    let totalHabits = 0
+    let completedHabits = 0
+
+    Object.values(calendarData.calendarData).forEach((habits: any) => {
+      totalHabits += habits.length
+      completedHabits += habits.filter((h: any) => h.completed).length
+    })
+
+    return totalHabits > 0 ? (completedHabits / totalHabits) * 100 : 0
+  }, [calendarData])
 
   // Mutations
   const createHabitMutation = trpc.habits.create.useMutation({
@@ -299,6 +360,10 @@ function HabitTrackerPageContent() {
       utils.habits.getByDateRange.invalidate()
       setShowDeleteDialog(false)
       setDeleteTarget(null)
+    },
+    onError: (error) => {
+      console.error('Failed to delete habit:', error)
+      // Keep dialog open on error so user can try again
     },
   })
 
@@ -346,6 +411,10 @@ function HabitTrackerPageContent() {
       utils.habits.getByDateRange.invalidate()
       setShowDeleteDialog(false)
       setDeleteTarget(null)
+    },
+    onError: (error) => {
+      console.error('Failed to delete sub-habit:', error)
+      // Keep dialog open on error so user can try again
     },
   })
 
@@ -433,10 +502,18 @@ function HabitTrackerPageContent() {
 
   const handleConfirmDelete = async () => {
     if (!deleteTarget) return
-    if (deleteTarget.type === 'habit') {
-      await deleteHabitMutation.mutateAsync({ id: deleteTarget.id })
-    } else {
-      await deleteSubHabitMutation.mutateAsync({ id: deleteTarget.id })
+    // Prevent multiple simultaneous deletions
+    if (deleteHabitMutation.isPending || deleteSubHabitMutation.isPending) return
+
+    try {
+      if (deleteTarget.type === 'habit') {
+        await deleteHabitMutation.mutateAsync({ id: deleteTarget.id })
+      } else {
+        await deleteSubHabitMutation.mutateAsync({ id: deleteTarget.id })
+      }
+    } catch (error) {
+      console.error('Error deleting:', error)
+      // Error is already handled in mutation's onError
     }
   }
 
@@ -562,13 +639,13 @@ function HabitTrackerPageContent() {
             transition={{ duration: 0.2 }}
           >
             {/* Hero Section */}
-            <div className="mb-8">
-              <MotivationalGreeting
-                overallStreak={overallStreak}
-                todayCompleted={todayCompleted}
-                todayTotal={todayTotal}
-              />
-            </div>
+            <MotivationalGreeting
+              overallStreak={overallStreak}
+              todayCompleted={todayCompleted}
+              todayTotal={todayTotal}
+              weekProgress={weekProgress}
+              monthProgress={monthProgress}
+            />
 
             {/* Today's Habits */}
             {todayHabits.length === 0 ? (
@@ -598,21 +675,24 @@ function HabitTrackerPageContent() {
                 </div>
               </Card>
             ) : (
-              <motion.div
-                variants={staggerContainer}
-                initial="initial"
-                animate="animate"
-                className="space-y-4 mb-6"
-              >
-                {todayHabits.map((habit) => (
-                  <HabitCardWithHistory
-                    key={habit.id}
-                    habit={habit}
-                    weeklyProgress={getWeeklyProgress(habit.id)}
-                    onToggleComplete={() => handleToggleHabit(habit.id, habit.completion?.completed || false)}
-                  />
-                ))}
-              </motion.div>
+              <>
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">Today's Habits</h2>
+                <motion.div
+                  variants={staggerContainer}
+                  initial="initial"
+                  animate="animate"
+                  className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6"
+                >
+                  {todayHabits.map((habit) => (
+                    <HabitCardWithHistory
+                      key={habit.id}
+                      habit={habit}
+                      weeklyProgress={getWeeklyProgress(habit.id)}
+                      onToggleComplete={() => handleToggleHabit(habit.id, habit.completion?.completed || false)}
+                    />
+                  ))}
+                </motion.div>
+              </>
             )}
 
             {/* Contribution Graph */}
@@ -1037,13 +1117,16 @@ function HabitTrackerPageContent() {
             ? 'Are you sure you want to delete this habit? This will also delete all sub-habits and completion records.'
             : 'Are you sure you want to delete this sub-habit?'
         }
-        confirmLabel="Delete"
+        confirmLabel={deleteHabitMutation.isPending || deleteSubHabitMutation.isPending ? 'Deleting...' : 'Delete'}
         cancelLabel="Cancel"
         variant="danger"
+        disabled={deleteHabitMutation.isPending || deleteSubHabitMutation.isPending}
         onConfirm={handleConfirmDelete}
         onCancel={() => {
-          setShowDeleteDialog(false)
-          setDeleteTarget(null)
+          if (!deleteHabitMutation.isPending && !deleteSubHabitMutation.isPending) {
+            setShowDeleteDialog(false)
+            setDeleteTarget(null)
+          }
         }}
       />
 

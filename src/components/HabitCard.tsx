@@ -2,8 +2,7 @@
 
 import { motion } from 'framer-motion'
 import * as LucideIcons from 'lucide-react'
-import { Flame, Edit, Trash2, Pause, Play } from 'lucide-react'
-import { HabitProgressRing } from './HabitProgressRing'
+import { Flame, Edit, Trash2, Pause, Play, Check } from 'lucide-react'
 
 interface HabitCardProps {
   habit: {
@@ -44,43 +43,69 @@ export function HabitCard({
   const completedSubHabits = (habit.subHabitCompletions || []).filter((sc) => sc.completed).length
   const totalSubHabits = habit.subHabits?.length || 0
   const progress = totalSubHabits > 0 ? (completedSubHabits / totalSubHabits) * 100 : isComplete ? 100 : 0
+  const todayProgress = isComplete ? 100 : (totalSubHabits > 0 ? (completedSubHabits / totalSubHabits) * 100 : 0)
+
+  // Determine if streak is broken (streak is 0 but habit was previously completed)
+  const streakBroken = currentStreak === 0 && completionRate > 0
 
   const renderIcon = () => {
     if (!habit.icon) {
-      return <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm transition-all duration-300 ${
-        isComplete
-          ? 'bg-gradient-to-br from-accent-emerald/20 dark:from-accent-emerald-dark/30 to-accent-emerald/10 dark:to-accent-emerald-dark/20 text-accent-emerald dark:text-accent-emerald-dark ring-2 ring-accent-emerald/30 dark:ring-accent-emerald-dark/30'
-          : 'bg-gradient-to-br from-accent-blue/10 dark:from-accent-blue-dark/20 to-accent-blue/5 dark:to-accent-blue-dark/10 text-accent-blue dark:text-accent-blue-dark'
-      }`}>
-        {habit.name.charAt(0).toUpperCase()}
-      </div>
+      return (
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold bg-blue-100 text-blue-600">
+          {habit.name.charAt(0).toUpperCase()}
+        </div>
+      )
     }
 
     const IconComponent = (LucideIcons as any)[habit.icon] as React.ComponentType<{ className?: string }>
     if (!IconComponent) {
-      return <div className={`w-14 h-14 rounded-2xl flex items-center justify-center text-xl font-bold shadow-sm transition-all duration-300 ${
-        isComplete
-          ? 'bg-gradient-to-br from-accent-emerald/20 dark:from-accent-emerald-dark/30 to-accent-emerald/10 dark:to-accent-emerald-dark/20 text-accent-emerald dark:text-accent-emerald-dark ring-2 ring-accent-emerald/30 dark:ring-accent-emerald-dark/30'
-          : 'bg-gradient-to-br from-accent-blue/10 dark:from-accent-blue-dark/20 to-accent-blue/5 dark:to-accent-blue-dark/10 text-accent-blue dark:text-accent-blue-dark'
-      }`}>
-        {habit.name.charAt(0).toUpperCase()}
-      </div>
+      return (
+        <div className="w-12 h-12 rounded-xl flex items-center justify-center text-xl font-bold bg-blue-100 text-blue-600">
+          {habit.name.charAt(0).toUpperCase()}
+        </div>
+      )
     }
 
+    // Map icon colors and backgrounds based on icon name
+    const iconStyles: Record<string, { bg: string; text: string }> = {
+      Droplet: { bg: 'bg-blue-100', text: 'text-blue-600' },
+      Running: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+      BookOpen: { bg: 'bg-green-100', text: 'text-green-600' },
+      Brain: { bg: 'bg-yellow-100', text: 'text-yellow-600' },
+      Laptop: { bg: 'bg-gray-100', text: 'text-gray-800' },
+    }
+
+    const iconStyle = iconStyles[habit.icon] || { bg: 'bg-blue-100', text: 'text-blue-600' }
+
     return (
-      <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-sm transition-all duration-300 ${
-        isComplete
-          ? 'bg-gradient-to-br from-accent-emerald/20 dark:from-accent-emerald-dark/30 to-accent-emerald/10 dark:to-accent-emerald-dark/20 ring-2 ring-accent-emerald/30 dark:ring-accent-emerald-dark/30'
-          : 'bg-gradient-to-br from-accent-blue/10 dark:from-accent-blue-dark/20 to-accent-blue/5 dark:to-accent-blue-dark/10'
-      }`}>
-        <IconComponent className={`w-7 h-7 ${
-          isComplete
-            ? 'text-accent-emerald dark:text-accent-emerald-dark'
-            : 'text-accent-blue dark:text-accent-blue-dark'
-        }`} />
+      <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${iconStyle.bg}`}>
+        <IconComponent className={`w-6 h-6 ${iconStyle.text}`} />
       </div>
     )
   }
+
+  // Get metric columns based on habit type
+  const getMetrics = () => {
+    if (totalSubHabits > 0) {
+      // For habits with sub-habits, show progress
+      const subHabitName = habit.subHabits?.[0]?.name || 'Items'
+      // Try to extract a unit or make it more readable
+      const firstMetric = `${completedSubHabits}/${totalSubHabits} ${subHabitName}`
+      return [
+        firstMetric,
+        `${Math.round(todayProgress)}% Today`,
+        `${Math.round(weeklyProgress)}% This Week`,
+      ]
+    }
+    // For simple habits without sub-habits
+    return [
+      isComplete ? 'Completed' : '0/1',
+      `${Math.round(todayProgress)}% Today`,
+      `${Math.round(weeklyProgress)}% This Week`,
+    ]
+  }
+
+  const metrics = getMetrics()
 
   return (
     <motion.div
@@ -88,164 +113,105 @@ export function HabitCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
       whileHover={{ scale: 1.01, transition: { duration: 0.2 } }}
-      className={`p-5 rounded-2xl border transition-all duration-300 shadow-sm hover:shadow-md ${
-        isComplete
-          ? 'bg-gradient-to-br from-accent-emerald/5 dark:from-accent-emerald-dark/15 to-accent-emerald/10 dark:to-accent-emerald-dark/10 border-accent-emerald/40 dark:border-accent-emerald-dark/40'
-          : 'bg-white dark:bg-surface-dark border-border/60 dark:border-border-dark/60 hover:border-accent-blue/40 dark:hover:border-accent-blue-dark/40'
-      }`}
+      className="bg-white rounded-2xl p-5 shadow-md hover:shadow-lg transition-all duration-300 relative h-full flex flex-col"
     >
-      <div className="flex items-start gap-4">
-        {/* Icon */}
-        <div className="flex-shrink-0">
-          {renderIcon()}
-        </div>
+      {/* Completion Checkbox - Top Right */}
+      <button
+        onClick={onToggleComplete}
+        className={`absolute top-5 right-5 w-8 h-8 rounded-full border-2 flex items-center justify-center transition-all duration-200 ${
+          isComplete
+            ? 'bg-purple-600 border-purple-600 text-white'
+            : 'border-gray-300 hover:border-purple-400'
+        }`}
+      >
+        {isComplete && <Check className="w-5 h-5" />}
+      </button>
 
-        {/* Content */}
-        <div className="flex-1 min-w-0">
-          <div className="flex items-start justify-between mb-3">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <h3 className={`font-semibold text-lg ${
-                  isComplete
-                    ? 'line-through text-text-secondary dark:text-text-secondary-dark'
-                    : 'text-text-primary dark:text-text-primary-dark'
-                } transition-colors duration-200`}>
-                  {habit.name}
-                </h3>
-                {currentStreak > 0 && (
-                  <div className="flex items-center gap-1 text-accent-amber dark:text-accent-amber-dark">
-                    <Flame className="w-4 h-4 text-accent-amber dark:text-accent-amber-dark" />
-                    <span className="text-sm font-medium">{currentStreak}</span>
-                  </div>
-                )}
-                {habit.status === 'paused' && (
-                  <span className="text-xs px-2 py-1 bg-accent-amber/20 dark:bg-accent-amber-dark/20 text-accent-amber dark:text-accent-amber-dark rounded-full">
-                    Paused
-                  </span>
-                )}
-              </div>
+      {/* Icon - Top Left */}
+      <div className="mb-3">
+        {renderIcon()}
+      </div>
 
-              {/* Quick Stats */}
-              {(bestStreak > 0 || completionRate > 0) && (
-                <div className="flex items-center gap-4 text-xs text-text-secondary dark:text-text-secondary-dark mt-2">
-                  {bestStreak > 0 && (
-                    <span>Best: {bestStreak} days</span>
-                  )}
-                  {completionRate > 0 && (
-                    <span>{Math.round(completionRate)}% completion</span>
-                  )}
-                </div>
-              )}
+      {/* Title */}
+      <h3 className="font-bold text-lg text-gray-900 mb-2 pr-10">
+        {habit.name}
+      </h3>
 
-              {/* Sub-habits progress */}
-              {totalSubHabits > 0 && (
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-text-secondary dark:text-text-secondary-dark font-medium transition-colors duration-200">
-                      {completedSubHabits} / {totalSubHabits} completed
-                    </span>
-                    <span className={`font-bold ${
-                      isComplete
-                        ? 'text-accent-emerald dark:text-accent-emerald-dark'
-                        : 'text-accent-blue dark:text-accent-blue-dark'
-                    }`}>
-                      {Math.round(progress)}%
-                    </span>
-                  </div>
-                  <div className="w-full h-2.5 bg-background dark:bg-background-dark rounded-full overflow-hidden shadow-inner">
-                    <motion.div
-                      className={`h-full rounded-full ${
-                        isComplete
-                          ? 'bg-gradient-to-r from-accent-emerald dark:from-accent-emerald-dark to-accent-emerald/80 dark:to-accent-emerald-dark/80'
-                          : 'bg-gradient-to-r from-accent-blue dark:from-accent-blue-dark to-accent-blue/80 dark:to-accent-blue-dark/80'
-                      } transition-colors duration-200 shadow-sm`}
-                      initial={{ width: 0 }}
-                      animate={{ width: `${progress}%` }}
-                      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Weekly Progress */}
-              {weeklyProgress > 0 && (
-                <div className="mt-3">
-                  <div className="flex items-center justify-between text-xs mb-2">
-                    <span className="text-text-secondary dark:text-text-secondary-dark font-medium transition-colors duration-200">
-                      This week
-                    </span>
-                    <span className="text-accent-blue/80 dark:text-accent-blue-dark/80 font-bold">
-                      {Math.round(weeklyProgress)}%
-                    </span>
-                  </div>
-                  <div className="w-full h-2 bg-background dark:bg-background-dark rounded-full overflow-hidden shadow-inner">
-                    <motion.div
-                      className="h-full bg-gradient-to-r from-accent-blue/60 dark:from-accent-blue-dark/60 to-accent-blue/40 dark:to-accent-blue-dark/40 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ width: `${weeklyProgress}%` }}
-                      transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1], delay: 0.1 }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Progress Ring */}
-            <div className="flex-shrink-0 ml-4">
-              <HabitProgressRing
-                progress={progress}
-                completed={isComplete}
-                onClick={onToggleComplete}
-              />
-            </div>
+      {/* Streak Indicator */}
+      <div className="mb-3 min-h-[20px]">
+        {streakBroken ? (
+          <span className="text-red-500 text-sm font-medium">Streak broken</span>
+        ) : currentStreak > 0 ? (
+          <div className="flex items-center gap-1 text-orange-500 text-sm font-medium">
+            <Flame className="w-4 h-4" />
+            <span>{currentStreak} day streak{currentStreak >= 30 ? '!' : ''}</span>
           </div>
+        ) : <span className="invisible">placeholder</span>}
+      </div>
 
-          {/* Actions */}
-          {showActions && (
-            <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border/50 dark:border-border-dark/50">
-              {onEdit && (
-                <button
-                  onClick={onEdit}
-                  className="p-2.5 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 rounded-xl transition-all duration-200 hover:scale-105"
-                  title="Edit habit"
-                >
-                  <Edit className="w-4 h-4 text-accent-blue dark:text-accent-blue-dark" />
-                </button>
-              )}
-              {habit.status === 'active' ? (
-                onPause && (
-                  <button
-                    onClick={onPause}
-                    className="p-2.5 hover:bg-accent-amber/10 dark:hover:bg-accent-amber-dark/10 rounded-xl transition-all duration-200 hover:scale-105"
-                    title="Pause habit"
-                  >
-                    <Pause className="w-4 h-4 text-accent-amber dark:text-accent-amber-dark" />
-                  </button>
-                )
-              ) : (
-                onResume && (
-                  <button
-                    onClick={onResume}
-                    className="p-2.5 hover:bg-accent-emerald/10 dark:hover:bg-accent-emerald-dark/10 rounded-xl transition-all duration-200 hover:scale-105"
-                    title="Resume habit"
-                  >
-                    <Play className="w-4 h-4 text-accent-emerald dark:text-accent-emerald-dark" />
-                  </button>
-                )
-              )}
-              {onDelete && (
-                <button
-                  onClick={onDelete}
-                  className="p-2.5 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-xl transition-all duration-200 hover:scale-105 text-red-600 dark:text-red-400 ml-auto"
-                  title="Delete habit"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              )}
-            </div>
+      {/* Progress Bar */}
+      <div className="w-full h-1 bg-gray-200 rounded-full overflow-hidden mb-4">
+        <motion.div
+          className="h-full bg-purple-600 rounded-full"
+          initial={{ width: 0 }}
+          animate={{ width: `${progress}%` }}
+          transition={{ duration: 0.6, ease: [0.4, 0, 0.2, 1] }}
+        />
+      </div>
+
+      {/* Metrics - Three Columns */}
+      <div className="grid grid-cols-3 gap-2 text-xs text-gray-600 mt-auto">
+        {metrics.map((metric, index) => (
+          <div key={index} className="text-center">
+            {metric}
+          </div>
+        ))}
+      </div>
+
+      {/* Actions - Only show when showActions is true */}
+      {showActions && (
+        <div className="flex items-center gap-2 mt-4 pt-4 border-t border-gray-200">
+          {onEdit && (
+            <button
+              onClick={onEdit}
+              className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Edit habit"
+            >
+              <Edit className="w-4 h-4 text-gray-600" />
+            </button>
+          )}
+          {habit.status === 'active' ? (
+            onPause && (
+              <button
+                onClick={onPause}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Pause habit"
+              >
+                <Pause className="w-4 h-4 text-gray-600" />
+              </button>
+            )
+          ) : (
+            onResume && (
+              <button
+                onClick={onResume}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Resume habit"
+              >
+                <Play className="w-4 h-4 text-gray-600" />
+              </button>
+            )
+          )}
+          {onDelete && (
+            <button
+              onClick={onDelete}
+              className="p-2 hover:bg-red-50 rounded-lg transition-colors text-red-600 ml-auto"
+              title="Delete habit"
+            >
+              <Trash2 className="w-4 h-4" />
+            </button>
           )}
         </div>
-      </div>
+      )}
     </motion.div>
   )
 }
