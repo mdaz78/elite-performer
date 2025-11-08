@@ -13,7 +13,7 @@ import {
 } from '@/src/utils/date';
 import { AnimatePresence, motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
-import { Check, ChevronDown, ChevronUp, Code, DollarSign, Heart, Zap } from 'lucide-react';
+import { ChevronDown, Code, DollarSign, Heart, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -73,24 +73,9 @@ function DashboardContent() {
     },
   });
 
-  // Mutation to toggle habit completion
-  const markHabitCompleteMutation = trpc.habits.markHabitComplete.useMutation({
-    onSuccess: () => {
-      utils.habits.getToday.invalidate();
-    },
-  });
-
   const toggleSubHabit = async (subHabitId: number, completed: boolean) => {
     await markSubHabitCompleteMutation.mutateAsync({
       subHabitId,
-      date: new Date().toISOString(),
-      completed: !completed,
-    });
-  };
-
-  const toggleHabit = async (habitId: number, completed: boolean) => {
-    await markHabitCompleteMutation.mutateAsync({
-      habitId,
       date: new Date().toISOString(),
       completed: !completed,
     });
@@ -172,135 +157,188 @@ function DashboardContent() {
   const tradingWinRate = tradingStats?.winRate ?? 0;
 
   return (
-    <div className="max-w-7xl mx-auto px-6 sm:px-6 lg:px-12 py-8">
+    <div className="max-w-[1400px] mx-auto px-6 py-8">
       {/* Page Title */}
       <div className="mb-8">
-        <h1 className="text-h1 font-bold text-neutral-800 dark:text-neutral-900">Dashboard</h1>
-        <p className="mt-2 text-body-sm text-neutral-600 dark:text-neutral-500">
+        <h1 className="text-[36px] font-bold text-neutral-900 dark:text-neutral-900 leading-tight">
+          Dashboard
+        </h1>
+        <p className="mt-2 text-[16px] text-neutral-600 dark:text-neutral-600">
           180-Day Transformation Overview
         </p>
       </div>
 
       {/* Transformation Progress Card */}
-      <Card className="mb-6">
+      <Card className="mb-8 animate-fadeIn">
         <div className="mb-4">
-          <h2 className="text-h3 font-bold text-neutral-800 dark:text-neutral-900">
+          <h3 className="text-[18px] font-semibold text-neutral-900 dark:text-neutral-900 mb-1">
             Transformation Progress
-          </h2>
-          <p className="text-body-sm text-neutral-600 dark:text-neutral-500 mt-1">
+          </h3>
+          <p className="text-[14px] text-neutral-500 dark:text-neutral-500">
             {daysRemaining} days remaining • Started {formatDisplayDate(startDate)}
           </p>
         </div>
         <div className="flex items-center gap-4">
           <div className="flex-1">
-            <div className="w-full bg-neutral-200 dark:bg-neutral-200 rounded h-2">
+            <div className="w-full bg-neutral-200 dark:bg-neutral-200 rounded-md h-3 overflow-hidden">
               <div
-                className="h-2 rounded bg-gradient-to-r from-primary-500 to-primary-400 transition-all duration-[300ms]"
+                className="h-3 rounded-md bg-gradient-to-r from-primary-500 to-primary-600 transition-all duration-500 ease-out shimmer-effect"
                 style={{ width: `${Math.min(100, Math.max(0, transformationProgress))}%` }}
               />
             </div>
           </div>
-          <span className="text-body-sm text-neutral-600 dark:text-neutral-500 font-medium">
+          <span className="text-[16px] text-neutral-900 dark:text-neutral-900 font-semibold min-w-[50px] text-right">
             {transformationProgress.toFixed(1)}%
           </span>
         </div>
       </Card>
 
       {/* Key Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-10">
         {/* Coding Progress Card */}
-        <Card>
-          <div className="relative">
-            <p className="text-overline text-neutral-600 dark:text-neutral-500 mb-2">
+        <div
+          className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6 transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-dark-lg hover:border-primary-500 dark:hover:border-primary-500 animate-fadeIn"
+          style={{ animationDelay: '0ms' }}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <p className="text-[14px] text-neutral-500 dark:text-neutral-500 font-medium uppercase tracking-wider">
               CODING PROGRESS
             </p>
-            <div className="absolute top-0 right-0 w-10 h-10 bg-primary-500 dark:bg-primary-500 rounded flex items-center justify-center">
-              <Code className="w-5 h-5 text-white" />
-            </div>
-            <p className="text-h2 font-bold text-neutral-800 dark:text-neutral-900 mt-6">
-              {Math.round(codingProgress)}%
-            </p>
-            <p className="text-body-sm text-neutral-600 dark:text-neutral-500 mt-2">
-              0 trades • 0.0% win rate
-            </p>
-            <div className="mt-4">
-              <Link
-                href="/coding"
-                className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-              >
-                View courses →
-              </Link>
+            <div className="w-12 h-12 bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-500 rounded-[10px] flex items-center justify-center">
+              <Code className="w-6 h-6" />
             </div>
           </div>
-        </Card>
+          <p className="text-[32px] font-bold text-neutral-900 dark:text-neutral-900 mb-1">
+            {Math.round(codingProgress)}%
+          </p>
+          <p className="text-[14px] text-neutral-500 dark:text-neutral-500">
+            {completedModules} of {totalModules} modules complete
+          </p>
+          <Link
+            href="/coding"
+            className="text-[14px] text-primary-600 dark:text-primary-500 font-medium inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all duration-[150ms]"
+          >
+            View courses
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </Link>
+        </div>
 
         {/* Fitness Card */}
-        <Card>
-          <div className="relative">
-            <p className="text-overline text-neutral-600 dark:text-neutral-500 mb-2">FITNESS</p>
-            <div className="absolute top-0 right-0 w-10 h-10 bg-accent-500 dark:bg-accent-500 rounded flex items-center justify-center">
-              <Zap className="w-5 h-5 text-white" />
-            </div>
-            <p className="text-h2 font-bold text-neutral-800 dark:text-neutral-900 mt-6">
-              {latestWeight ? `${latestWeight} KG` : 'No data'}
+        <div
+          className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6 transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-dark-lg hover:border-primary-500 dark:hover:border-primary-500 animate-fadeIn"
+          style={{ animationDelay: '50ms' }}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <p className="text-[14px] text-neutral-500 dark:text-neutral-500 font-medium uppercase tracking-wider">
+              FITNESS
             </p>
-            <p className="text-body-sm text-neutral-600 dark:text-neutral-500 mt-2">
-              {latestWeight ? 'Keep up the great work!' : 'Start logging your workouts'}
-            </p>
-            <div className="mt-4">
-              <Link
-                href="/fitness"
-                className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-              >
-                View logs →
-              </Link>
+            <div className="w-12 h-12 bg-accent-100 dark:bg-accent-500/15 text-accent-500 dark:text-accent-500 rounded-[10px] flex items-center justify-center">
+              <Zap className="w-6 h-6" />
             </div>
           </div>
-        </Card>
+          <p className="text-[32px] font-bold text-neutral-900 dark:text-neutral-900 mb-1">
+            {latestWeight ? `${latestWeight} KG` : 'No data'}
+          </p>
+          <p className="text-[14px] text-neutral-500 dark:text-neutral-500">
+            {latestWeight ? 'Keep up the great work!' : 'Start logging your workouts'}
+          </p>
+          <Link
+            href="/fitness"
+            className="text-[14px] text-primary-600 dark:text-primary-500 font-medium inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all duration-[150ms]"
+          >
+            View logs
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </Link>
+        </div>
 
         {/* Trading Card */}
-        <Card>
-          <div className="relative">
-            <p className="text-overline text-neutral-600 dark:text-neutral-500 mb-2">TRADING</p>
-            <div className="absolute top-0 right-0 w-10 h-10 bg-success-500 dark:bg-success-500 rounded flex items-center justify-center">
-              <DollarSign className="w-5 h-5 text-white" />
-            </div>
-            <p className="text-h2 font-bold text-neutral-800 dark:text-neutral-900 mt-6">
-              ${tradingTotalPnL.toFixed(2)}
+        <div
+          className="bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 rounded-xl p-6 transition-all duration-200 cursor-pointer hover:-translate-y-1 hover:shadow-lg dark:hover:shadow-dark-lg hover:border-primary-500 dark:hover:border-primary-500 animate-fadeIn"
+          style={{ animationDelay: '100ms' }}
+        >
+          <div className="flex items-start justify-between mb-4">
+            <p className="text-[14px] text-neutral-500 dark:text-neutral-500 font-medium uppercase tracking-wider">
+              TRADING
             </p>
-            <p className="text-body-sm text-neutral-600 dark:text-neutral-500 mt-2">
-              {tradingTradesCount} trades • {tradingWinRate.toFixed(1)}% win rate
-            </p>
-            <div className="mt-4">
-              <Link
-                href="/trading"
-                className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-              >
-                View journal →
-              </Link>
+            <div className="w-12 h-12 bg-success-100 dark:bg-success-500/15 text-success-600 dark:text-success-500 rounded-[10px] flex items-center justify-center">
+              <DollarSign className="w-6 h-6" />
             </div>
           </div>
-        </Card>
+          <p className="text-[32px] font-bold text-neutral-900 dark:text-neutral-900 mb-1">
+            ${tradingTotalPnL.toFixed(2)}
+          </p>
+          <p className="text-[14px] text-neutral-500 dark:text-neutral-500">
+            {tradingTradesCount} trades • {tradingWinRate.toFixed(1)}% win rate
+          </p>
+          <Link
+            href="/trading"
+            className="text-[14px] text-primary-600 dark:text-primary-500 font-medium inline-flex items-center gap-1 mt-3 hover:gap-2 transition-all duration-[150ms]"
+          >
+            View journal
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+            >
+              <line x1="5" y1="12" x2="19" y2="12" />
+              <polyline points="12 5 19 12 12 19" />
+            </svg>
+          </Link>
+        </div>
       </div>
 
       {/* Today's Tasks & Habits */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Today's Tasks Card */}
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-h3 font-bold text-neutral-800 dark:text-neutral-900">
+        <Card className="animate-fadeIn" style={{ animationDelay: '150ms' }}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-3">
+              <h2 className="text-[20px] font-semibold text-neutral-900 dark:text-neutral-900">
                 Today's Tasks
-              </h3>
-              <span className="text-body-sm text-neutral-600 dark:text-neutral-500">
+              </h2>
+              <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 rounded-xl text-[13px] font-semibold">
                 {completedTasksCount} of {totalTasksCount} done
               </span>
             </div>
             <Link
               href="/tasks"
-              className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
+              className="text-[14px] text-primary-600 dark:text-primary-500 font-medium inline-flex items-center gap-1 hover:gap-2 transition-all duration-[150ms]"
             >
-              View all →
+              View all
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
             </Link>
           </div>
           {todayTasks.length === 0 && todayModules.length === 0 ? (
@@ -308,57 +346,66 @@ function DashboardContent() {
               No tasks or modules scheduled for today
             </p>
           ) : (
-            <ul className="space-y-3">
+            <div className="space-y-2">
               {/* Course Modules */}
               {todayModules.map((module) => {
                 const isUpdating =
                   updateCodingModuleMutation.isPending || updateTradingModuleMutation.isPending;
                 return (
-                  <li
+                  <div
                     key={`${module.courseType}-${module.id}`}
-                    className="flex items-start justify-between py-2"
+                    className="flex items-start gap-3 p-4 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms] cursor-pointer"
                   >
                     <button
                       onClick={() =>
                         toggleModuleCompletion(module.id, module.completed, module.courseType)
                       }
                       disabled={isUpdating}
-                      className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
+                      className={`mt-[2px] w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
                         module.completed
                           ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
-                          : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
+                          : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
                       } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
-                      {module.completed && <Check className="w-3 h-3" />}
+                      {module.completed && (
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="3"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
                     </button>
                     <div className="flex-1 min-w-0">
                       <div
-                        className={`font-medium text-body ${module.completed ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-800 dark:text-neutral-900'}`}
+                        className={`text-[15px] font-medium ${module.completed ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-900 dark:text-neutral-900'}`}
                       >
                         {module.name}
                       </div>
-                      <div className="text-caption text-neutral-500 dark:text-neutral-500 mt-1">
+                      <div className="text-[13px] text-neutral-500 dark:text-neutral-500 mt-1 flex items-center flex-wrap gap-2">
                         {module.courseName}
+                        <span
+                          className={`inline-block px-[10px] py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${
+                            module.courseType === 'coding'
+                              ? 'bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-500'
+                              : 'bg-success-100 dark:bg-success-500/15 text-success-600 dark:text-success-500'
+                          }`}
+                        >
+                          {module.courseType === 'coding' ? 'CODING' : 'TRADING'}
+                        </span>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                      <span
-                        className={`text-caption px-2 py-1 rounded text-white font-medium ${
-                          module.courseType === 'coding'
-                            ? 'bg-info-500 dark:bg-info-500'
-                            : 'bg-success-500 dark:bg-success-500'
-                        }`}
-                      >
-                        {module.courseType === 'coding' ? 'CODING' : 'TRADING'}
-                      </span>
-                      <Link
-                        href={`/${module.courseType}/${module.courseId}`}
-                        className="text-caption text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-                      >
-                        View →
-                      </Link>
-                    </div>
-                  </li>
+                    <Link
+                      href={`/${module.courseType}/${module.courseId}`}
+                      className="px-[14px] py-[6px] bg-transparent border-[1.5px] border-neutral-200 dark:border-neutral-200 rounded-md text-[13px] font-semibold text-primary-600 dark:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/15 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-[150ms] flex-shrink-0"
+                    >
+                      View →
+                    </Link>
+                  </div>
                 );
               })}
 
@@ -371,89 +418,109 @@ function DashboardContent() {
                     : task.type === 'TradingPractice'
                       ? 'TRADING'
                       : task.type.toUpperCase();
-                const taskTypeColor =
+                const taskTypeColorClasses =
                   task.type === 'DeepWork'
-                    ? 'bg-accent-500 dark:bg-accent-500'
+                    ? 'bg-accent-100 dark:bg-accent-500/15 text-accent-600 dark:text-accent-500'
                     : task.type === 'TradingPractice'
-                      ? 'bg-success-500 dark:bg-success-500'
-                      : 'bg-info-500 dark:bg-info-500';
+                      ? 'bg-success-100 dark:bg-success-500/15 text-success-600 dark:text-success-500'
+                      : 'bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-500';
                 return (
-                  <li key={`task-${task.id}`} className="flex items-start justify-between py-2">
+                  <div
+                    key={`task-${task.id}`}
+                    className="flex items-start gap-3 p-4 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms] cursor-pointer"
+                  >
                     <button
                       onClick={() => toggleTaskCompletion(task.id, task.completed)}
                       disabled={isUpdating}
-                      className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
+                      className={`mt-[2px] w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
                         task.completed
                           ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
-                          : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
+                          : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
                       } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                     >
-                      {task.completed && <Check className="w-3 h-3" />}
+                      {task.completed && (
+                        <svg
+                          width="14"
+                          height="14"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="3"
+                        >
+                          <polyline points="20 6 9 17 4 12" />
+                        </svg>
+                      )}
                     </button>
                     <div className="flex-1 min-w-0">
                       <div
-                        className={`font-medium text-body ${task.completed ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-800 dark:text-neutral-900'}`}
+                        className={`text-[15px] font-medium ${task.completed ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-900 dark:text-neutral-900'}`}
                       >
                         {task.title}
                       </div>
-                      {task.taskProject && (
-                        <div className="text-caption text-neutral-500 dark:text-neutral-500 mt-1">
-                          {task.taskProject.name}
-                        </div>
-                      )}
+                      <div className="text-[13px] text-neutral-500 dark:text-neutral-500 mt-1 flex items-center flex-wrap gap-2">
+                        {task.taskProject && task.taskProject.name}
+                        <span
+                          className={`inline-block px-[10px] py-1 rounded-md text-[11px] font-semibold uppercase tracking-wide ${taskTypeColorClasses}`}
+                        >
+                          {taskTypeDisplay}
+                        </span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                      <span
-                        className={`text-caption px-2 py-1 rounded text-white font-medium ${taskTypeColor}`}
-                      >
-                        {taskTypeDisplay}
-                      </span>
-                      <Link
-                        href="/tasks"
-                        className="text-caption text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-                      >
-                        View →
-                      </Link>
-                    </div>
-                  </li>
+                    <Link
+                      href="/tasks"
+                      className="px-[14px] py-[6px] bg-transparent border-[1.5px] border-neutral-200 dark:border-neutral-200 rounded-md text-[13px] font-semibold text-primary-600 dark:text-primary-500 hover:bg-primary-50 dark:hover:bg-primary-500/15 hover:border-primary-500 dark:hover:border-primary-500 transition-all duration-[150ms] flex-shrink-0"
+                    >
+                      View →
+                    </Link>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           )}
         </Card>
 
         {/* Today's Habits Card */}
-        <Card>
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="text-h3 font-bold text-neutral-800 dark:text-neutral-900">
-              Today's Habits
-            </h3>
+        <Card className="animate-fadeIn" style={{ animationDelay: '200ms' }}>
+          <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <span className="text-body-sm bg-neutral-200 dark:bg-neutral-200 text-neutral-800 dark:text-neutral-800 px-3 py-1 rounded-full">
+              <h2 className="text-[20px] font-semibold text-neutral-900 dark:text-neutral-900">
+                Today's Habits
+              </h2>
+              <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 rounded-xl text-[13px] font-semibold">
                 {completedHabitsCount} of {totalHabitsCount} done
               </span>
-              <Link
-                href="/habit-tracker"
-                className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-              >
-                View all →
-              </Link>
             </div>
+            <Link
+              href="/habit-tracker"
+              className="text-[14px] text-primary-600 dark:text-primary-500 font-medium inline-flex items-center gap-1 hover:gap-2 transition-all duration-[150ms]"
+            >
+              View all
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+            </Link>
           </div>
           {todayHabits.length === 0 ? (
-            <p className="text-neutral-500 dark:text-neutral-500 text-body-sm">
+            <p className="text-neutral-500 dark:text-neutral-500 text-[14px]">
               No habits scheduled for today
             </p>
           ) : (
-            <ul className="space-y-3">
+            <div className="space-y-2">
               {todayHabits.map((habit) => {
-                const isComplete = habit.completion?.completed || false;
                 const isExpanded = expandedHabits.has(habit.id);
                 const totalSubHabits = habit.subHabits?.length || 0;
                 const completedSubHabits =
                   habit.subHabitCompletions?.filter((sc) => sc.completed).length || 0;
 
-                // Render habit icon in blue square
+                // Render habit icon
                 const renderHabitIcon = () => {
                   const IconComponent = habit.icon
                     ? (
@@ -465,7 +532,7 @@ function DashboardContent() {
                     : Heart;
 
                   return (
-                    <div className="w-8 h-8 bg-info-500 dark:bg-info-500 rounded flex items-center justify-center flex-shrink-0">
+                    <div className="w-10 h-10 bg-info-500 dark:bg-info-500 rounded-lg flex items-center justify-center flex-shrink-0">
                       {IconComponent ? (
                         <IconComponent className="w-5 h-5 text-white" />
                       ) : (
@@ -476,45 +543,27 @@ function DashboardContent() {
                 };
 
                 return (
-                  <li key={habit.id} className="py-2">
+                  <div
+                    key={habit.id}
+                    className="p-4 rounded-lg hover:bg-neutral-50 dark:hover:bg-neutral-50 transition-all duration-[150ms]"
+                  >
                     <div className="flex items-start justify-between">
-                      <div className="flex items-start flex-1 min-w-0">
-                        {/* Habit Icon */}
-                        <div className="mr-3 mt-0.5 flex-shrink-0">{renderHabitIcon()}</div>
+                      <div className="flex items-start gap-3 flex-1 min-w-0">
+                        {renderHabitIcon()}
                         <div className="flex-1 min-w-0">
-                          <div className="font-bold text-body text-neutral-800 dark:text-neutral-900">
+                          <h4 className="text-[15px] font-semibold text-neutral-900 dark:text-neutral-900">
                             {habit.name}
-                          </div>
+                          </h4>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-2 flex-shrink-0">
-                        <button
-                          onClick={() => toggleHabit(habit.id, isComplete)}
-                          disabled={markHabitCompleteMutation.isPending}
-                          className={`px-3 py-1 rounded text-body-sm font-medium text-white transition-all duration-[150ms] flex-shrink-0 ${
-                            isComplete
-                              ? 'bg-violet-400 dark:bg-violet-400'
-                              : 'bg-violet-600 dark:bg-violet-600 hover:bg-violet-700 dark:hover:bg-violet-700'
-                          } ${markHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                          aria-label={
-                            isComplete
-                              ? `Mark ${habit.name} as incomplete`
-                              : `Mark ${habit.name} as complete`
-                          }
-                        >
-                          Complete
-                        </button>
                         {totalSubHabits > 0 && (
                           <button
                             onClick={() => toggleExpandHabit(habit.id)}
-                            className="p-1 hover:bg-neutral-50 dark:hover:bg-neutral-100 rounded transition-colors duration-[150ms] flex-shrink-0"
+                            className={`w-8 h-8 rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-all duration-[150ms] flex items-center justify-center ${isExpanded ? 'rotate-180' : ''}`}
                             aria-label={isExpanded ? 'Collapse habit' : 'Expand habit'}
                           >
-                            {isExpanded ? (
-                              <ChevronUp className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
-                            ) : (
-                              <ChevronDown className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
-                            )}
+                            <ChevronDown className="w-5 h-5 text-neutral-600 dark:text-neutral-600" />
                           </button>
                         )}
                       </div>
@@ -525,44 +574,36 @@ function DashboardContent() {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          transition={{ duration: 0.2, ease: 'easeOut' }}
                           className="overflow-hidden"
                         >
-                          <div className="mt-3 space-y-2">
+                          <div className="mt-3 bg-neutral-50 dark:bg-neutral-50 rounded-lg p-4 animate-slideDown">
                             {/* Progress indicator */}
-                            <motion.div
-                              initial={{ opacity: 0, y: -10 }}
-                              animate={{ opacity: 1, y: 0 }}
-                              transition={{ duration: 0.2, delay: 0.1 }}
-                              className="text-center text-body-sm text-neutral-500 dark:text-neutral-500 mb-3"
-                            >
-                              {completedSubHabits}/{totalSubHabits} completed (
+                            <div className="text-center text-[14px] text-neutral-500 dark:text-neutral-500 font-medium mb-3">
+                              {completedSubHabits} / {totalSubHabits} completed (
                               {Math.round((completedSubHabits / totalSubHabits) * 100)}%)
-                            </motion.div>
-                            {habit.subHabits
-                              ?.sort((a, b) => a.order - b.order)
-                              .map((subHabit, index) => {
-                                const subCompletion = habit.subHabitCompletions?.find(
-                                  (sc) => sc.subHabitId === subHabit.id
-                                );
-                                const isSubComplete = subCompletion?.completed || false;
+                            </div>
+                            <div className="space-y-2">
+                              {habit.subHabits
+                                ?.sort((a, b) => a.order - b.order)
+                                .map((subHabit) => {
+                                  const subCompletion = habit.subHabitCompletions?.find(
+                                    (sc) => sc.subHabitId === subHabit.id
+                                  );
+                                  const isSubComplete = subCompletion?.completed || false;
 
-                                return (
-                                  <motion.div
-                                    key={subHabit.id}
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
-                                    className="flex items-center justify-between py-2"
-                                  >
-                                    <div className="flex items-center gap-3 flex-1">
+                                  return (
+                                    <div
+                                      key={subHabit.id}
+                                      className="flex items-center gap-3 p-3 bg-neutral-0 dark:bg-neutral-100 rounded-md hover:translate-x-1 transition-all duration-[150ms]"
+                                    >
                                       <button
                                         onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
                                         disabled={markSubHabitCompleteMutation.isPending}
-                                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-[150ms] flex-shrink-0 ${
+                                        className={`w-[18px] h-[18px] rounded border-2 flex items-center justify-center transition-all duration-[150ms] flex-shrink-0 ${
                                           isSubComplete
                                             ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
-                                            : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
+                                            : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
                                         } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                                         aria-label={
                                           isSubComplete
@@ -570,45 +611,56 @@ function DashboardContent() {
                                             : `Mark ${subHabit.name} as complete`
                                         }
                                       >
-                                        {isSubComplete && <Check className="w-3 h-3" />}
+                                        {isSubComplete && (
+                                          <svg
+                                            width="12"
+                                            height="12"
+                                            viewBox="0 0 24 24"
+                                            fill="none"
+                                            stroke="white"
+                                            strokeWidth="3"
+                                          >
+                                            <polyline points="20 6 9 17 4 12" />
+                                          </svg>
+                                        )}
                                       </button>
                                       <span
-                                        className={`text-body-sm ${
+                                        className={`flex-1 text-[14px] font-medium ${
                                           isSubComplete
                                             ? 'line-through text-neutral-500 dark:text-neutral-500'
-                                            : 'text-neutral-800 dark:text-neutral-900'
+                                            : 'text-neutral-900 dark:text-neutral-900'
                                         }`}
                                       >
                                         {subHabit.name}
                                       </span>
+                                      <button
+                                        onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
+                                        disabled={markSubHabitCompleteMutation.isPending}
+                                        className={`px-3 py-[6px] rounded-md text-[12px] font-semibold text-white transition-all duration-[150ms] hover:-translate-y-[1px] flex-shrink-0 ${
+                                          isSubComplete
+                                            ? 'bg-success-500 dark:bg-success-500'
+                                            : 'bg-primary-500 dark:bg-primary-500 hover:bg-primary-600 dark:hover:bg-primary-600'
+                                        } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                        aria-label={
+                                          isSubComplete
+                                            ? `Mark ${subHabit.name} as incomplete`
+                                            : `Mark ${subHabit.name} as complete`
+                                        }
+                                      >
+                                        {isSubComplete ? 'Completed ✓' : 'Complete'}
+                                      </button>
                                     </div>
-                                    <button
-                                      onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
-                                      disabled={markSubHabitCompleteMutation.isPending}
-                                      className={`ml-2 px-3 py-1 rounded text-body-sm font-medium text-white transition-all duration-[150ms] flex-shrink-0 ${
-                                        isSubComplete
-                                          ? 'bg-violet-400 dark:bg-violet-400'
-                                          : 'bg-violet-600 dark:bg-violet-600 hover:bg-violet-700 dark:hover:bg-violet-700'
-                                      } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                      aria-label={
-                                        isSubComplete
-                                          ? `Mark ${subHabit.name} as incomplete`
-                                          : `Mark ${subHabit.name} as complete`
-                                      }
-                                    >
-                                      Complete
-                                    </button>
-                                  </motion.div>
-                                );
-                              })}
+                                  );
+                                })}
+                            </div>
                           </div>
                         </motion.div>
                       )}
                     </AnimatePresence>
-                  </li>
+                  </div>
                 );
               })}
-            </ul>
+            </div>
           )}
         </Card>
       </div>

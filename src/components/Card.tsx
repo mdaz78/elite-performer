@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, MouseEventHandler } from 'react'
+import { ReactNode, MouseEventHandler, CSSProperties } from 'react'
 
 interface CardProps {
   children: ReactNode;
@@ -8,14 +8,16 @@ interface CardProps {
   title?: string;
   action?: ReactNode;
   onClick?: MouseEventHandler<HTMLDivElement>;
+  style?: CSSProperties;
 }
 
-export const Card = ({ children, className = '', title, action, onClick }: CardProps) => {
+export const Card = ({ children, className = '', title, action, onClick, style }: CardProps) => {
   const isFlex = className.includes('flex')
   return (
     <div
       className={`bg-neutral-0 dark:bg-neutral-100 rounded-lg border border-neutral-200 dark:border-neutral-200 shadow transition-all duration-[150ms] ${onClick ? 'cursor-pointer hover:shadow-md dark:hover:shadow-dark-md hover:border-neutral-300 dark:hover:border-neutral-300' : ''} ${className}`}
       onClick={onClick}
+      style={style}
     >
       {(title || action) && (
         <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-200 flex justify-between items-center">

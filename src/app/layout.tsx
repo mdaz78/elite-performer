@@ -14,7 +14,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" suppressHydrationWarning>
       <body>
         <Providers>
-          <div className="min-h-screen bg-background dark:bg-background-dark transition-colors duration-200">
+          <div className="min-h-screen bg-neutral-50 dark:bg-neutral-50 transition-colors duration-300">
             <Header />
             <PageTransition>{children}</PageTransition>
           </div>
