@@ -1,6 +1,8 @@
 import { router } from '../trpc'
 import { codingCoursesRouter } from './coding-courses'
 import { courseModulesRouter } from './course-modules'
+import { tradingCoursesRouter } from './trading-courses'
+import { tradingCourseModulesRouter } from './trading-course-modules'
 import { projectsRouter } from './projects'
 import { tasksRouter } from './tasks'
 import { fitnessRouter } from './fitness'
@@ -11,6 +13,8 @@ import { settingsRouter } from './settings'
 export const appRouter = router({
   codingCourses: codingCoursesRouter,
   courseModules: courseModulesRouter,
+  tradingCourses: tradingCoursesRouter,
+  tradingCourseModules: tradingCourseModulesRouter,
   projects: projectsRouter,
   tasks: tasksRouter,
   fitness: fitnessRouter,

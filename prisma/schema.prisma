@@ -24,6 +24,7 @@ model User {
   accounts       Account[]
   sessions       Session[]
   codingCourses  CodingCourse[]
+  tradingCourses TradingCourse[]
   projects       Project[]
   tasks          Task[]
   fitnessLogs    FitnessLog[]
@@ -98,6 +99,36 @@ model CourseModule {
   completedAt DateTime?
 
   course CodingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([courseId])
+  @@index([completed])
+}
+
+model TradingCourse {
+  id          Int      @id @default(autoincrement())
+  userId      String
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+  startDate   DateTime?
+  targetDate  DateTime?
+
+  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modules TradingCourseModule[]
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model TradingCourseModule {
+  id          Int       @id @default(autoincrement())
+  courseId    Int
+  name        String
+  order       Int
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+
+  course TradingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
   @@index([completed])

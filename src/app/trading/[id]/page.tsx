@@ -1,0 +1,761 @@
+'use client'
+
+import {
+  DndContext,
+  KeyboardSensor,
+  PointerSensor,
+  closestCenter,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core'
+import {
+  SortableContext,
+  arrayMove,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable'
+import { CSS } from '@dnd-kit/utilities'
+import { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter, useParams } from 'next/navigation'
+import { trpc } from '@/src/lib/trpc-client'
+import { Card, CsvImporter, InputDialog, ProgressBar } from '@/src/components'
+import { ProtectedRoute } from '@/src/components/ProtectedRoute'
+import { formatDisplayDate } from '@/src/utils/date'
+import { createVariants, updateVariants, staggerContainer } from '@/src/lib/animations'
+
+interface SortableModuleItemProps {
+  module: { id: number; name: string; order: number; completed: boolean; completedAt: Date | null }
+  onToggle: (moduleId: number, completed: boolean) => void
+  onDelete: (moduleId: number) => void
+  isAnimating?: boolean
+  isFirstMount?: boolean
+}
+
+const SortableModuleItem = ({ module, onToggle, onDelete, isAnimating = false, isFirstMount = false }: SortableModuleItemProps) => {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
+    id: module.id,
+  })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  return (
+    <motion.div
+      ref={setNodeRef}
+      style={style}
+      variants={createVariants}
+      initial={isFirstMount ? false : "initial"}
+      animate={isAnimating ? 'animate' : 'animate'}
+      exit="exit"
+      layout
+      className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
+        module.completed
+          ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
+          : 'border-border dark:border-border-dark hover:border-blue-500 dark:hover:border-blue-500 hover:bg-background dark:hover:bg-background-dark'
+      }`}
+    >
+      <div className="flex items-center flex-1 min-w-0">
+        <div
+          {...attributes}
+          {...listeners}
+          className="shrink-0 mr-3 cursor-grab active:cursor-grabbing touch-none"
+          title="Drag to reorder"
+        >
+          <svg
+            className="w-5 h-5 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 8h16M4 16h16"
+            />
+          </svg>
+        </div>
+        <div className="shrink-0 mr-4">
+          <div
+            className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
+              module.completed ? 'bg-green-500 text-white' : 'bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark'
+            }`}
+          >
+            {module.order}
+          </div>
+        </div>
+        <input
+          type="checkbox"
+          checked={module.completed}
+          onChange={() => onToggle(module.id, module.completed)}
+          className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-border dark:border-border-dark rounded cursor-pointer transition-colors duration-200"
+        />
+        <div className="flex-1 min-w-0">
+          <p
+            className={`font-medium text-lg ${
+              module.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'
+            }`}
+          >
+            {module.name}
+          </p>
+          {module.completedAt && (
+            <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1">
+              Completed on {formatDisplayDate(module.completedAt.toISOString())}
+            </p>
+          )}
+        </div>
+      </div>
+      <button
+        onClick={() => onDelete(module.id)}
+        className="ml-4 px-3 py-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-sm font-medium transition-colors"
+        title="Delete module"
+      >
+        Delete
+      </button>
+    </motion.div>
+  )
+}
+
+function TradingCourseDetailContent() {
+  const params = useParams<{ id: string }>()
+  const router = useRouter()
+  const courseId = params?.id ? parseInt(params.id, 10) : null
+
+  const utils = trpc.useUtils()
+  const [editingName, setEditingName] = useState(false)
+  const [editingDescription, setEditingDescription] = useState(false)
+  const [editingDates, setEditingDates] = useState(false)
+  const [editedName, setEditedName] = useState('')
+  const [editedDescription, setEditedDescription] = useState('')
+  const [editedStartDate, setEditedStartDate] = useState('')
+  const [editedTargetDate, setEditedTargetDate] = useState('')
+  const [showAddModuleDialog, setShowAddModuleDialog] = useState(false)
+  const [animatingModuleId, setAnimatingModuleId] = useState<number | null>(null)
+  const isFirstMount = useRef(true)
+
+  useEffect(() => {
+    isFirstMount.current = false
+  }, [])
+
+  const { data: course, isLoading: courseLoading } = trpc.tradingCourses.getById.useQuery(
+    { id: courseId! },
+    { enabled: !!courseId }
+  )
+
+  const { data: modules = [], isLoading: modulesLoading } = trpc.tradingCourseModules.getByCourseId.useQuery(
+    { courseId: courseId! },
+    { enabled: !!courseId }
+  )
+
+  const updateCourseMutation = trpc.tradingCourses.update.useMutation({
+    onSuccess: () => {
+      utils.tradingCourses.getById.invalidate({ id: courseId! })
+      utils.tradingCourses.getAll.invalidate()
+      setEditingName(false)
+      setEditingDescription(false)
+      setEditingDates(false)
+    },
+  })
+
+  const createModuleMutation = trpc.tradingCourseModules.create.useMutation({
+    onSuccess: () => {
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.tradingCourses.getById.invalidate({ id: courseId! })
+      setShowAddModuleDialog(false)
+    },
+  })
+
+  const updateModuleMutation = trpc.tradingCourseModules.update.useMutation({
+    onSuccess: () => {
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.tradingCourses.getById.invalidate({ id: courseId! })
+    },
+  })
+
+  const deleteModuleMutation = trpc.tradingCourseModules.delete.useMutation({
+    onSuccess: () => {
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
+      utils.tradingCourses.getById.invalidate({ id: courseId! })
+    },
+  })
+
+  const reorderModuleMutation = trpc.tradingCourseModules.reorder.useMutation({
+    onSuccess: () => {
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! })
+    },
+  })
+
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  )
+
+  useEffect(() => {
+    if (!courseId) {
+      router.push('/trading')
+    }
+  }, [courseId, router])
+
+  useEffect(() => {
+    if (course) {
+      setEditedName(course.name)
+      setEditedDescription(course.description || '')
+      setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
+      setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
+    }
+  }, [course])
+
+  useEffect(() => {
+    if (!courseLoading && !modulesLoading && !course && courseId) {
+      router.push('/trading')
+    }
+  }, [course, courseLoading, modulesLoading, courseId, router])
+
+  if (!courseId) {
+    return null
+  }
+
+  if (courseLoading || modulesLoading) {
+    return (
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <p className="text-text-tertiary dark:text-text-tertiary-dark">Loading course...</p>
+      </div>
+    )
+  }
+
+  if (!course) {
+    return null
+  }
+
+  const completedModules = modules.filter((m) => m.completed).length
+  const totalModules = modules.length
+  const progress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
+
+  const handleToggleModule = async (moduleId: number, completed: boolean) => {
+    setAnimatingModuleId(moduleId)
+    await updateModuleMutation.mutateAsync({
+      id: moduleId,
+      completed: !completed,
+      completedAt: !completed ? new Date().toISOString() : null,
+    })
+    setTimeout(() => setAnimatingModuleId(null), 200)
+  }
+
+  const handleAddModule = async (name: string) => {
+    if (!name.trim() || !courseId) return
+
+    const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0
+
+    await createModuleMutation.mutateAsync({
+      courseId,
+      name: name.trim(),
+      order: maxOrder + 1,
+    })
+  }
+
+  const handleDeleteModule = async (moduleId: number) => {
+    if (!confirm('Delete this module?')) return
+    await deleteModuleMutation.mutateAsync({ id: moduleId })
+  }
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event
+
+    if (!over || active.id === over.id || !courseId) {
+      return
+    }
+
+    const oldIndex = modules.findIndex((m) => m.id === active.id)
+    const newIndex = modules.findIndex((m) => m.id === over.id)
+
+    if (oldIndex === -1 || newIndex === -1) {
+      return
+    }
+
+    const newModules = arrayMove(modules, oldIndex, newIndex)
+
+    // Update order values in database
+    await Promise.all(
+      newModules.map((module, index) =>
+        reorderModuleMutation.mutateAsync({
+          moduleId: module.id,
+          newOrder: index + 1,
+        })
+      )
+    )
+  }
+
+  const handleSaveCourseName = async () => {
+    if (!courseId || !editedName.trim()) return
+    await updateCourseMutation.mutateAsync({
+      id: courseId,
+      name: editedName.trim(),
+    })
+  }
+
+  const handleSaveDescription = async () => {
+    if (!courseId) return
+    await updateCourseMutation.mutateAsync({
+      id: courseId,
+      description: editedDescription.trim() || undefined,
+    })
+  }
+
+  const handleSaveDates = async () => {
+    if (!courseId) return
+    await updateCourseMutation.mutateAsync({
+      id: courseId,
+      startDate: editedStartDate ? new Date(editedStartDate).toISOString() : undefined,
+      targetDate: editedTargetDate ? new Date(editedTargetDate).toISOString() : undefined,
+    })
+  }
+
+  const handleEditName = () => {
+    setEditedName(course.name)
+    setEditingName(true)
+  }
+
+  const handleEditDescription = () => {
+    setEditedDescription(course.description || '')
+    setEditingDescription(true)
+  }
+
+  const handleEditDates = () => {
+    setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
+    setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
+    setEditingDates(true)
+  }
+
+  const handleCSVImport = async (data: Record<string, unknown>[]) => {
+    if (!courseId) return
+    try {
+      const maxOrder = modules.length > 0 ? Math.max(...modules.map((m) => m.order)) : 0
+
+      await Promise.all(
+        data.map((row: Record<string, unknown>, index: number) =>
+          createModuleMutation.mutateAsync({
+            courseId,
+            name: (row.name ||
+              row.Name ||
+              row.module ||
+              row.Module ||
+              `Module ${index + 1}`) as string,
+            order: row.order ? parseInt(String(row.order), 10) : maxOrder + index + 1,
+          })
+        )
+      )
+    } catch (error) {
+      alert(
+        'Failed to import modules: ' + (error instanceof Error ? error.message : 'Unknown error')
+      )
+    }
+  }
+
+  return (
+    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="mb-8">
+        <button
+          onClick={() => router.push('/trading')}
+          className="text-accent-blue dark:text-accent-blue-dark hover:underline mb-4 text-sm font-medium transition-colors duration-200"
+        >
+          ← Back to Courses
+        </button>
+        <div className="flex justify-between items-start mb-6">
+          <div>
+            <div className="flex items-center gap-3">
+              {editingName ? (
+                <div className="flex items-center gap-2 flex-1">
+                  <input
+                    type="text"
+                    value={editedName}
+                    onChange={(e) => setEditedName(e.target.value)}
+                    className="text-3xl font-bold text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark border-2 border-blue-500 rounded px-3 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                    autoFocus
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') handleSaveCourseName()
+                      if (e.key === 'Escape') {
+                        setEditingName(false)
+                        setEditedName(course.name)
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={handleSaveCourseName}
+                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors"
+                    aria-label="Save name"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingName(false)
+                      setEditedName(course.name)
+                    }}
+                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                    aria-label="Cancel editing"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 group">
+                  <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark">{course.name}</h1>
+                  <button
+                    onClick={handleEditName}
+                    className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity"
+                    aria-label="Edit course name"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              )}
+            </div>
+            {editingDescription ? (
+              <div className="mt-2 flex items-start gap-2">
+                <textarea
+                  value={editedDescription}
+                  onChange={(e) => setEditedDescription(e.target.value)}
+                  className="text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark text-lg border-2 border-blue-500 rounded px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors duration-200"
+                  rows={3}
+                  autoFocus
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setEditingDescription(false)
+                      setEditedDescription(course.description || '')
+                    }
+                  }}
+                />
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handleSaveDescription}
+                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors"
+                    aria-label="Save description"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEditingDescription(false)
+                      setEditedDescription(course.description || '')
+                    }}
+                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
+                    aria-label="Cancel editing"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-2 flex items-start gap-2 group">
+                {course.description ? (
+                  <p className="text-text-secondary dark:text-text-secondary-dark text-lg">{course.description}</p>
+                ) : (
+                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-lg italic">No description</p>
+                )}
+                <button
+                  onClick={handleEditDescription}
+                  className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity mt-1"
+                  aria-label="Edit description"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
+              </div>
+            )}
+          </div>
+          <div className="flex gap-3">
+            <CsvImporter onImport={handleCSVImport} label="Import CSV" />
+            <button
+              onClick={() => setShowAddModuleDialog(true)}
+              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+            >
+              Add Module
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Course Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+        <Card>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-text-primary dark:text-text-primary-dark mb-1">{totalModules}</div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Modules</div>
+          </div>
+        </Card>
+        <Card>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{completedModules}</div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Completed</div>
+          </div>
+        </Card>
+        <Card>
+          <div className="text-center">
+            <div className="text-3xl font-bold text-accent-blue dark:text-accent-blue-dark mb-1">{Math.round(progress)}%</div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Progress</div>
+          </div>
+        </Card>
+      </div>
+
+      {/* Course Information */}
+      <Card
+        className="mb-6"
+        title="Course Information"
+        action={
+          !editingDates ? (
+            <button
+              onClick={handleEditDates}
+              className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark transition-colors"
+              aria-label="Edit dates"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                />
+              </svg>
+            </button>
+          ) : undefined
+        }
+      >
+        {editingDates ? (
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Start Date:</label>
+                <input
+                  type="date"
+                  value={editedStartDate}
+                  onChange={(e) => setEditedStartDate(e.target.value)}
+                  className="w-full bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Target Date:</label>
+                <input
+                  type="date"
+                  value={editedTargetDate}
+                  onChange={(e) => setEditedTargetDate(e.target.value)}
+                  className="w-full bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
+                />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveDates}
+                className="px-4 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
+                </svg>
+                Save
+              </button>
+              <button
+                onClick={() => {
+                  setEditingDates(false)
+                  setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
+                  setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
+                }}
+                className="px-4 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark rounded-md hover:bg-background/80 dark:hover:bg-background-dark/80 transition-colors flex items-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
+                </svg>
+                Cancel
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {course.startDate && (
+              <div>
+                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Start Date:</span>
+                <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.startDate.toISOString())}</p>
+              </div>
+            )}
+            {course.targetDate && (
+              <div>
+                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Target Date:</span>
+                <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.targetDate.toISOString())}</p>
+              </div>
+            )}
+            {!course.startDate && !course.targetDate && (
+              <div className="col-span-2 text-text-tertiary dark:text-text-tertiary-dark italic">
+                No dates set. Click the edit icon to add dates.
+              </div>
+            )}
+            <div>
+              <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Created:</span>
+              <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.createdAt.toISOString())}</p>
+            </div>
+          </div>
+        )}
+      </Card>
+
+      {/* Progress Bar */}
+      <Card className="mb-6">
+        <div className="mb-4">
+          <h2 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark mb-3">Overall Progress</h2>
+          <ProgressBar progress={progress} color="career" showPercentage={true} />
+          <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-3">
+            {completedModules} of {totalModules} modules completed
+            {totalModules > 0 && (
+              <span className="ml-2">({totalModules - completedModules} remaining)</span>
+            )}
+          </p>
+        </div>
+      </Card>
+
+      {/* Course Contents */}
+      <Card
+        title={`Course Contents (${totalModules} ${totalModules === 1 ? 'Module' : 'Modules'})`}
+      >
+        {modules.length === 0 ? (
+          <div className="text-center py-12">
+            <div className="text-text-tertiary dark:text-text-tertiary-dark mb-4">
+              <svg
+                className="mx-auto h-12 w-12"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+            </div>
+            <p className="text-text-secondary dark:text-text-secondary-dark mb-2 font-medium">No modules yet</p>
+            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm mb-4">
+              Add modules to start tracking your course progress
+            </p>
+            <button
+              onClick={() => setShowAddModuleDialog(true)}
+              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+            >
+              Add Your First Module
+            </button>
+          </div>
+        ) : (
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext
+              items={modules.map((m) => m.id)}
+              strategy={verticalListSortingStrategy}
+            >
+              <AnimatePresence mode="popLayout">
+                <motion.div
+                  variants={staggerContainer}
+                  initial={isFirstMount.current ? false : "initial"}
+                  animate="animate"
+                  className="space-y-3"
+                >
+                  {modules.map((module) => (
+                    <motion.div
+                      key={module.id}
+                      animate={animatingModuleId === module.id ? updateVariants.animate : {}}
+                    >
+                      <SortableModuleItem
+                        module={module}
+                        onToggle={handleToggleModule}
+                        onDelete={handleDeleteModule}
+                        isAnimating={animatingModuleId === module.id}
+                        isFirstMount={isFirstMount.current}
+                      />
+                    </motion.div>
+                  ))}
+                </motion.div>
+              </AnimatePresence>
+            </SortableContext>
+          </DndContext>
+        )}
+      </Card>
+
+      <InputDialog
+        isOpen={showAddModuleDialog}
+        title="Add New Module"
+        message="Enter a name for the new module"
+        inputLabel="Module Name"
+        inputPlaceholder="e.g., Introduction to Technical Analysis"
+        confirmLabel="Add Module"
+        cancelLabel="Cancel"
+        onConfirm={handleAddModule}
+        onCancel={() => setShowAddModuleDialog(false)}
+      />
+    </div>
+  )
+}
+
+export default function TradingCourseDetail() {
+  return (
+    <ProtectedRoute>
+      <TradingCourseDetailContent />
+    </ProtectedRoute>
+  )
+}

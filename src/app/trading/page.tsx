@@ -1,364 +1,175 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { useRouter } from 'next/navigation'
 import { trpc } from '@/src/lib/trpc-client'
-import { Card } from '@/src/components'
+import { Card, InputDialog, ProgressBar } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
-import { getToday, formatDisplayDate } from '@/src/utils/date'
+import { formatDisplayDate } from '@/src/utils/date'
 import { createVariants, staggerContainer } from '@/src/lib/animations'
 
 function TradingPageContent() {
+  const router = useRouter()
   const utils = trpc.useUtils()
-  const [formData, setFormData] = useState({
-    date: getToday(),
-    symbol: '',
-    setup: '',
-    entry: '',
-    exit: '',
-    quantity: '',
-    pnl: '',
-    emotion: '',
-    notes: '',
-  })
+  const [showAddDialog, setShowAddDialog] = useState(false)
+  const isFirstMount = useRef(true)
 
-  const { data: trades = [], isLoading } = trpc.trades.getAll.useQuery({})
-  const { data: stats } = trpc.trades.getStats.useQuery({})
+  useEffect(() => {
+    isFirstMount.current = false
+  }, [])
 
-  const createMutation = trpc.trades.create.useMutation({
+  const { data: courses = [], isLoading } = trpc.tradingCourses.getAll.useQuery()
+  const createMutation = trpc.tradingCourses.create.useMutation({
     onSuccess: () => {
-      utils.trades.getAll.invalidate()
-      utils.trades.getStats.invalidate()
-      setFormData({
-        date: getToday(),
-        symbol: '',
-        setup: '',
-        entry: '',
-        exit: '',
-        quantity: '',
-        pnl: '',
-        emotion: '',
-        notes: '',
-      })
+      utils.tradingCourses.getAll.invalidate()
+      setShowAddDialog(false)
+    },
+  })
+  const deleteMutation = trpc.tradingCourses.delete.useMutation({
+    onSuccess: () => {
+      utils.tradingCourses.getAll.invalidate()
     },
   })
 
-  const deleteMutation = trpc.trades.delete.useMutation({
-    onSuccess: () => {
-      utils.trades.getAll.invalidate()
-      utils.trades.getStats.invalidate()
-    },
+  // Calculate progress for each course
+  const coursesWithProgress = courses.map((course) => {
+    const courseModules = course.modules || []
+    const completed = courseModules.filter((m) => m.completed).length
+    const progress = courseModules.length > 0 ? (completed / courseModules.length) * 100 : 0
+    return { ...course, progress }
   })
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-
+  const handleAddCourse = async (name: string) => {
+    if (!name.trim()) return
     await createMutation.mutateAsync({
-      date: new Date(formData.date).toISOString(),
-      symbol: formData.symbol,
-      setup: formData.setup,
-      entry: Number(formData.entry),
-      exit: Number(formData.exit),
-      quantity: Number(formData.quantity),
-      pnl: Number(formData.pnl),
-      emotion: formData.emotion || undefined,
-      notes: formData.notes || undefined,
+      name: name.trim(),
     })
   }
 
-  const handleDelete = async (id: number) => {
-    if (!confirm('Delete this trade?')) return
+  const handleDeleteCourse = async (id: number) => {
+    if (!confirm('Delete this course? All modules will also be deleted.')) return
     await deleteMutation.mutateAsync({ id })
-  }
-
-  const handleCalculatePnl = () => {
-    const entry = Number(formData.entry) || 0
-    const exit = Number(formData.exit) || 0
-    const quantity = Number(formData.quantity) || 0
-    const pnl = (exit - entry) * quantity
-    setFormData({ ...formData, pnl: pnl.toString() })
   }
 
   if (isLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading trades...</p>
+        <p className="text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">Loading courses...</p>
       </div>
     )
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Trading Journal</h1>
-        <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Track your trades and analyze performance</p>
+      <div className="mb-8 flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark transition-colors duration-200">Trading Courses</h1>
+          <p className="mt-2 text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Track your learning progress</p>
+        </div>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setShowAddDialog(true)}
+            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+          >
+            Add Course
+          </button>
+        </div>
       </div>
 
-      {/* Metrics */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      {coursesWithProgress.length === 0 ? (
         <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Total P&L</p>
-              <p className={`text-2xl font-bold mt-1 transition-colors duration-200 ${(stats?.totalPnL ?? 0) >= 0 ? 'text-accent-emerald dark:text-accent-emerald-dark' : 'text-red-600 dark:text-red-400'}`}>
-                ${(stats?.totalPnL ?? 0).toFixed(2)}
-              </p>
-            </div>
-            <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Win Rate</p>
-              <p className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark mt-1 transition-colors duration-200">{(stats?.winRate ?? 0).toFixed(1)}%</p>
-            </div>
-            <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Trade Count</p>
-              <p className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark mt-1 transition-colors duration-200">{stats?.totalTrades ?? 0}</p>
-            </div>
-            <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-
-        <Card>
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Avg P&L</p>
-              <p className={`text-2xl font-bold mt-1 transition-colors duration-200 ${(stats?.avgPnL ?? 0) >= 0 ? 'text-accent-emerald dark:text-accent-emerald-dark' : 'text-red-600 dark:text-red-400'}`}>
-                ${(stats?.avgPnL ?? 0).toFixed(2)}
-              </p>
-            </div>
-            <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
-              <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-              </svg>
-            </div>
-          </div>
-        </Card>
-      </div>
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-        <Card title="Log Trade" className="lg:col-span-1">
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Date</label>
-              <input
-                type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Symbol</label>
-              <input
-                type="text"
-                value={formData.symbol}
-                onChange={(e) => setFormData({ ...formData, symbol: e.target.value.toUpperCase() })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                placeholder="e.g., AAPL"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Setup</label>
-              <input
-                type="text"
-                value={formData.setup}
-                onChange={(e) => setFormData({ ...formData, setup: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                placeholder="e.g., Breakout, Pullback"
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Entry Price</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.entry}
-                  onChange={(e) => setFormData({ ...formData, entry: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Exit Price</label>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={formData.exit}
-                  onChange={(e) => setFormData({ ...formData, exit: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                  required
-                />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Quantity</label>
-              <input
-                type="number"
-                value={formData.quantity}
-                onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">
-                P&L
-                <button
-                  type="button"
-                  onClick={handleCalculatePnl}
-                  className="ml-2 text-xs text-accent-emerald dark:text-accent-emerald-dark hover:underline transition-colors duration-200"
-                >
-                  (Calculate)
-                </button>
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                value={formData.pnl}
-                onChange={(e) => setFormData({ ...formData, pnl: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                required
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Emotion</label>
-              <input
-                type="text"
-                value={formData.emotion}
-                onChange={(e) => setFormData({ ...formData, emotion: e.target.value })}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                placeholder="e.g., Confident, Nervous"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1 transition-colors duration-200">Notes</label>
-              <textarea
-                value={formData.notes}
-                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-                rows={3}
-                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-emerald dark:focus:ring-accent-emerald-dark focus:border-accent-emerald dark:focus:border-accent-emerald-dark transition-colors duration-200"
-                placeholder="Trade notes..."
-              />
-            </div>
-
+          <div className="text-center py-12">
+            <p className="text-text-tertiary dark:text-text-tertiary-dark mb-4 transition-colors duration-200">
+              No courses yet. Add your first course to get started!
+            </p>
             <button
-              type="submit"
-              className="w-full px-4 py-2 bg-accent-emerald dark:bg-accent-emerald-dark text-white rounded-md hover:bg-accent-emerald/90 dark:hover:bg-accent-emerald-dark/90 transition-colors duration-200"
+              onClick={() => setShowAddDialog(true)}
+              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
-              Save Trade
+              Add Course
             </button>
-          </form>
+          </div>
         </Card>
-
-        <Card title="Trade List" className="lg:col-span-2">
-          {trades.length === 0 ? (
-            <p className="text-text-tertiary dark:text-text-tertiary-dark text-center py-8 transition-colors duration-200">No trades yet. Log your first trade above!</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-border dark:divide-border-dark">
-                <thead className="bg-background dark:bg-background-dark">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Date</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Symbol</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Setup</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Entry</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Exit</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Qty</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">P&L</th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-text-secondary dark:text-text-secondary-dark uppercase tracking-wider transition-colors duration-200">Actions</th>
-                  </tr>
-                </thead>
-                <AnimatePresence mode="popLayout">
-                  <motion.tbody
-                    variants={staggerContainer}
-                    initial="initial"
-                    animate="animate"
-                    className="bg-surface dark:bg-surface-dark divide-y divide-border dark:divide-border-dark"
-                  >
-                    {trades.map((trade) => (
-                      <motion.tr
-                        key={trade.id}
-                        variants={createVariants}
-                        initial="initial"
-                        animate="animate"
-                        exit="exit"
-                        layout
-                        className="hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
+      ) : (
+        <AnimatePresence mode="popLayout">
+          <motion.div
+            variants={staggerContainer}
+            initial={isFirstMount.current ? false : "initial"}
+            animate="animate"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {coursesWithProgress.map((course) => (
+              <motion.div
+                key={course.id}
+                variants={createVariants}
+                initial={isFirstMount.current ? false : "initial"}
+                animate="animate"
+                exit="exit"
+                layout
+              >
+                <Card
+                  className="hover:shadow-lg transition-all cursor-pointer group relative"
+                  onClick={() => router.push(`/trading/${course.id}`)}
+                >
+                  <div className="mb-4 relative z-0">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark group-hover:text-accent-blue dark:group-hover:text-accent-blue-dark transition-colors duration-200">
+                        {course.name}
+                      </h3>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleDeleteCourse(course.id)
+                        }}
+                        className="text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 relative z-20 p-1.5 hover:bg-red-100 dark:hover:bg-red-900/20 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-md cursor-pointer"
+                        aria-label={`Delete ${course.name}`}
+                        title="Delete course"
                       >
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                          {formatDisplayDate(trade.date.toISOString())}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                          {trade.symbol}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                          {trade.setup}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                          ${trade.entry.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                          ${trade.exit.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                          {trade.quantity}
-                        </td>
-                        <td className={`px-6 py-4 whitespace-nowrap text-sm font-medium transition-colors duration-200 ${
-                          trade.pnl >= 0 ? 'text-accent-emerald dark:text-accent-emerald-dark' : 'text-red-600 dark:text-red-400'
-                        }`}>
-                          ${trade.pnl.toFixed(2)}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <button
-                            onClick={() => handleDelete(trade.id)}
-                            className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 transition-colors duration-200"
-                          >
-                            Delete
-                          </button>
-                        </td>
-                      </motion.tr>
-                    ))}
-                  </motion.tbody>
-                </AnimatePresence>
-              </table>
-            </div>
-          )}
-        </Card>
-      </div>
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                          />
+                        </svg>
+                      </button>
+                    </div>
+                    {course.description && (
+                      <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">{course.description}</p>
+                    )}
+                    {course.startDate && (
+                      <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">
+                        Started: {formatDisplayDate(course.startDate.toISOString())}
+                      </p>
+                    )}
+                  </div>
+                  <ProgressBar progress={course.progress} color="career" showPercentage={true} />
+                  <div className="mt-4 flex justify-between items-center">
+                    <span className="text-sm text-accent-blue dark:text-accent-blue-dark font-medium group-hover:underline transition-colors duration-200">
+                      View Details →
+                    </span>
+                    <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">{Math.round(course.progress)}%</span>
+                  </div>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      )}
+
+      <InputDialog
+        isOpen={showAddDialog}
+        title="Add New Course"
+        message="Enter a name for your new course"
+        inputLabel="Course Name"
+        inputPlaceholder="e.g., Technical Analysis Fundamentals"
+        confirmLabel="Add Course"
+        cancelLabel="Cancel"
+        onConfirm={handleAddCourse}
+        onCancel={() => setShowAddDialog(false)}
+      />
     </div>
   )
 }
