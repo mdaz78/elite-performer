@@ -585,123 +585,6 @@ function TasksPageContent() {
                 })}
               </motion.div>
             )}
-
-            {/* Project Form Modal */}
-            {showProjectForm && (
-              <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity">
-                <div className="fixed inset-0 z-50 overflow-y-auto">
-                  <div className="flex min-h-full items-center justify-center p-4">
-                    <motion.div
-                      initial={{ opacity: 0, scale: 0.95 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      className="bg-surface dark:bg-surface-dark rounded-xl shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-4">
-                        {editingProjectId ? 'Edit Project' : 'Add Project'}
-                      </h3>
-                      <form onSubmit={handleProjectSubmit} className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
-                            Name
-                          </label>
-                          <input
-                            type="text"
-                            value={projectFormData.name}
-                            onChange={(e) => setProjectFormData({ ...projectFormData, name: e.target.value })}
-                            className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
-                            placeholder="e.g., Build Portfolio App"
-                            required
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
-                            Description
-                          </label>
-                          <textarea
-                            value={projectFormData.description}
-                            onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
-                            rows={3}
-                            className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
-                            placeholder="Project description..."
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
-                            Status
-                          </label>
-                          <select
-                            value={projectFormData.status}
-                            onChange={(e) =>
-                              setProjectFormData({ ...projectFormData, status: e.target.value as 'active' | 'completed' | 'paused' })
-                            }
-                            className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
-                          >
-                            <option value="active">Active</option>
-                            <option value="completed">Completed</option>
-                            <option value="paused">Paused</option>
-                          </select>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div>
-                            <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
-                              Start Date
-                            </label>
-                            <input
-                              type="date"
-                              value={projectFormData.startDate}
-                              onChange={(e) => setProjectFormData({ ...projectFormData, startDate: e.target.value })}
-                              className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
-                            />
-                          </div>
-
-                          <div>
-                            <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
-                              Target Date
-                            </label>
-                            <input
-                              type="date"
-                              value={projectFormData.targetDate}
-                              onChange={(e) => setProjectFormData({ ...projectFormData, targetDate: e.target.value })}
-                              className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="flex justify-end gap-2 pt-2">
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setShowProjectForm(false)
-                              setEditingProjectId(null)
-                              setProjectFormData({
-                                name: '',
-                                description: '',
-                                status: 'active',
-                                startDate: getToday(),
-                                targetDate: addDays(getToday(), 30),
-                              })
-                            }}
-                            className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            type="submit"
-                            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors font-medium shadow-sm"
-                          >
-                            {editingProjectId ? 'Update' : 'Add'} Project
-                          </button>
-                        </div>
-                      </form>
-                    </motion.div>
-                  </div>
-                </div>
-              </div>
-            )}
           </motion.div>
         )}
 
@@ -832,105 +715,6 @@ function TasksPageContent() {
                 )}
               </div>
             </div>
-
-      {/* Task Creation Form */}
-      {showTaskForm && (
-        <Card title="Create New Task" className="mb-6">
-          <form onSubmit={handleTaskSubmit} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Title</label>
-                <input
-                  type="text"
-                  value={formData.title}
-                  onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                  placeholder="e.g., Complete React module"
-                  required
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Type</label>
-                <select
-                  value={formData.type}
-                  onChange={(e) => setFormData({ ...formData, type: e.target.value as typeof formData.type })}
-                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                >
-                  {taskTypes.map((type) => (
-                    <option key={type} value={type}>
-                      {type === 'DeepWork' ? 'Deep Work' : type === 'TradingPractice' ? 'Trading Practice' : type}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Task Project (Optional)</label>
-                <select
-                  value={formData.taskProjectId || ''}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      taskProjectId: e.target.value ? parseInt(e.target.value, 10) : undefined,
-                    })
-                  }
-                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                >
-                  <option value="">None</option>
-                  {taskProjects
-                    .filter((p) => p.status === 'active')
-                    .map((taskProject) => (
-                      <option key={taskProject.id} value={taskProject.id}>
-                        {taskProject.name}
-                      </option>
-                    ))}
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Assign to Day</label>
-                <select
-                  value={formData.scheduledDate}
-                  onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
-                >
-                  <option value="unassigned">Unassigned (Backlog)</option>
-                  {weekDays.map((date, idx) => (
-                    <option key={date} value={date}>
-                      {dayNames[idx]} - {formatDisplayDate(date)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setShowTaskForm(false)
-                  setFormData({
-                    title: '',
-                    type: 'DeepWork',
-                    projectId: undefined,
-                    scheduledDate: 'unassigned',
-                  })
-                }}
-                className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors font-medium shadow-sm"
-              >
-                Add Task
-              </button>
-            </div>
-          </form>
-        </Card>
-      )}
 
       {/* Week View - Horizontal Date Sections */}
       <div className="mb-8 space-y-6">
@@ -1271,6 +1055,236 @@ function TasksPageContent() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Task Creation Form Modal - Available on all tabs */}
+      {showTaskForm && (
+        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowTaskForm(false)}>
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-surface dark:bg-surface-dark rounded-xl shadow-2xl p-6 max-w-2xl w-full border border-border dark:border-border-dark transition-colors duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-4">
+                  Create New Task
+                </h3>
+                <form onSubmit={handleTaskSubmit} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Title</label>
+                      <input
+                        type="text"
+                        value={formData.title}
+                        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                        placeholder="e.g., Complete React module"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Type</label>
+                      <select
+                        value={formData.type}
+                        onChange={(e) => setFormData({ ...formData, type: e.target.value as typeof formData.type })}
+                        className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      >
+                        {taskTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type === 'DeepWork' ? 'Deep Work' : type === 'TradingPractice' ? 'Trading Practice' : type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Task Project (Optional)</label>
+                      <select
+                        value={formData.taskProjectId || ''}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            taskProjectId: e.target.value ? parseInt(e.target.value, 10) : undefined,
+                          })
+                        }
+                        className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      >
+                        <option value="">None</option>
+                        {taskProjects
+                          .filter((p) => p.status === 'active')
+                          .map((taskProject) => (
+                            <option key={taskProject.id} value={taskProject.id}>
+                              {taskProject.name}
+                            </option>
+                          ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Assign to Day</label>
+                      <select
+                        value={formData.scheduledDate}
+                        onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
+                        className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      >
+                        <option value="unassigned">Unassigned (Backlog)</option>
+                        {weekDays.map((date, idx) => (
+                          <option key={date} value={date}>
+                            {dayNames[idx]} - {formatDisplayDate(date)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowTaskForm(false)
+                        setFormData({
+                          title: '',
+                          type: 'DeepWork',
+                          taskProjectId: undefined,
+                          scheduledDate: 'unassigned',
+                        })
+                      }}
+                      className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors font-medium shadow-sm"
+                    >
+                      Add Task
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Project Form Modal - Available on all tabs */}
+      {showProjectForm && (
+        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity">
+          <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-full items-center justify-center p-4">
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className="bg-surface dark:bg-surface-dark rounded-xl shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-4">
+                  {editingProjectId ? 'Edit Project' : 'Add Project'}
+                </h3>
+                <form onSubmit={handleProjectSubmit} className="space-y-4">
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                      Name
+                    </label>
+                    <input
+                      type="text"
+                      value={projectFormData.name}
+                      onChange={(e) => setProjectFormData({ ...projectFormData, name: e.target.value })}
+                      className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      placeholder="e.g., Build Portfolio App"
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                      Description
+                    </label>
+                    <textarea
+                      value={projectFormData.description}
+                      onChange={(e) => setProjectFormData({ ...projectFormData, description: e.target.value })}
+                      rows={3}
+                      className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      placeholder="Project description..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                      Status
+                    </label>
+                    <select
+                      value={projectFormData.status}
+                      onChange={(e) =>
+                        setProjectFormData({ ...projectFormData, status: e.target.value as 'active' | 'completed' | 'paused' })
+                      }
+                      className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                    >
+                      <option value="active">Active</option>
+                      <option value="completed">Completed</option>
+                      <option value="paused">Paused</option>
+                    </select>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                        Start Date
+                      </label>
+                      <input
+                        type="date"
+                        value={projectFormData.startDate}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, startDate: e.target.value })}
+                        className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">
+                        Target Date
+                      </label>
+                      <input
+                        type="date"
+                        value={projectFormData.targetDate}
+                        onChange={(e) => setProjectFormData({ ...projectFormData, targetDate: e.target.value })}
+                        className="w-full px-3 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-accent-blue dark:focus:ring-accent-blue-dark focus:border-accent-blue dark:focus:border-accent-blue-dark transition-colors duration-200"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end gap-2 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setShowProjectForm(false)
+                        setEditingProjectId(null)
+                        setProjectFormData({
+                          name: '',
+                          description: '',
+                          status: 'active',
+                          startDate: getToday(),
+                          targetDate: addDays(getToday(), 30),
+                        })
+                      }}
+                      className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors font-medium shadow-sm"
+                    >
+                      {editingProjectId ? 'Update' : 'Add'} Project
+                    </button>
+                  </div>
+                </form>
+              </motion.div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
