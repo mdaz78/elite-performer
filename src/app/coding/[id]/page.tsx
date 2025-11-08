@@ -47,8 +47,8 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
       style={style}
       className={`flex items-center justify-between p-4 border-2 rounded-lg transition-all ${
         module.completed
-          ? 'border-green-200 bg-green-50'
-          : 'border-gray-200 hover:border-blue-500 hover:bg-gray-50'
+          ? 'border-green-200 dark:border-green-800 bg-green-50 dark:bg-green-900/20'
+          : 'border-border dark:border-border-dark hover:border-blue-500 dark:hover:border-blue-500 hover:bg-background dark:hover:bg-background-dark'
       }`}
     >
       <div className="flex items-center flex-1 min-w-0">
@@ -59,7 +59,7 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
           title="Drag to reorder"
         >
           <svg
-            className="w-5 h-5 text-gray-400 hover:text-gray-600"
+            className="w-5 h-5 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark"
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
@@ -75,7 +75,7 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
         <div className="shrink-0 mr-4">
           <div
             className={`w-8 h-8 rounded-full flex items-center justify-center font-semibold text-sm ${
-              module.completed ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-600'
+              module.completed ? 'bg-green-500 text-white' : 'bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark'
             }`}
           >
             {module.order}
@@ -85,18 +85,18 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
           type="checkbox"
           checked={module.completed}
           onChange={() => onToggle(module.id, module.completed)}
-          className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+          className="mr-4 h-5 w-5 text-blue-500 focus:ring-blue-500 border-border dark:border-border-dark rounded cursor-pointer transition-colors duration-200"
         />
         <div className="flex-1 min-w-0">
           <p
             className={`font-medium text-lg ${
-              module.completed ? 'line-through text-gray-400' : 'text-gray-900'
+              module.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'
             }`}
           >
             {module.name}
           </p>
           {module.completedAt && (
-            <p className="text-xs text-gray-500 mt-1">
+            <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1">
               Completed on {formatDisplayDate(module.completedAt.toISOString())}
             </p>
           )}
@@ -104,7 +104,7 @@ const SortableModuleItem = ({ module, onToggle, onDelete }: SortableModuleItemPr
       </div>
       <button
         onClick={() => onDelete(module.id)}
-        className="ml-4 px-3 py-1 text-red-600 hover:text-red-800 hover:bg-red-50 rounded text-sm font-medium transition-colors"
+        className="ml-4 px-3 py-1 text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/20 rounded text-sm font-medium transition-colors"
         title="Delete module"
       >
         Delete
@@ -205,7 +205,7 @@ function CourseDetailContent() {
   if (courseLoading || modulesLoading) {
     return (
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <p className="text-gray-500">Loading course...</p>
+        <p className="text-text-tertiary dark:text-text-tertiary-dark">Loading course...</p>
       </div>
     )
   }
@@ -342,7 +342,7 @@ function CourseDetailContent() {
       <div className="mb-8">
         <button
           onClick={() => router.push('/coding')}
-          className="text-blue-500 hover:underline mb-4 text-sm font-medium"
+          className="text-accent-blue dark:text-accent-blue-dark hover:underline mb-4 text-sm font-medium transition-colors duration-200"
         >
           ← Back to Courses
         </button>
@@ -355,7 +355,7 @@ function CourseDetailContent() {
                     type="text"
                     value={editedName}
                     onChange={(e) => setEditedName(e.target.value)}
-                    className="text-3xl font-bold text-gray-900 border-2 border-blue-500 rounded px-3 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="text-3xl font-bold text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark border-2 border-blue-500 rounded px-3 py-1 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                     autoFocus
                     onKeyDown={(e) => {
                       if (e.key === 'Enter') handleSaveCourseName()
@@ -367,7 +367,7 @@ function CourseDetailContent() {
                   />
                   <button
                     onClick={handleSaveCourseName}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors"
+                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors"
                     aria-label="Save name"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -384,7 +384,7 @@ function CourseDetailContent() {
                       setEditingName(false)
                       setEditedName(course.name)
                     }}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                     aria-label="Cancel editing"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -399,10 +399,10 @@ function CourseDetailContent() {
                 </div>
               ) : (
                 <div className="flex items-center gap-2 group">
-                  <h1 className="text-3xl font-bold text-gray-900">{course.name}</h1>
+                  <h1 className="text-3xl font-bold text-text-primary dark:text-text-primary-dark">{course.name}</h1>
                   <button
                     onClick={handleEditName}
-                    className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity"
+                    className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity"
                     aria-label="Edit course name"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -422,7 +422,7 @@ function CourseDetailContent() {
                 <textarea
                   value={editedDescription}
                   onChange={(e) => setEditedDescription(e.target.value)}
-                  className="text-gray-600 text-lg border-2 border-blue-500 rounded px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  className="text-text-primary dark:text-text-primary-dark bg-surface dark:bg-surface-dark text-lg border-2 border-blue-500 rounded px-3 py-2 flex-1 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none transition-colors duration-200"
                   rows={3}
                   autoFocus
                   onKeyDown={(e) => {
@@ -435,7 +435,7 @@ function CourseDetailContent() {
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={handleSaveDescription}
-                    className="p-2 text-green-600 hover:bg-green-50 rounded-full transition-colors"
+                    className="p-2 text-green-600 dark:text-green-400 hover:bg-green-50 dark:hover:bg-green-900/20 rounded-full transition-colors"
                     aria-label="Save description"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -452,7 +452,7 @@ function CourseDetailContent() {
                       setEditingDescription(false)
                       setEditedDescription(course.description || '')
                     }}
-                    className="p-2 text-red-600 hover:bg-red-50 rounded-full transition-colors"
+                    className="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-full transition-colors"
                     aria-label="Cancel editing"
                   >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -469,13 +469,13 @@ function CourseDetailContent() {
             ) : (
               <div className="mt-2 flex items-start gap-2 group">
                 {course.description ? (
-                  <p className="text-gray-600 text-lg">{course.description}</p>
+                  <p className="text-text-secondary dark:text-text-secondary-dark text-lg">{course.description}</p>
                 ) : (
-                  <p className="text-gray-400 text-lg italic">No description</p>
+                  <p className="text-text-tertiary dark:text-text-tertiary-dark text-lg italic">No description</p>
                 )}
                 <button
                   onClick={handleEditDescription}
-                  className="p-1 text-gray-400 hover:text-gray-600 opacity-0 group-hover:opacity-100 transition-opacity mt-1"
+                  className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark opacity-0 group-hover:opacity-100 transition-opacity mt-1"
                   aria-label="Edit description"
                 >
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -494,7 +494,7 @@ function CourseDetailContent() {
             <CsvImporter onImport={handleCSVImport} label="Import CSV" />
             <button
               onClick={() => setShowAddModuleDialog(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
               Add Module
             </button>
@@ -506,20 +506,20 @@ function CourseDetailContent() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-gray-900 mb-1">{totalModules}</div>
-            <div className="text-sm text-gray-600">Total Modules</div>
+            <div className="text-3xl font-bold text-text-primary dark:text-text-primary-dark mb-1">{totalModules}</div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Total Modules</div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-green-600 mb-1">{completedModules}</div>
-            <div className="text-sm text-gray-600">Completed</div>
+            <div className="text-3xl font-bold text-green-600 dark:text-green-400 mb-1">{completedModules}</div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Completed</div>
           </div>
         </Card>
         <Card>
           <div className="text-center">
-            <div className="text-3xl font-bold text-blue-500 mb-1">{Math.round(progress)}%</div>
-            <div className="text-sm text-gray-600">Progress</div>
+            <div className="text-3xl font-bold text-accent-blue dark:text-accent-blue-dark mb-1">{Math.round(progress)}%</div>
+            <div className="text-sm text-text-secondary dark:text-text-secondary-dark">Progress</div>
           </div>
         </Card>
       </div>
@@ -532,7 +532,7 @@ function CourseDetailContent() {
           !editingDates ? (
             <button
               onClick={handleEditDates}
-              className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+              className="p-1 text-text-tertiary dark:text-text-tertiary-dark hover:text-text-secondary dark:hover:text-text-secondary-dark transition-colors"
               aria-label="Edit dates"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -551,21 +551,21 @@ function CourseDetailContent() {
           <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Start Date:</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Start Date:</label>
                 <input
                   type="date"
                   value={editedStartDate}
                   onChange={(e) => setEditedStartDate(e.target.value)}
-                  className="w-full bg-white text-gray-900 border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                 />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Target Date:</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Target Date:</label>
                 <input
                   type="date"
                   value={editedTargetDate}
                   onChange={(e) => setEditedTargetDate(e.target.value)}
-                  className="w-full bg-white text-gray-900 border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border-2 border-blue-500 rounded px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors duration-200"
                 />
               </div>
             </div>
@@ -590,7 +590,7 @@ function CourseDetailContent() {
                   setEditedStartDate(course.startDate ? new Date(course.startDate).toISOString().split('T')[0] : '')
                   setEditedTargetDate(course.targetDate ? new Date(course.targetDate).toISOString().split('T')[0] : '')
                 }}
-                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md hover:bg-gray-300 transition-colors flex items-center gap-2"
+                className="px-4 py-2 bg-background dark:bg-background-dark text-text-primary dark:text-text-primary-dark rounded-md hover:bg-background/80 dark:hover:bg-background-dark/80 transition-colors flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path
@@ -608,24 +608,24 @@ function CourseDetailContent() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {course.startDate && (
               <div>
-                <span className="text-sm font-medium text-gray-700">Start Date:</span>
-                <p className="text-gray-900">{formatDisplayDate(course.startDate.toISOString())}</p>
+                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Start Date:</span>
+                <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.startDate.toISOString())}</p>
               </div>
             )}
             {course.targetDate && (
               <div>
-                <span className="text-sm font-medium text-gray-700">Target Date:</span>
-                <p className="text-gray-900">{formatDisplayDate(course.targetDate.toISOString())}</p>
+                <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Target Date:</span>
+                <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.targetDate.toISOString())}</p>
               </div>
             )}
             {!course.startDate && !course.targetDate && (
-              <div className="col-span-2 text-gray-400 italic">
+              <div className="col-span-2 text-text-tertiary dark:text-text-tertiary-dark italic">
                 No dates set. Click the edit icon to add dates.
               </div>
             )}
             <div>
-              <span className="text-sm font-medium text-gray-700">Created:</span>
-              <p className="text-gray-900">{formatDisplayDate(course.createdAt.toISOString())}</p>
+              <span className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark">Created:</span>
+              <p className="text-text-primary dark:text-text-primary-dark">{formatDisplayDate(course.createdAt.toISOString())}</p>
             </div>
           </div>
         )}
@@ -634,9 +634,9 @@ function CourseDetailContent() {
       {/* Progress Bar */}
       <Card className="mb-6">
         <div className="mb-4">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">Overall Progress</h2>
+          <h2 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark mb-3">Overall Progress</h2>
           <ProgressBar progress={progress} color="career" showPercentage={true} />
-          <p className="text-sm text-gray-600 mt-3">
+          <p className="text-sm text-text-secondary dark:text-text-secondary-dark mt-3">
             {completedModules} of {totalModules} modules completed
             {totalModules > 0 && (
               <span className="ml-2">({totalModules - completedModules} remaining)</span>
@@ -651,7 +651,7 @@ function CourseDetailContent() {
       >
         {modules.length === 0 ? (
           <div className="text-center py-12">
-            <div className="text-gray-400 mb-4">
+            <div className="text-text-tertiary dark:text-text-tertiary-dark mb-4">
               <svg
                 className="mx-auto h-12 w-12"
                 fill="none"
@@ -666,13 +666,13 @@ function CourseDetailContent() {
                 />
               </svg>
             </div>
-            <p className="text-gray-500 mb-2 font-medium">No modules yet</p>
-            <p className="text-gray-400 text-sm mb-4">
+            <p className="text-text-secondary dark:text-text-secondary-dark mb-2 font-medium">No modules yet</p>
+            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm mb-4">
               Add modules to start tracking your course progress
             </p>
             <button
               onClick={() => setShowAddModuleDialog(true)}
-              className="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors"
+              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
               Add Your First Module
             </button>

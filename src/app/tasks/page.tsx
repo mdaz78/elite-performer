@@ -252,28 +252,28 @@ function TasksPageContent() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => navigateWeek('prev')}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm h-10"
+            className="px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-border/60 dark:hover:border-border-dark/60 transition-colors duration-200 shadow-sm h-10"
           >
             ← Previous
           </button>
-          <div className="flex items-center gap-3 bg-white border border-gray-300 rounded-lg px-4 shadow-sm h-10">
+          <div className="flex items-center gap-3 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg px-4 shadow-sm h-10">
             <input
               type="date"
               value={selectedWeekStart}
               onChange={(e) => setSelectedWeekStart(getWeekStartSunday(e.target.value))}
-              className="border-0 bg-transparent text-gray-700 font-medium focus:outline-none focus:ring-0 cursor-pointer h-full py-0"
+              className="border-0 bg-transparent text-text-primary dark:text-text-primary-dark font-medium focus:outline-none focus:ring-0 cursor-pointer h-full py-0 transition-colors duration-200"
             />
-            <span className="text-gray-700 font-semibold text-sm whitespace-nowrap">{formatWeekRange(selectedWeekStart)}</span>
+            <span className="text-text-primary dark:text-text-primary-dark font-semibold text-sm whitespace-nowrap">{formatWeekRange(selectedWeekStart)}</span>
           </div>
           <button
             onClick={() => navigateWeek('next')}
-            className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 hover:border-gray-400 transition-colors shadow-sm h-10"
+            className="px-4 py-2 bg-surface dark:bg-surface-dark border border-border dark:border-border-dark rounded-lg text-text-primary dark:text-text-primary-dark font-medium hover:bg-background dark:hover:bg-background-dark hover:border-border/60 dark:hover:border-border-dark/60 transition-colors duration-200 shadow-sm h-10"
           >
             Next →
           </button>
           <button
             onClick={() => setSelectedWeekStart(getWeekStartSunday())}
-            className="px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-colors h-10"
+            className="px-4 py-2 text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 rounded-lg transition-colors duration-200 h-10"
           >
             This Week
           </button>
@@ -289,7 +289,7 @@ function TasksPageContent() {
           )}
           <button
             onClick={() => setShowTaskForm(!showTaskForm)}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors shadow-sm font-medium text-sm"
+            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200 shadow-sm font-medium text-sm"
           >
             {showTaskForm ? 'Cancel' : '+ Add Task'}
           </button>
@@ -302,23 +302,23 @@ function TasksPageContent() {
           <form onSubmit={handleTaskSubmit} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Title</label>
                 <input
                   type="text"
                   value={formData.title}
                   onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                   placeholder="e.g., Complete React module"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Type</label>
                 <select
                   value={formData.type}
                   onChange={(e) => setFormData({ ...formData, type: e.target.value as typeof formData.type })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 >
                   {taskTypes.map((type) => (
                     <option key={type} value={type}>
@@ -329,7 +329,7 @@ function TasksPageContent() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Project (Optional)</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Project (Optional)</label>
                 <select
                   value={formData.projectId || ''}
                   onChange={(e) =>
@@ -338,7 +338,7 @@ function TasksPageContent() {
                       projectId: e.target.value ? parseInt(e.target.value, 10) : undefined,
                     })
                   }
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 >
                   <option value="">None</option>
                   {projects
@@ -352,11 +352,11 @@ function TasksPageContent() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Assign to Day</label>
+                <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Assign to Day</label>
                 <select
                   value={formData.scheduledDate}
                   onChange={(e) => setFormData({ ...formData, scheduledDate: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 >
                   <option value={selectedWeekStart}>Unassigned (This Week)</option>
                   {weekDays.map((date, idx) => (
@@ -380,7 +380,7 @@ function TasksPageContent() {
                     scheduledDate: selectedWeekStart,
                   })
                 }}
-                className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
               >
                 Cancel
               </button>
@@ -406,23 +406,23 @@ function TasksPageContent() {
             return (
               <div
                 key={date}
-                className={`bg-white rounded-lg shadow-sm border-2 transition-all ${
+                className={`bg-surface dark:bg-surface-dark rounded-lg shadow-sm border-2 transition-all ${
                   isToday
                     ? 'border-blue-500 shadow-md'
                     : isSunday
-                    ? 'border-blue-200 bg-blue-50/50'
-                    : 'border-gray-200'
+                    ? 'border-blue-200 dark:border-blue-800 bg-blue-50/50 dark:bg-blue-900/20'
+                    : 'border-border dark:border-border-dark'
                 }`}
               >
-                <div className="px-4 py-3 border-b border-gray-200 bg-white rounded-t-lg">
+                <div className="px-4 py-3 border-b border-border dark:border-border-dark bg-surface dark:bg-surface-dark rounded-t-lg">
                   <div className="flex items-center justify-between">
                     <div>
-                      <div className="text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      <div className="text-xs font-semibold text-text-tertiary dark:text-text-tertiary-dark uppercase tracking-wide">
                         {dayNames[idx]}
                       </div>
                       <div
                         className={`text-xl font-bold mt-0.5 ${
-                          isToday ? 'text-blue-600' : 'text-gray-900'
+                          isToday ? 'text-blue-600 dark:text-blue-400' : 'text-text-primary dark:text-text-primary-dark'
                         }`}
                       >
                         {dayjs(date).format('D')}
@@ -439,7 +439,7 @@ function TasksPageContent() {
                   <div className="space-y-2">
                     {dayTasks.length === 0 ? (
                       <div className="flex items-center justify-center h-full min-h-[300px]">
-                        <p className="text-sm text-gray-400">No tasks</p>
+                        <p className="text-sm text-text-tertiary dark:text-text-tertiary-dark">No tasks</p>
                       </div>
                     ) : (
                       dayTasks.map((task) => {
@@ -450,8 +450,8 @@ function TasksPageContent() {
                             key={task.id}
                             className={`group p-3 border rounded-lg transition-all ${
                               task.completed
-                                ? 'bg-gray-50 border-gray-200 opacity-60'
-                                : 'bg-white border-gray-200 hover:border-blue-300 hover:shadow-sm'
+                                ? 'bg-background dark:bg-background-dark border-border dark:border-border-dark opacity-60'
+                                : 'bg-surface dark:bg-surface-dark border-border dark:border-border-dark hover:border-blue-300 dark:hover:border-blue-600 hover:shadow-sm'
                             }`}
                           >
                             <div className="flex items-start gap-2">
@@ -459,22 +459,22 @@ function TasksPageContent() {
                                 type="checkbox"
                                 checked={task.completed}
                                 onChange={() => handleToggleComplete(task.id, task.completed)}
-                                className="mt-0.5 h-4 w-4 text-blue-500 focus:ring-blue-500 border-gray-300 rounded cursor-pointer"
+                                className="mt-0.5 h-4 w-4 text-blue-500 focus:ring-blue-500 border-border dark:border-border-dark rounded cursor-pointer transition-colors duration-200"
                               />
                               <div className="flex-1 min-w-0">
                                 <p
                                   className={`text-sm font-medium ${
-                                    task.completed ? 'line-through text-gray-400' : 'text-gray-900'
+                                    task.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'
                                   }`}
                                 >
                                   {task.title}
                                 </p>
                                 <div className="flex items-center gap-2 mt-1.5 flex-wrap">
-                                  <span className="text-xs font-medium px-2 py-0.5 bg-gray-100 text-gray-700 rounded-md">
+                                  <span className="text-xs font-medium px-2 py-0.5 bg-background dark:bg-background-dark text-text-secondary dark:text-text-secondary-dark rounded-md">
                                     {taskTypeDisplay}
                                   </span>
                                   {project && (
-                                    <span className="text-xs text-gray-500 truncate">• {project.name}</span>
+                                    <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark truncate">• {project.name}</span>
                                   )}
                                 </div>
                               </div>
@@ -482,7 +482,7 @@ function TasksPageContent() {
                                 <select
                                   value={new Date(task.scheduledDate).toISOString().split('T')[0]}
                                   onChange={(e) => handleAssignTask(task, e.target.value)}
-                                  className="text-xs border border-gray-300 rounded-md px-1.5 py-1 bg-white focus:ring-blue-500 focus:border-blue-500 cursor-pointer"
+                                  className="text-xs border border-border dark:border-border-dark rounded-md px-1.5 py-1 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark focus:ring-blue-500 focus:border-blue-500 cursor-pointer transition-colors duration-200"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {weekDays.map((d, i) => (
@@ -493,7 +493,7 @@ function TasksPageContent() {
                                 </select>
                                 <button
                                   onClick={() => handleDelete(task.id)}
-                                  className="text-red-600 hover:text-red-800 text-lg font-bold leading-none px-1 hover:bg-red-50 rounded transition-colors"
+                                  className="text-red-600 dark:text-red-400 hover:text-red-800 dark:hover:text-red-300 text-lg font-bold leading-none px-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors"
                                   title="Delete task"
                                 >
                                   ×
@@ -518,7 +518,7 @@ function TasksPageContent() {
         action={
           <button
             onClick={() => setShowReviewSection(!showReviewSection)}
-            className="text-sm font-medium text-blue-600 hover:text-blue-700 hover:bg-blue-50 px-3 py-1 rounded-md transition-colors"
+            className="text-sm font-medium text-accent-blue dark:text-accent-blue-dark hover:text-accent-blue/90 dark:hover:text-accent-blue-dark/90 hover:bg-accent-blue/10 dark:hover:bg-accent-blue-dark/10 px-3 py-1 rounded-md transition-colors duration-200"
           >
             {showReviewSection ? 'Collapse' : 'Expand'}
           </button>
@@ -527,34 +527,34 @@ function TasksPageContent() {
         {showReviewSection && (
           <form onSubmit={handleReviewSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Wins</label>
+              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Wins</label>
               <textarea
                 value={reviewData.wins}
                 onChange={(e) => setReviewData({ ...reviewData, wins: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 placeholder="What went well this week?"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Mistakes & Learnings</label>
+              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Mistakes & Learnings</label>
               <textarea
                 value={reviewData.mistakes}
                 onChange={(e) => setReviewData({ ...reviewData, mistakes: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 placeholder="What could be improved?"
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Next Week Goals</label>
+              <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark mb-1">Next Week Goals</label>
               <textarea
                 value={reviewData.nextWeekGoals}
                 onChange={(e) => setReviewData({ ...reviewData, nextWeekGoals: e.target.value })}
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
+                className="w-full px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200"
                 placeholder="What are your goals for next week?"
               />
             </div>
@@ -572,16 +572,16 @@ function TasksPageContent() {
         {!showReviewSection && hasReview && (
           <div className="space-y-3 text-sm">
             <div className="p-3 bg-green-50 border border-green-200 rounded-lg">
-              <span className="font-semibold text-gray-700">Wins: </span>
-              <span className="text-gray-700 whitespace-pre-wrap">{reviewData.wins}</span>
+              <span className="font-semibold text-text-primary dark:text-text-primary-dark">Wins: </span>
+              <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.wins}</span>
             </div>
             <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-              <span className="font-semibold text-gray-700">Mistakes & Learnings: </span>
-              <span className="text-gray-700 whitespace-pre-wrap">{reviewData.mistakes}</span>
+              <span className="font-semibold text-text-primary dark:text-text-primary-dark">Mistakes & Learnings: </span>
+              <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.mistakes}</span>
             </div>
             <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-              <span className="font-semibold text-gray-700">Next Week Goals: </span>
-              <span className="text-gray-700 whitespace-pre-wrap">{reviewData.nextWeekGoals}</span>
+              <span className="font-semibold text-text-primary dark:text-text-primary-dark">Next Week Goals: </span>
+              <span className="text-text-primary dark:text-text-primary-dark whitespace-pre-wrap">{reviewData.nextWeekGoals}</span>
             </div>
           </div>
         )}
@@ -589,20 +589,20 @@ function TasksPageContent() {
 
       {/* Rollover Dialog */}
       {showRolloverDialog && (
-        <div className="fixed inset-0 bg-gray-900 bg-opacity-50 z-40" onClick={() => setShowRolloverDialog(false)}>
+        <div className="fixed inset-0 bg-gray-900/50 dark:bg-gray-900/70 backdrop-blur-sm z-40 transition-opacity" onClick={() => setShowRolloverDialog(false)}>
           <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-full items-center justify-center p-4">
               <div
-                className="bg-white rounded-lg shadow-2xl p-6 max-w-md w-full border border-gray-200"
+                className="bg-surface dark:bg-surface-dark rounded-lg shadow-2xl p-6 max-w-md w-full border border-border dark:border-border-dark transition-colors duration-200"
                 onClick={(e) => e.stopPropagation()}
               >
-                <h3 className="text-xl font-bold text-gray-900 mb-2">Rollover Incomplete Tasks</h3>
-                <p className="text-sm text-gray-600 mb-4">
+                <h3 className="text-xl font-bold text-text-primary dark:text-text-primary-dark mb-2">Rollover Incomplete Tasks</h3>
+                <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-4">
                   Move {incompleteTasks.length} incomplete task{incompleteTasks.length !== 1 ? 's' : ''} to next week?
                 </p>
-                <div className="space-y-2 mb-6 max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                <div className="space-y-2 mb-6 max-h-48 overflow-y-auto border border-border dark:border-border-dark rounded-lg p-3 bg-background dark:bg-background-dark">
                   {incompleteTasks.map((task) => (
-                    <div key={task.id} className="text-sm text-gray-700 p-2 bg-white rounded-md border border-gray-200">
+                    <div key={task.id} className="text-sm text-text-primary dark:text-text-primary-dark p-2 bg-surface dark:bg-surface-dark rounded-md border border-border dark:border-border-dark">
                       {task.title}
                     </div>
                   ))}
@@ -610,13 +610,13 @@ function TasksPageContent() {
                 <div className="flex justify-end gap-2">
                   <button
                     onClick={() => setShowRolloverDialog(false)}
-                    className="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium transition-colors"
+                    className="px-4 py-2 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark text-text-primary dark:text-text-primary-dark font-medium transition-colors duration-200"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleRollover}
-                    className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 font-medium shadow-sm transition-colors"
+                    className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-lg hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 font-medium shadow-sm transition-colors duration-200"
                   >
                     Rollover
                   </button>
