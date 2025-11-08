@@ -85,3 +85,30 @@ export const getDaysInRange = (startDate: string, endDate: string): string[] => 
   }
   return days;
 };
+
+// Week functions for Sunday-based week planning
+export const getWeekStartSunday = (date?: string | Date): string => {
+  return dayjs(date).startOf('week').format('YYYY-MM-DD');
+};
+
+export const getWeekEndSaturday = (date?: string | Date): string => {
+  return dayjs(date).endOf('week').format('YYYY-MM-DD');
+};
+
+export const getWeekDays = (weekStartDate: string): string[] => {
+  const days: string[] = [];
+  let current = dayjs(weekStartDate);
+  for (let i = 0; i < 7; i++) {
+    days.push(current.format('YYYY-MM-DD'));
+    current = current.add(1, 'day');
+  }
+  return days;
+};
+
+export const formatWeekRange = (weekStartDate: string): string => {
+  const start = dayjs(weekStartDate);
+  const end = start.add(6, 'day');
+  const startFormatted = start.format('MMM D');
+  const endFormatted = end.format('MMM D, YYYY');
+  return `${startFormatted} - ${endFormatted}`;
+};

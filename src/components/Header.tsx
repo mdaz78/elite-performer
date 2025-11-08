@@ -10,7 +10,6 @@ export const Header = () => {
     { path: '/trading', label: 'Trading' },
     { path: '/tasks', label: 'Tasks' },
     { path: '/projects', label: 'Projects' },
-    { path: '/review', label: 'Weekly Review' },
   ];
 
   return (
