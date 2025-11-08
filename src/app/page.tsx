@@ -73,9 +73,24 @@ function DashboardContent() {
     },
   });
 
+  // Mutation to toggle habit completion
+  const markHabitCompleteMutation = trpc.habits.markHabitComplete.useMutation({
+    onSuccess: () => {
+      utils.habits.getToday.invalidate();
+    },
+  });
+
   const toggleSubHabit = async (subHabitId: number, completed: boolean) => {
     await markSubHabitCompleteMutation.mutateAsync({
       subHabitId,
+      date: new Date().toISOString(),
+      completed: !completed,
+    });
+  };
+
+  const toggleHabit = async (habitId: number, completed: boolean) => {
+    await markHabitCompleteMutation.mutateAsync({
+      habitId,
       date: new Date().toISOString(),
       completed: !completed,
     });
@@ -479,19 +494,37 @@ function DashboardContent() {
                           )}
                         </div>
                       </div>
-                      {totalSubHabits > 0 && (
+                      <div className="flex items-center gap-2 ml-2 flex-shrink-0">
                         <button
-                          onClick={() => toggleExpandHabit(habit.id)}
-                          className="ml-2 p-1 hover:bg-neutral-50 dark:hover:bg-neutral-100 rounded transition-colors duration-[150ms] flex-shrink-0"
-                          aria-label={isExpanded ? 'Collapse habit' : 'Expand habit'}
+                          onClick={() => toggleHabit(habit.id, isComplete)}
+                          disabled={markHabitCompleteMutation.isPending}
+                          className={`px-3 py-1 rounded text-body-sm font-medium text-white transition-all duration-[150ms] flex-shrink-0 ${
+                            isComplete
+                              ? 'bg-violet-400 dark:bg-violet-400'
+                              : 'bg-violet-600 dark:bg-violet-600 hover:bg-violet-700 dark:hover:bg-violet-700'
+                          } ${markHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                          aria-label={
+                            isComplete
+                              ? `Mark ${habit.name} as incomplete`
+                              : `Mark ${habit.name} as complete`
+                          }
                         >
-                          {isExpanded ? (
-                            <ChevronUp className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
-                          )}
+                          Complete
                         </button>
-                      )}
+                        {totalSubHabits > 0 && (
+                          <button
+                            onClick={() => toggleExpandHabit(habit.id)}
+                            className="p-1 hover:bg-neutral-50 dark:hover:bg-neutral-100 rounded transition-colors duration-[150ms] flex-shrink-0"
+                            aria-label={isExpanded ? 'Collapse habit' : 'Expand habit'}
+                          >
+                            {isExpanded ? (
+                              <ChevronUp className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
+                            ) : (
+                              <ChevronDown className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
+                            )}
+                          </button>
+                        )}
+                      </div>
                     </div>
                     <AnimatePresence>
                       {isExpanded && totalSubHabits > 0 && (
