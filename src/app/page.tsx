@@ -33,6 +33,7 @@ function DashboardContent() {
     startDate: new Date(today).toISOString(),
     endDate: new Date(today).toISOString(),
   })
+  const { data: todayHabits = [] } = trpc.habits.getToday.useQuery()
 
   // Calculate transformation progress
   const startDate = startDateSetting?.value || today
@@ -172,6 +173,54 @@ function DashboardContent() {
           <div className="mt-4">
             <Link href="/tasks" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
               View all tasks →
+            </Link>
+          </div>
+        </Card>
+
+        <Card title="Today's Habits">
+          {todayHabits.length === 0 ? (
+            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200">No habits scheduled for today</p>
+          ) : (
+            <ul className="space-y-2">
+              {todayHabits.map((habit) => {
+                const isComplete = habit.completion?.completed || false
+                const completedSubHabits = habit.subHabitCompletions.filter((sc) => sc.completed).length
+                const totalSubHabits = habit.subHabits.length
+                const progress = totalSubHabits > 0 ? (completedSubHabits / totalSubHabits) * 100 : 0
+
+                return (
+                  <li key={habit.id} className="p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
+                    <div className="flex items-center justify-between mb-1">
+                      <div className="flex items-center">
+                        <div className={`mr-3 h-4 w-4 rounded border-2 flex items-center justify-center ${
+                          isComplete
+                            ? 'bg-green-500 border-green-500'
+                            : 'border-border dark:border-border-dark'
+                        } transition-colors duration-200`}>
+                          {isComplete && (
+                            <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                        </div>
+                        <span className={isComplete ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark transition-colors duration-200'}>
+                          {habit.name}
+                        </span>
+                      </div>
+                    </div>
+                    {totalSubHabits > 0 && (
+                      <div className="ml-7 text-xs text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                        {completedSubHabits} / {totalSubHabits} sub-habits ({Math.round(progress)}%)
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
+          <div className="mt-4">
+            <Link href="/habit-tracker" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
+              View all habits →
             </Link>
           </div>
         </Card>
