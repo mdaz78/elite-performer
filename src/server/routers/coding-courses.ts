@@ -16,7 +16,7 @@ export const codingCoursesRouter = router({
           orderBy: { order: 'asc' },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: 'asc' },
     })
   }),
 
