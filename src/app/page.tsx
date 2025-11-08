@@ -56,6 +56,7 @@ function DashboardContent() {
   const updateTradingModuleMutation = trpc.tradingCourseModules.update.useMutation({
     onSuccess: () => {
       utils.tasks.getScheduledModules.invalidate();
+      utils.tradingCourses.getAll.invalidate();
     },
   });
 
