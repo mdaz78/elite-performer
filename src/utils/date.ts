@@ -86,13 +86,15 @@ export const getDaysInRange = (startDate: string, endDate: string): string[] => 
   return days;
 };
 
-// Week functions for Sunday-based week planning
+// Week functions for Monday-based week planning
 export const getWeekStartSunday = (date?: string | Date): string => {
-  return dayjs(date).startOf('week').format('YYYY-MM-DD');
+  // Changed to start on Monday (isoWeek starts on Monday)
+  return dayjs(date).startOf('isoWeek').format('YYYY-MM-DD');
 };
 
 export const getWeekEndSaturday = (date?: string | Date): string => {
-  return dayjs(date).endOf('week').format('YYYY-MM-DD');
+  // Changed to end on Sunday (isoWeek ends on Sunday)
+  return dayjs(date).endOf('isoWeek').format('YYYY-MM-DD');
 };
 
 export const getWeekDays = (weekStartDate: string): string[] => {

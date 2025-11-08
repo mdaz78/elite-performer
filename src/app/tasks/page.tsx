@@ -56,7 +56,7 @@ function TasksPageContent() {
 
   const taskTypes = ['DeepWork', 'Gym', 'TradingPractice', 'Coding', 'Review', 'Other'] as const
   const weekDays = getWeekDays(selectedWeekStart)
-  const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+  const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
   const today = getToday()
   const weekEnd = getWeekEndSaturday(selectedWeekStart)
 
@@ -927,7 +927,7 @@ function TasksPageContent() {
             const dayTasks = getTasksForDay(date)
             const dayModules = getScheduledModulesForDay(date)
             const isToday = isSameDay(date, today)
-            const isSunday = idx === 0
+            const isSunday = idx === 6
           const hasItems = dayTasks.length > 0 || dayModules.length > 0
 
             return (
