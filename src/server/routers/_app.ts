@@ -9,6 +9,7 @@ import { fitnessRouter } from './fitness'
 import { tradesRouter } from './trades'
 import { reviewsRouter } from './reviews'
 import { settingsRouter } from './settings'
+import { habitsRouter } from './habits'
 
 export const appRouter = router({
   codingCourses: codingCoursesRouter,
@@ -21,6 +22,7 @@ export const appRouter = router({
   trades: tradesRouter,
   reviews: reviewsRouter,
   settings: settingsRouter,
+  habits: habitsRouter,
 })
 
 export type AppRouter = typeof appRouter

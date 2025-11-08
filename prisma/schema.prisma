@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,27 +7,29 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// NextAuth.js Models
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String    @unique
-  emailVerified DateTime?
-  password      String?
-  image         String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
+  id             String          @id @default(cuid())
+  name           String?
+  email          String          @unique
+  emailVerified  DateTime?
+  password       String?
+  image          String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
   accounts       Account[]
-  sessions       Session[]
   codingCourses  CodingCourse[]
-  tradingCourses TradingCourse[]
-  projects       Project[]
-  tasks          Task[]
   fitnessLogs    FitnessLog[]
-  trades         Trade[]
+  Goal           Goal[]
+  habits         Habit[]
+  habitCompletions HabitCompletion[]
+  subHabitCompletions SubHabitCompletion[]
+  projects       Project[]
   reviews        Review[]
+  sessions       Session[]
   settings       Settings[]
+  tasks          Task[]
+  trades         Trade[]
+  tradingCourses TradingCourse[]
 
   @@index([email])
 }
@@ -41,15 +40,14 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
+  refresh_token     String?
+  access_token      String?
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String? @db.Text
+  id_token          String?
   session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -73,71 +71,60 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-// Application Models
 model CodingCourse {
-  id          Int      @id @default(autoincrement())
+  id          Int            @id @default(autoincrement())
   userId      String
   name        String
   description String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime       @default(now())
   startDate   DateTime?
   targetDate  DateTime?
-
-  user    User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  modules CourseModule[]
+  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modules     CourseModule[]
 
   @@index([userId])
   @@index([createdAt])
 }
 
 model CourseModule {
-  id          Int       @id @default(autoincrement())
+  id          Int          @id @default(autoincrement())
   courseId    Int
   name        String
   order       Int
-  completed   Boolean   @default(false)
+  completed   Boolean      @default(false)
   completedAt DateTime?
-
-  course CodingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      CodingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
   @@index([completed])
 }
 
 model TradingCourse {
-  id          Int      @id @default(autoincrement())
+  id          Int                   @id @default(autoincrement())
   userId      String
   name        String
   description String?
-  createdAt   DateTime @default(now())
+  createdAt   DateTime              @default(now())
   startDate   DateTime?
   targetDate  DateTime?
-
-  user    User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  modules TradingCourseModule[]
+  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  modules     TradingCourseModule[]
 
   @@index([userId])
   @@index([createdAt])
 }
 
 model TradingCourseModule {
-  id          Int       @id @default(autoincrement())
+  id          Int           @id @default(autoincrement())
   courseId    Int
   name        String
   order       Int
-  completed   Boolean   @default(false)
+  completed   Boolean       @default(false)
   completedAt DateTime?
-
-  course TradingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  course      TradingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([courseId])
   @@index([completed])
-}
-
-enum ProjectStatus {
-  active
-  completed
-  paused
 }
 
 model Project {
@@ -149,21 +136,11 @@ model Project {
   startDate   DateTime?
   targetDate  DateTime?
   createdAt   DateTime      @default(now())
-
-  user  User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks Task[]
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
 
   @@index([userId])
   @@index([status])
-}
-
-enum TaskType {
-  DeepWork
-  Gym
-  TradingPractice
-  Coding
-  Review
-  Other
 }
 
 model Task {
@@ -176,9 +153,8 @@ model Task {
   scheduledDate DateTime
   completedAt   DateTime?
   createdAt     DateTime  @default(now())
-
-  user    User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  project Project? @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  project       Project?  @relation(fields: [projectId], references: [id])
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([scheduledDate])
@@ -198,8 +174,7 @@ model FitnessLog {
   workoutType String?
   notes       String?
   createdAt   DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
   @@index([userId])
@@ -219,8 +194,7 @@ model Trade {
   emotion   String?
   notes     String?
   createdAt DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@index([date])
@@ -231,13 +205,12 @@ model Review {
   id            Int      @id @default(autoincrement())
   userId        String
   weekStartDate DateTime
-  wins          String   @db.Text
-  mistakes      String   @db.Text
-  nextWeekGoals String   @db.Text
+  wins          String
+  mistakes      String
+  nextWeekGoals String
   metrics       Json?
   createdAt     DateTime @default(now())
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, weekStartDate])
   @@index([userId])
@@ -248,12 +221,144 @@ model Settings {
   id        Int      @id @default(autoincrement())
   userId    String
   key       String
-  value     String   @db.Text
+  value     String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, key])
   @@index([userId])
+}
+
+model Habit {
+  id          Int           @id @default(autoincrement())
+  userId      String
+  name        String
+  icon        String?       // Lucide-react icon name
+  frequency   HabitFrequency @default(daily)
+  customDays  Json?         // Array of day numbers (0=Sunday, 1=Monday, etc.)
+  targetCount Int           @default(1) // Number of sub-habits that must be completed
+  startDate   DateTime?     // Optional start date for the habit
+  endDate     DateTime?     // Optional end date for the habit
+  status      HabitStatus   @default(active)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subHabits      SubHabit[]
+  completions    HabitCompletion[]
+  subHabitCompletions SubHabitCompletion[]
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+  @@index([startDate])
+  @@index([endDate])
+}
+
+model SubHabit {
+  id        Int      @id @default(autoincrement())
+  habitId   Int
+  name      String
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+
+  habit       Habit                @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  completions SubHabitCompletion[]
+
+  @@index([habitId])
+  @@index([order])
+}
+
+model Goal {
+  id           Int        @id @default(autoincrement())
+  userId       String
+  name         String
+  description  String?
+  targetValue  Float
+  currentValue Float      @default(0)
+  startDate    DateTime?
+  endDate      DateTime?
+  status       GoalStatus @default(active)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime
+  User         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([endDate])
+  @@index([startDate])
+  @@index([status])
+  @@index([userId])
+}
+
+model HabitCompletion {
+  id          Int       @id @default(autoincrement())
+  habitId     Int
+  userId      String
+  date        DateTime
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, habitId, date])
+  @@index([userId])
+  @@index([habitId])
+  @@index([date])
+  @@index([completed])
+}
+
+model SubHabitCompletion {
+  id          Int       @id @default(autoincrement())
+  subHabitId  Int
+  habitId     Int
+  userId      String
+  date        DateTime
+  completed   Boolean   @default(false)
+  completedAt DateTime?
+  createdAt   DateTime  @default(now())
+
+  subHabit SubHabit @relation(fields: [subHabitId], references: [id], onDelete: Cascade)
+  habit    Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, subHabitId, date])
+  @@index([userId])
+  @@index([subHabitId])
+  @@index([habitId])
+  @@index([date])
+  @@index([completed])
+}
+
+enum ProjectStatus {
+  active
+  completed
+  paused
+}
+
+enum TaskType {
+  DeepWork
+  Gym
+  TradingPractice
+  Coding
+  Review
+  Other
+}
+
+enum HabitFrequency {
+  daily
+  weekly
+  custom
+}
+
+enum HabitStatus {
+  active
+  paused
+}
+
+enum GoalStatus {
+  active
+  completed
+  paused
 }
