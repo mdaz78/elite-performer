@@ -239,7 +239,7 @@ function HabitTrackerPageContent() {
   })
 
   const [subHabitName, setSubHabitName] = useState('')
-  const [subHabitsInForm, setSubHabitsInForm] = useState<Array<{ name: string; order: number }>>([])
+  const [subHabitsInForm, setSubHabitsInForm] = useState<Array<{ id?: number; name: string; order: number }>>([])
 
   // Get month start and end dates
   const monthStart = dayjs(selectedMonth).startOf('month').format('YYYY-MM-DD')
@@ -349,10 +349,7 @@ function HabitTrackerPageContent() {
       utils.habits.getAll.invalidate()
       utils.habits.getToday.invalidate()
       utils.habits.getByDateRange.invalidate()
-      setEditingHabit(null)
-      setShowHabitForm(false)
-      setShowIconPicker(false)
-      setHabitFormData({ name: '', icon: null, frequency: 'daily', customDays: [], targetCount: 1, startDate: '', endDate: '' })
+      // Don't close form here - wait for sub-habit updates to complete in handleUpdateHabit
     },
   })
 
@@ -469,13 +466,72 @@ function HabitTrackerPageContent() {
   const handleUpdateHabit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!editingHabit) return
-    await updateHabitMutation.mutateAsync({
-      id: editingHabit,
-      ...habitFormData,
-      customDays: habitFormData.frequency === 'custom' ? habitFormData.customDays : null,
-      startDate: habitFormData.startDate && habitFormData.startDate.trim() ? new Date(habitFormData.startDate).toISOString() : null,
-      endDate: habitFormData.endDate && habitFormData.endDate.trim() ? new Date(habitFormData.endDate).toISOString() : null,
-    })
+
+    try {
+      // Update the habit
+      await updateHabitMutation.mutateAsync({
+        id: editingHabit,
+        ...habitFormData,
+        customDays: habitFormData.frequency === 'custom' ? habitFormData.customDays : null,
+        startDate: habitFormData.startDate && habitFormData.startDate.trim() ? new Date(habitFormData.startDate).toISOString() : null,
+        endDate: habitFormData.endDate && habitFormData.endDate.trim() ? new Date(habitFormData.endDate).toISOString() : null,
+      })
+
+      // Handle sub-habits updates
+      const habit = allHabits.find((h) => h.id === editingHabit)
+      if (habit) {
+        if (subHabitsInForm.length > 0) {
+          const existingSubHabitIds = new Set((habit.subHabits || []).map((sh) => sh.id))
+          const formSubHabitIds = new Set(subHabitsInForm.filter((sh) => sh.id).map((sh) => sh.id!))
+
+          // Delete sub-habits that were removed
+          const toDelete = Array.from(existingSubHabitIds).filter((id) => !formSubHabitIds.has(id))
+          if (toDelete.length > 0) {
+            await Promise.all(
+              toDelete.map((id) => deleteSubHabitMutation.mutateAsync({ id }))
+            )
+          }
+
+          // Update existing sub-habits and create new ones
+          await Promise.all(
+            subHabitsInForm.map((subHabit, index) => {
+              if (subHabit.id) {
+                // Update existing sub-habit
+                return updateSubHabitMutation.mutateAsync({
+                  id: subHabit.id,
+                  name: subHabit.name,
+                  order: index,
+                })
+              } else {
+                // Create new sub-habit
+                return createSubHabitMutation.mutateAsync({
+                  habitId: editingHabit,
+                  name: subHabit.name,
+                  order: index,
+                })
+              }
+            })
+          )
+        } else {
+          // If no sub-habits in form, delete all existing ones
+          if (habit.subHabits.length > 0) {
+            await Promise.all(
+              habit.subHabits.map((sh) => deleteSubHabitMutation.mutateAsync({ id: sh.id }))
+            )
+          }
+        }
+      }
+
+      // Close form and reset state after all operations complete successfully
+      setEditingHabit(null)
+      setShowHabitForm(false)
+      setShowIconPicker(false)
+      setHabitFormData({ name: '', icon: null, frequency: 'daily', customDays: [], targetCount: 1, startDate: '', endDate: '' })
+      setSubHabitsInForm([])
+    } catch (error) {
+      console.error('Error updating habit:', error)
+      // Error is handled by mutation's onError, but we don't want to close the form on error
+    }
   }
 
   const handleEditHabit = (habit: typeof allHabits[0]) => {
@@ -489,7 +545,14 @@ function HabitTrackerPageContent() {
       startDate: habit.startDate ? dayjs(habit.startDate).format('YYYY-MM-DD') : '',
       endDate: habit.endDate ? dayjs(habit.endDate).format('YYYY-MM-DD') : '',
     })
-    setSubHabitsInForm([])
+    // Load existing sub-habits into the form
+    setSubHabitsInForm(
+      (habit.subHabits || []).map((subHabit, index) => ({
+        id: subHabit.id,
+        name: subHabit.name,
+        order: subHabit.order,
+      }))
+    )
     setShowHabitForm(true)
   }
 
@@ -1014,54 +1077,52 @@ function HabitTrackerPageContent() {
                     </div>
                   </div>
 
-                  {!editingHabit && (
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
-                          Sub-habits (Optional)
-                        </label>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSubHabitsInForm([...subHabitsInForm, { name: '', order: subHabitsInForm.length }])
-                          }}
-                          className="text-xs px-2 py-1 bg-accent-blue dark:bg-accent-blue-dark text-white rounded hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors flex items-center gap-1"
-                        >
-                          <Plus className="w-3 h-3 text-white" />
-                          Add Sub-habit
-                        </button>
-                      </div>
-                      {subHabitsInForm.length > 0 && (
-                        <div className="space-y-2 p-3 bg-background dark:bg-background-dark rounded-lg border border-border dark:border-border-dark">
-                          {subHabitsInForm.map((subHabit, index) => (
-                            <div key={index} className="flex items-center gap-2">
-                              <input
-                                type="text"
-                                value={subHabit.name}
-                                onChange={(e) => {
-                                  const newSubHabits = [...subHabitsInForm]
-                                  newSubHabits[index].name = e.target.value
-                                  setSubHabitsInForm(newSubHabits)
-                                }}
-                                className="flex-1 px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-sm"
-                                placeholder="e.g., Fajr"
-                              />
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  setSubHabitsInForm(subHabitsInForm.filter((_, i) => i !== index))
-                                }}
-                                className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors text-red-600 dark:text-red-400"
-                                title="Remove sub-habit"
-                              >
-                                <X className="w-4 h-4" />
-                              </button>
-                            </div>
-                          ))}
-                        </div>
-                      )}
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="block text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
+                        Sub-habits (Optional)
+                      </label>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSubHabitsInForm([...subHabitsInForm, { name: '', order: subHabitsInForm.length }])
+                        }}
+                        className="text-xs px-2 py-1 bg-accent-blue dark:bg-accent-blue-dark text-white rounded hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors flex items-center gap-1"
+                      >
+                        <Plus className="w-3 h-3 text-white" />
+                        Add Sub-habit
+                      </button>
                     </div>
-                  )}
+                    {subHabitsInForm.length > 0 && (
+                      <div className="space-y-2 p-3 bg-background dark:bg-background-dark rounded-lg border border-border dark:border-border-dark">
+                        {subHabitsInForm.map((subHabit, index) => (
+                          <div key={subHabit.id || `new-${index}`} className="flex items-center gap-2">
+                            <input
+                              type="text"
+                              value={subHabit.name}
+                              onChange={(e) => {
+                                const newSubHabits = [...subHabitsInForm]
+                                newSubHabits[index].name = e.target.value
+                                setSubHabitsInForm(newSubHabits)
+                              }}
+                              className="flex-1 px-3 py-2 bg-surface dark:bg-surface-dark text-text-primary dark:text-text-primary-dark border border-border dark:border-border-dark rounded-md focus:ring-blue-500 focus:border-blue-500 transition-colors duration-200 text-sm"
+                              placeholder="e.g., Fajr"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setSubHabitsInForm(subHabitsInForm.filter((_, i) => i !== index))
+                              }}
+                              className="p-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors text-red-600 dark:text-red-400"
+                              title="Remove sub-habit"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
 
                   <div className="flex justify-end gap-3 pt-4 mt-6 border-t border-border/30 dark:border-border-dark/30">
                     <button
