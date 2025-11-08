@@ -11,8 +11,9 @@ import {
   getWeekEnd,
   getWeekStart,
 } from '@/src/utils/date';
+import { AnimatePresence, motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
-import { Check, ChevronDown, Code, DollarSign, Heart, Zap } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Code, DollarSign, Heart, Zap } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 
@@ -409,20 +410,20 @@ function DashboardContent() {
         {/* Today's Habits Card */}
         <Card>
           <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <h3 className="text-h3 font-bold text-neutral-800 dark:text-neutral-900">
-                Today's Habits
-              </h3>
-              <span className="text-body-sm text-neutral-600 dark:text-neutral-500">
+            <h3 className="text-h3 font-bold text-neutral-800 dark:text-neutral-900">
+              Today's Habits
+            </h3>
+            <div className="flex items-center gap-3">
+              <span className="text-body-sm bg-neutral-200 dark:bg-neutral-200 text-neutral-800 dark:text-neutral-800 px-3 py-1 rounded-full">
                 {completedHabitsCount} of {totalHabitsCount} done
               </span>
+              <Link
+                href="/habit-tracker"
+                className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
+              >
+                View all →
+              </Link>
             </div>
-            <Link
-              href="/habit-tracker"
-              className="text-body-sm text-primary-500 dark:text-primary-500 hover:underline transition-colors duration-[150ms] inline-flex items-center gap-1"
-            >
-              View all →
-            </Link>
           </div>
           {todayHabits.length === 0 ? (
             <p className="text-neutral-500 dark:text-neutral-500 text-body-sm">
@@ -434,23 +435,31 @@ function DashboardContent() {
                 const isComplete = habit.completion?.completed || false;
                 const isExpanded = expandedHabits.has(habit.id);
                 const totalSubHabits = habit.subHabits?.length || 0;
+                const completedSubHabits =
+                  habit.subHabitCompletions?.filter((sc) => sc.completed).length || 0;
                 // Check if streak is broken (simplified - you may need to add actual streak logic)
                 const streakBroken = !isComplete && habit.completion?.completed === false;
 
-                // Render habit icon
+                // Render habit icon in blue square
                 const renderHabitIcon = () => {
-                  if (habit.icon) {
-                    const IconComponent = (
-                      LucideIcons as unknown as Record<
-                        string,
-                        React.ComponentType<{ className?: string }>
-                      >
-                    )[habit.icon];
-                    if (IconComponent) {
-                      return <IconComponent className="w-5 h-5 text-info-500 dark:text-info-500" />;
-                    }
-                  }
-                  return <Heart className="w-5 h-5 text-info-500 dark:text-info-500" />;
+                  const IconComponent = habit.icon
+                    ? (
+                        LucideIcons as unknown as Record<
+                          string,
+                          React.ComponentType<{ className?: string }>
+                        >
+                      )[habit.icon]
+                    : Heart;
+
+                  return (
+                    <div className="w-8 h-8 bg-info-500 dark:bg-info-500 rounded flex items-center justify-center flex-shrink-0">
+                      {IconComponent ? (
+                        <IconComponent className="w-5 h-5 text-white" />
+                      ) : (
+                        <Heart className="w-5 h-5 text-white" />
+                      )}
+                    </div>
+                  );
                 };
 
                 return (
@@ -460,9 +469,7 @@ function DashboardContent() {
                         {/* Habit Icon */}
                         <div className="mr-3 mt-0.5 flex-shrink-0">{renderHabitIcon()}</div>
                         <div className="flex-1 min-w-0">
-                          <div
-                            className={`font-medium text-body ${isComplete ? 'line-through text-neutral-500 dark:text-neutral-500' : 'text-neutral-800 dark:text-neutral-900'}`}
-                          >
+                          <div className="font-bold text-body text-neutral-800 dark:text-neutral-900">
                             {habit.name}
                           </div>
                           {streakBroken && (
@@ -478,57 +485,100 @@ function DashboardContent() {
                           className="ml-2 p-1 hover:bg-neutral-50 dark:hover:bg-neutral-100 rounded transition-colors duration-[150ms] flex-shrink-0"
                           aria-label={isExpanded ? 'Collapse habit' : 'Expand habit'}
                         >
-                          <ChevronDown
-                            className={`w-4 h-4 text-neutral-600 dark:text-neutral-500 transition-transform duration-[150ms] ${isExpanded ? 'rotate-180' : ''}`}
-                          />
+                          {isExpanded ? (
+                            <ChevronUp className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
+                          ) : (
+                            <ChevronDown className="w-4 h-4 text-neutral-600 dark:text-neutral-500" />
+                          )}
                         </button>
                       )}
                     </div>
-                    {isExpanded && totalSubHabits > 0 && (
-                      <div className="ml-8 mt-3 space-y-2">
-                        {habit.subHabits
-                          ?.sort((a, b) => a.order - b.order)
-                          .map((subHabit) => {
-                            const subCompletion = habit.subHabitCompletions?.find(
-                              (sc) => sc.subHabitId === subHabit.id
-                            );
-                            const isSubComplete = subCompletion?.completed || false;
+                    <AnimatePresence>
+                      {isExpanded && totalSubHabits > 0 && (
+                        <motion.div
+                          initial={{ height: 0, opacity: 0 }}
+                          animate={{ height: 'auto', opacity: 1 }}
+                          exit={{ height: 0, opacity: 0 }}
+                          transition={{ duration: 0.2, ease: 'easeInOut' }}
+                          className="overflow-hidden"
+                        >
+                          <div className="mt-3 space-y-2">
+                            {/* Progress indicator */}
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              transition={{ duration: 0.2, delay: 0.1 }}
+                              className="text-center text-body-sm text-neutral-500 dark:text-neutral-500 mb-3"
+                            >
+                              {completedSubHabits}/{totalSubHabits} completed (
+                              {Math.round((completedSubHabits / totalSubHabits) * 100)}%)
+                            </motion.div>
+                            {habit.subHabits
+                              ?.sort((a, b) => a.order - b.order)
+                              .map((subHabit, index) => {
+                                const subCompletion = habit.subHabitCompletions?.find(
+                                  (sc) => sc.subHabitId === subHabit.id
+                                );
+                                const isSubComplete = subCompletion?.completed || false;
 
-                            return (
-                              <div
-                                key={subHabit.id}
-                                className="flex items-center justify-between py-2"
-                              >
-                                <span
-                                  className={`text-body-sm flex-1 ${
-                                    isSubComplete
-                                      ? 'line-through text-neutral-500 dark:text-neutral-500'
-                                      : 'text-neutral-800 dark:text-neutral-900'
-                                  }`}
-                                >
-                                  {subHabit.name}
-                                </span>
-                                <button
-                                  onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
-                                  disabled={markSubHabitCompleteMutation.isPending}
-                                  className={`ml-2 w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-[150ms] ${
-                                    isSubComplete
-                                      ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
-                                      : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
-                                  } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
-                                  aria-label={
-                                    isSubComplete
-                                      ? `Mark ${subHabit.name} as incomplete`
-                                      : `Mark ${subHabit.name} as complete`
-                                  }
-                                >
-                                  {isSubComplete && <Check className="w-3 h-3" />}
-                                </button>
-                              </div>
-                            );
-                          })}
-                      </div>
-                    )}
+                                return (
+                                  <motion.div
+                                    key={subHabit.id}
+                                    initial={{ opacity: 0, x: -10 }}
+                                    animate={{ opacity: 1, x: 0 }}
+                                    transition={{ duration: 0.2, delay: 0.1 + index * 0.05 }}
+                                    className="flex items-center justify-between py-2"
+                                  >
+                                    <div className="flex items-center gap-3 flex-1">
+                                      <button
+                                        onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
+                                        disabled={markSubHabitCompleteMutation.isPending}
+                                        className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all duration-[150ms] flex-shrink-0 ${
+                                          isSubComplete
+                                            ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
+                                            : 'border-neutral-300 dark:border-neutral-200 hover:border-primary-400 dark:hover:border-primary-400'
+                                        } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                        aria-label={
+                                          isSubComplete
+                                            ? `Mark ${subHabit.name} as incomplete`
+                                            : `Mark ${subHabit.name} as complete`
+                                        }
+                                      >
+                                        {isSubComplete && <Check className="w-3 h-3" />}
+                                      </button>
+                                      <span
+                                        className={`text-body-sm ${
+                                          isSubComplete
+                                            ? 'line-through text-neutral-500 dark:text-neutral-500'
+                                            : 'text-neutral-800 dark:text-neutral-900'
+                                        }`}
+                                      >
+                                        {subHabit.name}
+                                      </span>
+                                    </div>
+                                    <button
+                                      onClick={() => toggleSubHabit(subHabit.id, isSubComplete)}
+                                      disabled={markSubHabitCompleteMutation.isPending}
+                                      className={`ml-2 px-3 py-1 rounded text-body-sm font-medium text-white transition-all duration-[150ms] flex-shrink-0 ${
+                                        isSubComplete
+                                          ? 'bg-violet-400 dark:bg-violet-400'
+                                          : 'bg-violet-600 dark:bg-violet-600 hover:bg-violet-700 dark:hover:bg-violet-700'
+                                      } ${markSubHabitCompleteMutation.isPending ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                                      aria-label={
+                                        isSubComplete
+                                          ? `Mark ${subHabit.name} as incomplete`
+                                          : `Mark ${subHabit.name} as complete`
+                                      }
+                                    >
+                                      Complete
+                                    </button>
+                                  </motion.div>
+                                );
+                              })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </li>
                 );
               })}
