@@ -11,6 +11,7 @@ interface CardProps {
 }
 
 export const Card = ({ children, className = '', title, action, onClick }: CardProps) => {
+  const isFlex = className.includes('flex')
   return (
     <div
       className={`bg-surface dark:bg-surface-dark rounded-lg border border-border dark:border-border-dark transition-colors duration-200 ${onClick ? 'cursor-pointer hover:border-border/60 dark:hover:border-border-dark/60' : ''} ${className}`}
@@ -22,7 +23,7 @@ export const Card = ({ children, className = '', title, action, onClick }: CardP
           {action && <div>{action}</div>}
         </div>
       )}
-      <div className="p-6">{children}</div>
+      <div className={`p-6 ${isFlex ? 'flex flex-col flex-1 min-h-0' : ''}`}>{children}</div>
     </div>
   );
 };

@@ -132,7 +132,7 @@ const SortableModuleItem = ({
   );
 };
 
-function CourseDetailContent() {
+function TradingCourseDetailContent() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const courseId = params?.id ? parseInt(params.id, 10) : null;
@@ -153,49 +153,52 @@ function CourseDetailContent() {
     isFirstMount.current = false;
   }, []);
 
-  const { data: course, isLoading: courseLoading } = trpc.codingCourses.getById.useQuery(
+  const { data: course, isLoading: courseLoading } = trpc.tradingCourses.getById.useQuery(
     { id: courseId! },
     { enabled: !!courseId }
   );
 
   const { data: modules = [], isLoading: modulesLoading } =
-    trpc.courseModules.getByCourseId.useQuery({ courseId: courseId! }, { enabled: !!courseId });
+    trpc.tradingCourseModules.getByCourseId.useQuery(
+      { courseId: courseId! },
+      { enabled: !!courseId }
+    );
 
-  const updateCourseMutation = trpc.codingCourses.update.useMutation({
+  const updateCourseMutation = trpc.tradingCourses.update.useMutation({
     onSuccess: () => {
-      utils.codingCourses.getById.invalidate({ id: courseId! });
-      utils.codingCourses.getAll.invalidate();
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
+      utils.tradingCourses.getAll.invalidate();
       setEditingName(false);
       setEditingDescription(false);
       setEditingDates(false);
     },
   });
 
-  const createModuleMutation = trpc.courseModules.create.useMutation({
+  const createModuleMutation = trpc.tradingCourseModules.create.useMutation({
     onSuccess: () => {
-      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! });
-      utils.codingCourses.getById.invalidate({ id: courseId! });
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
       setShowAddModuleDialog(false);
     },
   });
 
-  const updateModuleMutation = trpc.courseModules.update.useMutation({
+  const updateModuleMutation = trpc.tradingCourseModules.update.useMutation({
     onSuccess: () => {
-      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! });
-      utils.codingCourses.getById.invalidate({ id: courseId! });
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
     },
   });
 
-  const deleteModuleMutation = trpc.courseModules.delete.useMutation({
+  const deleteModuleMutation = trpc.tradingCourseModules.delete.useMutation({
     onSuccess: () => {
-      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! });
-      utils.codingCourses.getById.invalidate({ id: courseId! });
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourses.getById.invalidate({ id: courseId! });
     },
   });
 
-  const reorderModuleMutation = trpc.courseModules.reorder.useMutation({
+  const reorderModuleMutation = trpc.tradingCourseModules.reorder.useMutation({
     onSuccess: () => {
-      utils.courseModules.getByCourseId.invalidate({ courseId: courseId! });
+      utils.tradingCourseModules.getByCourseId.invalidate({ courseId: courseId! });
     },
   });
 
@@ -208,7 +211,7 @@ function CourseDetailContent() {
 
   useEffect(() => {
     if (!courseId) {
-      router.push('/coding');
+      router.push('/trading');
     }
   }, [courseId, router]);
 
@@ -227,7 +230,7 @@ function CourseDetailContent() {
 
   useEffect(() => {
     if (!courseLoading && !modulesLoading && !course && courseId) {
-      router.push('/coding');
+      router.push('/trading');
     }
   }, [course, courseLoading, modulesLoading, courseId, router]);
 
@@ -379,7 +382,7 @@ function CourseDetailContent() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <button
-          onClick={() => router.push('/coding')}
+          onClick={() => router.push('/trading')}
           className="text-accent-blue dark:text-accent-blue-dark hover:underline mb-4 text-sm font-medium transition-colors duration-200"
         >
           ← Back to Courses
@@ -801,7 +804,7 @@ function CourseDetailContent() {
         title="Add New Module"
         message="Enter a name for the new module"
         inputLabel="Module Name"
-        inputPlaceholder="e.g., Introduction to React Hooks"
+        inputPlaceholder="e.g., Introduction to Technical Analysis"
         confirmLabel="Add Module"
         cancelLabel="Cancel"
         onConfirm={handleAddModule}
@@ -811,10 +814,10 @@ function CourseDetailContent() {
   );
 }
 
-export default function CourseDetail() {
+export default function TradingCourseDetail() {
   return (
     <ProtectedRoute>
-      <CourseDetailContent />
+      <TradingCourseDetailContent />
     </ProtectedRoute>
   );
 }

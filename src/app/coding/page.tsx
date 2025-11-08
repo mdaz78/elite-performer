@@ -8,6 +8,7 @@ import { Card, InputDialog, ProgressBar } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate } from '@/src/utils/date'
 import { createVariants, staggerContainer } from '@/src/lib/animations'
+import { Plus } from 'lucide-react'
 
 function CodingPageContent() {
   const router = useRouter()
@@ -70,9 +71,10 @@ function CodingPageContent() {
         <div className="flex gap-3">
           <button
             onClick={() => setShowAddDialog(true)}
-            className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+            className="flex items-center space-x-2 px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
           >
-            Add Course
+            <Plus className="w-4 h-4" />
+            <span>Add Course</span>
           </button>
         </div>
       </div>
@@ -85,9 +87,10 @@ function CodingPageContent() {
             </p>
             <button
               onClick={() => setShowAddDialog(true)}
-              className="px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
+              className="flex items-center space-x-2 px-4 py-2 bg-accent-blue dark:bg-accent-blue-dark text-white rounded-md hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90 transition-colors duration-200"
             >
-              Add Course
+              <Plus className="w-4 h-4" />
+              <span>Add Course</span>
             </button>
           </div>
         </Card>
@@ -107,12 +110,13 @@ function CodingPageContent() {
                 animate="animate"
                 exit="exit"
                 layout
+                className="h-full"
               >
                 <Card
-                  className="hover:shadow-lg transition-all cursor-pointer group relative"
+                  className="hover:shadow-lg transition-all cursor-pointer group relative h-full flex flex-col"
                   onClick={() => router.push(`/coding/${course.id}`)}
                 >
-                  <div className="mb-4 relative z-0">
+                  <div className="relative z-0 flex-grow">
                     <div className="flex justify-between items-start mb-2">
                       <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark group-hover:text-accent-blue dark:group-hover:text-accent-blue-dark transition-colors duration-200">
                         {course.name}
@@ -145,12 +149,14 @@ function CodingPageContent() {
                       </p>
                     )}
                   </div>
-                  <ProgressBar progress={course.progress} color="career" showPercentage={true} />
-                  <div className="mt-4 flex justify-between items-center">
-                    <span className="text-sm text-accent-blue dark:text-accent-blue-dark font-medium group-hover:underline transition-colors duration-200">
-                      View Details →
-                    </span>
-                    <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">{Math.round(course.progress)}%</span>
+                  <div className="mt-auto pt-4">
+                    <ProgressBar progress={course.progress} color="career" showPercentage={true} />
+                    <div className="mt-4 flex justify-between items-center">
+                      <span className="text-sm text-accent-blue dark:text-accent-blue-dark font-medium group-hover:underline transition-colors duration-200">
+                        View Details →
+                      </span>
+                      <span className="text-xs text-text-tertiary dark:text-text-tertiary-dark transition-colors duration-200">{Math.round(course.progress)}%</span>
+                    </div>
                   </div>
                 </Card>
               </motion.div>
