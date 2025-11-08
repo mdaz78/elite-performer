@@ -4,11 +4,35 @@
 
 @layer base {
   * {
-    @apply transition-colors duration-200;
+    @apply transition-colors duration-[150ms];
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased font-sans text-body text-neutral-900 dark:text-neutral-900 bg-neutral-0 dark:bg-neutral-0;
+  }
+
+  h1 {
+    @apply text-h1 font-bold text-neutral-800 dark:text-neutral-800;
+  }
+
+  h2 {
+    @apply text-h2 font-semibold text-neutral-800 dark:text-neutral-800;
+  }
+
+  h3 {
+    @apply text-h3 font-semibold text-neutral-800 dark:text-neutral-800;
+  }
+
+  h4 {
+    @apply text-h4 font-semibold text-neutral-800 dark:text-neutral-800;
+  }
+
+  h5 {
+    @apply text-h5 font-semibold text-neutral-800 dark:text-neutral-800;
+  }
+
+  p {
+    @apply text-body text-neutral-600 dark:text-neutral-600;
   }
 }
 
@@ -18,14 +42,72 @@
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
-    @apply bg-gray-100 dark:bg-gray-800 rounded-lg;
+    @apply bg-neutral-100 dark:bg-neutral-50 rounded-lg;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    @apply bg-gray-400 dark:bg-gray-600 rounded-lg;
+    @apply bg-neutral-300 dark:bg-neutral-300 rounded-lg;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    @apply bg-gray-500 dark:bg-gray-500;
+    @apply bg-neutral-400 dark:bg-neutral-400;
+  }
+
+  /* Shimmer animation for progress bar */
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+
+  .shimmer-effect {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .shimmer-effect::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    animation: shimmer 2s infinite;
+  }
+
+  /* Fade in animation for cards */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fadeIn {
+    animation: fadeIn 300ms ease-out forwards;
+  }
+
+  /* Slide down animation for sub-habits */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-slideDown {
+    animation: slideDown 200ms ease-out forwards;
   }
 }

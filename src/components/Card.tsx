@@ -1,6 +1,6 @@
 'use client'
 
-import { ReactNode, MouseEventHandler } from 'react'
+import { ReactNode, MouseEventHandler, CSSProperties } from 'react'
 
 interface CardProps {
   children: ReactNode;
@@ -8,18 +8,20 @@ interface CardProps {
   title?: string;
   action?: ReactNode;
   onClick?: MouseEventHandler<HTMLDivElement>;
+  style?: CSSProperties;
 }
 
-export const Card = ({ children, className = '', title, action, onClick }: CardProps) => {
+export const Card = ({ children, className = '', title, action, onClick, style }: CardProps) => {
   const isFlex = className.includes('flex')
   return (
     <div
-      className={`bg-surface dark:bg-surface-dark rounded-lg border border-border dark:border-border-dark transition-colors duration-200 ${onClick ? 'cursor-pointer hover:border-border/60 dark:hover:border-border-dark/60' : ''} ${className}`}
+      className={`bg-neutral-0 dark:bg-neutral-100 rounded-lg border border-neutral-200 dark:border-neutral-200 shadow transition-all duration-[150ms] ${onClick ? 'cursor-pointer hover:shadow-md dark:hover:shadow-dark-md hover:border-neutral-300 dark:hover:border-neutral-300' : ''} ${className}`}
       onClick={onClick}
+      style={style}
     >
       {(title || action) && (
-        <div className="px-6 py-4 border-b border-border dark:border-border-dark flex justify-between items-center transition-colors duration-200">
-          {title && <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">{title}</h3>}
+        <div className="px-6 py-4 border-b border-neutral-200 dark:border-neutral-200 flex justify-between items-center">
+          {title && <h3 className="text-h3 text-neutral-800 dark:text-neutral-800">{title}</h3>}
           {action && <div>{action}</div>}
         </div>
       )}

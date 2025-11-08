@@ -3,9 +3,11 @@
 import { useTheme } from '@/src/lib/use-theme';
 import {
   Activity,
+  Bell,
   BookOpen,
   CheckSquare,
   ChevronDown,
+  Clock,
   Code,
   FolderKanban,
   LayoutDashboard,
@@ -14,7 +16,6 @@ import {
   Sun,
   Target,
   TrendingUp,
-  Trophy,
   User,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
@@ -72,20 +73,36 @@ export const Header = () => {
     { path: '/trading', label: 'Trading', icon: TrendingUp },
   ];
 
+  // Get user initial for avatar
+  const getUserInitial = () => {
+    if (session?.user?.name) {
+      return session.user.name.charAt(0).toUpperCase();
+    }
+    if (session?.user?.email) {
+      return session.user.email.charAt(0).toUpperCase();
+    }
+    return 'U';
+  };
+
   return (
-    <header className="bg-surface dark:bg-surface-dark border-b border-border dark:border-border-dark transition-colors duration-200">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center h-16">
-          <div className="flex items-center">
+    <header className="sticky top-0 z-[100] bg-neutral-0 dark:bg-neutral-100 border-b border-neutral-200 dark:border-neutral-200 transition-all duration-300">
+      <div className="max-w-[1400px] mx-auto px-6">
+        <div className="flex justify-between items-center h-[72px]">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
             <Link
               href="/"
-              className="flex items-center space-x-2 text-xl font-bold text-text-primary dark:text-text-primary-dark leading-none transition-colors duration-200"
+              className="flex items-center gap-3"
             >
-              <Trophy className="w-6 h-6 text-accent-blue dark:text-accent-blue-dark" />
-              <span>Elite Performer</span>
+              <div className="w-9 h-9 bg-gradient-to-br from-primary-500 to-primary-600 rounded-lg flex items-center justify-center">
+                <span className="text-white text-[18px] font-bold">EP</span>
+              </div>
+              <span className="text-[20px] font-bold text-neutral-800 dark:text-neutral-900">Elite Performer</span>
             </Link>
           </div>
-          <nav className="flex items-center space-x-1">
+
+          {/* Navigation */}
+          <nav className="flex items-center gap-2">
             {navLinks.map((link) => {
               // For dashboard, match exactly. For other routes, match if pathname starts with the link path
               const isActive =
@@ -95,13 +112,13 @@ export const Header = () => {
                 <Link
                   key={link.path}
                   href={link.path}
-                  className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 flex items-center space-x-2 ${
+                  className={`px-4 py-[10px] rounded-lg text-[14px] font-medium transition-all duration-[150ms] flex items-center gap-2 ${
                     isActive
-                      ? 'bg-accent-blue dark:bg-accent-blue-dark text-white hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90'
-                      : 'text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark'
+                      ? 'bg-primary-50 dark:bg-primary-500/15 text-primary-600 dark:text-primary-500'
+                      : 'text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 hover:text-neutral-800 dark:hover:text-neutral-900'
                   }`}
                 >
-                  <IconComponent className="w-4 h-4" />
+                  <IconComponent className="w-5 h-5" />
                   <span>{link.label}</span>
                 </Link>
               );
@@ -109,16 +126,16 @@ export const Header = () => {
             <div className="relative" ref={learningDropdownRef}>
               <button
                 onClick={() => setIsLearningDropdownOpen(!isLearningDropdownOpen)}
-                className="px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200 flex items-center space-x-2"
+                className="px-4 py-[10px] rounded-lg text-[14px] font-medium text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 hover:text-neutral-800 dark:hover:text-neutral-900 transition-all duration-[150ms] flex items-center gap-2"
               >
-                <BookOpen className="w-4 h-4" />
+                <BookOpen className="w-5 h-5" />
                 <span>Learning</span>
                 <ChevronDown
-                  className={`w-4 h-4 transition-transform duration-200 ${isLearningDropdownOpen ? 'rotate-180' : ''}`}
+                  className={`w-5 h-5 transition-transform duration-[150ms] ${isLearningDropdownOpen ? 'rotate-180' : ''}`}
                 />
               </button>
               {isLearningDropdownOpen && (
-                <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-surface dark:bg-surface-dark border border-border dark:border-border-dark z-50">
+                <div className="absolute left-0 mt-2 w-48 rounded-lg shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
                   <div className="py-1">
                     {learningLinks.map((link) => {
                       const isActive = pathname?.startsWith(link.path) ?? false;
@@ -128,13 +145,13 @@ export const Header = () => {
                           key={link.path}
                           href={link.path}
                           onClick={() => setIsLearningDropdownOpen(false)}
-                          className={`flex items-center space-x-3 px-4 py-2 text-sm transition-colors duration-200 ${
+                          className={`flex items-center gap-3 px-4 py-2 text-[14px] transition-all duration-[150ms] ${
                             isActive
-                              ? 'bg-accent-blue dark:bg-accent-blue-dark text-white hover:bg-accent-blue/90 dark:hover:bg-accent-blue-dark/90'
-                              : 'text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark'
+                              ? 'bg-primary-500 dark:bg-primary-500 text-white hover:bg-primary-600 dark:hover:bg-primary-600'
+                              : 'text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100'
                           }`}
                         >
-                          <IconComponent className="w-4 h-4" />
+                          <IconComponent className="w-5 h-5" />
                           <span>{link.label}</span>
                         </Link>
                       );
@@ -143,58 +160,81 @@ export const Header = () => {
                 </div>
               )}
             </div>
-            {session && (
-              <div className="ml-4 relative" ref={dropdownRef}>
-                <button
-                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                  className="flex items-center space-x-2 px-3 py-2 rounded-md text-sm font-medium text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
-                >
-                  <User className="w-4 h-4" />
-                  <span>{session.user?.name || session.user?.email}</span>
-                  <ChevronDown
-                    className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`}
-                  />
-                </button>
-                {isDropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-surface dark:bg-surface-dark border border-border dark:border-border-dark z-50">
-                    <div className="py-1">
-                      <div className="px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark border-b border-border dark:border-border-dark">
-                        {session.user?.name || session.user?.email}
-                      </div>
-                      <button
-                        onClick={() => {
-                          toggleTheme();
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
-                      >
-                        {theme === 'dark' ? (
-                          <>
-                            <Sun className="w-5 h-5" />
-                            <span>Light Mode</span>
-                          </>
-                        ) : (
-                          <>
-                            <Moon className="w-5 h-5" />
-                            <span>Dark Mode</span>
-                          </>
-                        )}
-                      </button>
-                      <button
-                        onClick={() => {
-                          signOut({ callbackUrl: '/auth/login' });
-                          setIsDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center space-x-3 px-4 py-2 text-sm text-text-secondary dark:text-text-secondary-dark hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
-                      >
-                        <LogOut className="w-5 h-5" />
-                        <span>Sign out</span>
-                      </button>
-                    </div>
-                  </div>
+
+            {/* Right side utilities */}
+            <div className="ml-4 flex items-center gap-3">
+              {/* Theme Toggle */}
+              <button
+                onClick={toggleTheme}
+                className="w-10 h-10 rounded-lg text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 hover:text-neutral-800 dark:hover:text-neutral-900 transition-all duration-[150ms] flex items-center justify-center"
+                aria-label="Toggle theme"
+              >
+                {theme === 'dark' ? (
+                  <Sun className="w-5 h-5" />
+                ) : (
+                  <Moon className="w-5 h-5" />
                 )}
-              </div>
-            )}
+              </button>
+
+              {/* Notifications */}
+              <button
+                className="w-10 h-10 rounded-lg text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 hover:text-neutral-800 dark:hover:text-neutral-900 transition-all duration-[150ms] flex items-center justify-center"
+                aria-label="Notifications"
+              >
+                <Bell className="w-5 h-5" />
+              </button>
+
+              {/* User Avatar */}
+              {session && (
+                <div className="relative" ref={dropdownRef}>
+                  <button
+                    onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                    className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-white text-[14px] font-semibold hover:scale-105 transition-transform duration-[150ms] cursor-pointer"
+                    aria-label="User menu"
+                  >
+                    {getUserInitial()}
+                  </button>
+                  {isDropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
+                      <div className="py-1">
+                        <div className="px-4 py-2 text-[14px] text-neutral-600 dark:text-neutral-600 border-b border-neutral-200 dark:border-neutral-200">
+                          {session.user?.name || session.user?.email}
+                        </div>
+                        <button
+                          onClick={() => {
+                            toggleTheme();
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-all duration-[150ms]"
+                        >
+                          {theme === 'dark' ? (
+                            <>
+                              <Sun className="w-5 h-5" />
+                              <span>Light Mode</span>
+                            </>
+                          ) : (
+                            <>
+                              <Moon className="w-5 h-5" />
+                              <span>Dark Mode</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            signOut({ callbackUrl: '/auth/login' });
+                            setIsDropdownOpen(false);
+                          }}
+                          className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-all duration-[150ms]"
+                        >
+                          <LogOut className="w-5 h-5" />
+                          <span>Sign out</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </nav>
         </div>
       </div>

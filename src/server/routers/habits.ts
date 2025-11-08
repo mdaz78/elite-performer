@@ -245,29 +245,6 @@ export const habitsRouter = router({
         orderBy: { date: 'asc' },
       })
 
-      // Calculate streak
-      let streak = 0
-      let currentDate = dayjs().startOf('day')
-
-      while (currentDate.isAfter(startDate) || currentDate.isSame(startDate, 'day')) {
-        if (dateMatchesHabit(currentDate.toDate(), {
-          frequency: habit.frequency,
-          customDays: habit.customDays as number[] | null,
-          startDate: habit.startDate,
-          endDate: habit.endDate,
-        })) {
-          const completion = completions.find((c) =>
-            dayjs(c.date).isSame(currentDate, 'day')
-          )
-          if (completion?.completed) {
-            streak++
-          } else {
-            break
-          }
-        }
-        currentDate = currentDate.subtract(1, 'day')
-      }
-
       // Calculate completion percentage
       let applicableDays = 0
       let completedDays = 0
@@ -296,7 +273,6 @@ export const habitsRouter = router({
 
       return {
         completions,
-        streak,
         completionPercentage: Math.round(completionPercentage * 100) / 100,
         applicableDays,
         completedDays,
@@ -626,13 +602,17 @@ export const habitsRouter = router({
       // Verify ownership
       const habit = await ctx.prisma.habit.findFirst({
         where: { id: input.habitId, userId },
+        include: {
+          subHabits: true,
+        },
       })
 
       if (!habit) {
         throw new Error('Habit not found')
       }
 
-      return await ctx.prisma.habitCompletion.upsert({
+      // Mark/unmark the parent habit
+      const habitCompletion = await ctx.prisma.habitCompletion.upsert({
         where: {
           userId_habitId_date: {
             userId,
@@ -652,5 +632,37 @@ export const habitsRouter = router({
           completedAt: input.completed ? new Date() : null,
         },
       })
+
+      // If marking as complete, also mark all sub-habits as complete
+      // If marking as incomplete, also unmark all sub-habits
+      if (habit.subHabits.length > 0) {
+        await Promise.all(
+          habit.subHabits.map((subHabit) =>
+            ctx.prisma.subHabitCompletion.upsert({
+              where: {
+                userId_subHabitId_date: {
+                  userId,
+                  subHabitId: subHabit.id,
+                  date,
+                },
+              },
+              create: {
+                subHabitId: subHabit.id,
+                habitId: input.habitId,
+                userId,
+                date,
+                completed: input.completed,
+                completedAt: input.completed ? new Date() : null,
+              },
+              update: {
+                completed: input.completed,
+                completedAt: input.completed ? new Date() : null,
+              },
+            })
+          )
+        )
+      }
+
+      return habitCompletion
     }),
 })

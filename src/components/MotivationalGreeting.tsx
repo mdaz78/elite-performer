@@ -1,9 +1,6 @@
 'use client'
 
-import { Flame } from 'lucide-react'
-
 interface MotivationalGreetingProps {
-  overallStreak: number
   todayCompleted: number
   todayTotal: number
   weekProgress: number
@@ -11,7 +8,6 @@ interface MotivationalGreetingProps {
 }
 
 export function MotivationalGreeting({
-  overallStreak,
   todayCompleted,
   todayTotal,
   weekProgress,
@@ -26,12 +22,6 @@ export function MotivationalGreeting({
 
   const getMotivationalMessage = () => {
     if (todayCompleted === todayTotal && todayTotal > 0) {
-      return "You're on fire! Keep up the amazing work."
-    }
-    if (overallStreak >= 7) {
-      return "You're on fire! Keep up the amazing work."
-    }
-    if (overallStreak >= 3) {
       return "You're on fire! Keep up the amazing work."
     }
     if (todayCompleted > 0) {
@@ -55,17 +45,6 @@ export function MotivationalGreeting({
 
         {/* Summary Cards */}
         <div className="flex flex-wrap gap-4 md:flex-nowrap">
-          {/* Day Streak Card */}
-          <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px] border border-white/30">
-            <div className="text-3xl font-bold text-white mb-1">
-              {overallStreak}
-            </div>
-            <div className="flex items-center gap-1 text-white/90 text-sm">
-              <Flame className="w-4 h-4" />
-              <span>Day Streak</span>
-            </div>
-          </div>
-
           {/* Completed Today Card */}
           <div className="bg-white/20 backdrop-blur-sm rounded-2xl p-4 min-w-[120px] border border-white/30">
             <div className="text-3xl font-bold text-white mb-1">
