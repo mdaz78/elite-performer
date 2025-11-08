@@ -28,11 +28,11 @@ function DashboardContent() {
 
   // Load all data
   const { data: courses = [] } = trpc.codingCourses.getAll.useQuery()
+  const { data: tradingCourses = [] } = trpc.tradingCourses.getAll.useQuery()
   const { data: fitnessLogs = [] } = trpc.fitness.getByDateRange.useQuery({
     startDate: new Date(weekStart).toISOString(),
     endDate: new Date(weekEnd).toISOString(),
   })
-  const { data: tradingStats } = trpc.trades.getStats.useQuery({})
   const { data: todayTasks = [] } = trpc.tasks.getByDate.useQuery({
     startDate: new Date(today).toISOString(),
     endDate: new Date(today).toISOString(),
@@ -130,6 +130,15 @@ function DashboardContent() {
   })
   const codingProgress = totalModules > 0 ? (completedModules / totalModules) * 100 : 0
 
+  // Calculate trading progress
+  let totalTradingModules = 0
+  let completedTradingModules = 0
+  tradingCourses.forEach((course) => {
+    totalTradingModules += course.modules?.length || 0
+    completedTradingModules += course.modules?.filter((m) => m.completed).length || 0
+  })
+  const tradingProgress = totalTradingModules > 0 ? (completedTradingModules / totalTradingModules) * 100 : 0
+
   // Get latest weight
   const sortedLogs = [...fitnessLogs]
     .filter((log) => log.weight != null)
@@ -184,7 +193,7 @@ function DashboardContent() {
             <div>
               <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Fitness</p>
               <p className="text-2xl font-bold text-accent-amber dark:text-accent-amber-dark mt-1 transition-colors duration-200">
-                {latestWeight ? `${latestWeight} lbs` : 'No data'}
+                {latestWeight ? `${latestWeight} KG` : 'No data'}
               </p>
             </div>
             <div className="p-3 bg-accent-amber/10 dark:bg-accent-amber-dark/10 rounded-lg transition-colors duration-200">
@@ -203,13 +212,8 @@ function DashboardContent() {
         <Card>
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Trading</p>
-              <p className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark mt-1 transition-colors duration-200">
-                ${tradingStats?.totalPnL?.toFixed(2) || '0.00'}
-              </p>
-              <p className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
-                {tradingStats?.totalTrades || 0} trades • {tradingStats?.winRate?.toFixed(1) || 0}% win rate
-              </p>
+              <p className="text-sm font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">Trading Progress</p>
+              <p className="text-2xl font-bold text-accent-emerald dark:text-accent-emerald-dark mt-1 transition-colors duration-200">{Math.round(tradingProgress)}%</p>
             </div>
             <div className="p-3 bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 rounded-lg transition-colors duration-200">
               <svg className="w-8 h-8 text-accent-emerald dark:text-accent-emerald-dark transition-colors duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -219,7 +223,7 @@ function DashboardContent() {
           </div>
           <div className="mt-4">
             <Link href="/trading" className="text-sm text-accent-emerald dark:text-accent-emerald-dark hover:underline transition-colors duration-200">
-              View journal →
+              View courses →
             </Link>
           </div>
         </Card>
@@ -432,26 +436,6 @@ function DashboardContent() {
           <div className="mt-4">
             <Link href="/habit-tracker" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
               View all habits →
-            </Link>
-          </div>
-        </Card>
-
-        <Card title="This Week's Activity">
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">Fitness Logs</p>
-              <p className="text-lg font-semibold text-accent-amber dark:text-accent-amber-dark transition-colors duration-200">{fitnessLogs.length} entries</p>
-            </div>
-            <div>
-              <p className="text-sm text-text-secondary dark:text-text-secondary-dark mb-2 transition-colors duration-200">Week Range</p>
-              <p className="text-sm text-text-primary dark:text-text-primary-dark transition-colors duration-200">
-                {formatDisplayDate(weekStart)} - {formatDisplayDate(weekEnd)}
-              </p>
-            </div>
-          </div>
-          <div className="mt-4">
-            <Link href="/review" className="text-sm text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200">
-              Weekly Review →
             </Link>
           </div>
         </Card>
