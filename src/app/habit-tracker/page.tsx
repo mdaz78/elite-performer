@@ -23,7 +23,7 @@ import {
 } from '@/src/utils/date'
 import dayjs from 'dayjs'
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts'
-import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, Pause, Play, Check, X, Flame } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, Edit, Trash2, Pause, Play, Check, X } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
 
 type TabType = 'today' | 'habits' | 'progress'
@@ -62,15 +62,12 @@ function HabitCardWithHistory({
     { habitId: habit.id, days: 7 },
     { enabled: !!habit.id }
   )
-  const currentStreak = history.data?.streak || 0
   const completionRate = history.data?.completionPercentage || 0
 
   return (
     <motion.div variants={habitCompleteVariants}>
       <HabitCard
         habit={habit}
-        currentStreak={currentStreak}
-        bestStreak={currentStreak}
         completionRate={completionRate}
         weeklyProgress={weeklyProgress}
         onToggleComplete={onToggleComplete}
@@ -133,21 +130,7 @@ function HabitAnalyticsCard({ habitId, habitName, icon }: { habitId: number; hab
         </div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="p-4 bg-gradient-to-br from-accent-blue/5 dark:from-accent-blue-dark/10 to-accent-blue/10 dark:to-accent-blue-dark/15 rounded-2xl border border-accent-blue/20 dark:border-accent-blue-dark/20">
-            <div className="flex items-center gap-2 mb-2">
-              <Flame className="w-4 h-4 text-accent-amber dark:text-accent-amber-dark" />
-              <div className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
-                Current Streak
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">
-              {history.streak}
-              <span className="text-sm font-normal text-text-tertiary dark:text-text-tertiary-dark ml-1">
-                {history.streak === 1 ? 'day' : 'days'}
-              </span>
-            </div>
-          </div>
+        <div className="grid grid-cols-1 gap-3">
           <div className="p-4 bg-gradient-to-br from-accent-emerald/5 dark:from-accent-emerald-dark/10 to-accent-emerald/10 dark:to-accent-emerald-dark/15 rounded-2xl border border-accent-emerald/20 dark:border-accent-emerald-dark/20">
             <div className="text-xs font-medium text-text-secondary dark:text-text-secondary-dark transition-colors duration-200 mb-2">
               Completion Rate
@@ -258,46 +241,6 @@ function HabitTrackerPageContent() {
     startDate: new Date(weekStart).toISOString(),
     endDate: new Date(weekEnd).toISOString(),
   })
-
-  // Query 30-day range for streak calculation
-  const { data: streakCalendarData } = trpc.habits.getByDateRange.useQuery({
-    startDate: new Date(dayjs().subtract(30, 'day').format('YYYY-MM-DD')).toISOString(),
-    endDate: new Date().toISOString(),
-  })
-
-  // Calculate overall streak - get the longest current streak from active habits
-  const overallStreak = useMemo(() => {
-    if (!allHabits.length || !streakCalendarData?.calendarData) return 0
-
-    // Calculate streak by checking consecutive days from today backwards
-    let streak = 0
-    let currentDate = dayjs().startOf('day')
-    const startDate = dayjs().subtract(30, 'day').startOf('day')
-
-    while (currentDate.isAfter(startDate) || currentDate.isSame(startDate, 'day')) {
-      const dateStr = currentDate.format('YYYY-MM-DD')
-      const dayHabits = streakCalendarData.calendarData[dateStr] || []
-
-      // If no habits for this day, break the streak
-      if (dayHabits.length === 0) {
-        // Only break if we've already started counting
-        if (streak > 0) break
-        currentDate = currentDate.subtract(1, 'day')
-        continue
-      }
-
-      const allCompleted = dayHabits.every((h: any) => h.completed)
-      if (allCompleted) {
-        streak++
-      } else {
-        break
-      }
-
-      currentDate = currentDate.subtract(1, 'day')
-    }
-
-    return streak
-  }, [allHabits, streakCalendarData])
 
   // Calculate today's progress
   const todayCompleted = todayHabits.filter((h) => h.completion?.completed).length
@@ -423,7 +366,6 @@ function HabitTrackerPageContent() {
       utils.habits.getToday.invalidate()
       utils.habits.getAll.invalidate()
       utils.habits.getByDateRange.invalidate()
-      // Invalidate completion history for all habits to refresh streaks
       utils.habits.getCompletionHistory.invalidate()
     },
   })
@@ -706,7 +648,6 @@ function HabitTrackerPageContent() {
           >
             {/* Hero Section */}
             <MotivationalGreeting
-              overallStreak={overallStreak}
               todayCompleted={todayCompleted}
               todayTotal={todayTotal}
               weekProgress={weekProgress}

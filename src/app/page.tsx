@@ -452,8 +452,6 @@ function DashboardContent() {
                 const totalSubHabits = habit.subHabits?.length || 0;
                 const completedSubHabits =
                   habit.subHabitCompletions?.filter((sc) => sc.completed).length || 0;
-                // Check if streak is broken (simplified - you may need to add actual streak logic)
-                const streakBroken = !isComplete && habit.completion?.completed === false;
 
                 // Render habit icon in blue square
                 const renderHabitIcon = () => {
@@ -487,11 +485,6 @@ function DashboardContent() {
                           <div className="font-bold text-body text-neutral-800 dark:text-neutral-900">
                             {habit.name}
                           </div>
-                          {streakBroken && (
-                            <div className="text-body-sm text-error-500 dark:text-error-500 mt-1">
-                              Streak broken
-                            </div>
-                          )}
                         </div>
                       </div>
                       <div className="flex items-center gap-2 ml-2 flex-shrink-0">

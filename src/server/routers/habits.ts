@@ -245,29 +245,6 @@ export const habitsRouter = router({
         orderBy: { date: 'asc' },
       })
 
-      // Calculate streak
-      let streak = 0
-      let currentDate = dayjs().startOf('day')
-
-      while (currentDate.isAfter(startDate) || currentDate.isSame(startDate, 'day')) {
-        if (dateMatchesHabit(currentDate.toDate(), {
-          frequency: habit.frequency,
-          customDays: habit.customDays as number[] | null,
-          startDate: habit.startDate,
-          endDate: habit.endDate,
-        })) {
-          const completion = completions.find((c) =>
-            dayjs(c.date).isSame(currentDate, 'day')
-          )
-          if (completion?.completed) {
-            streak++
-          } else {
-            break
-          }
-        }
-        currentDate = currentDate.subtract(1, 'day')
-      }
-
       // Calculate completion percentage
       let applicableDays = 0
       let completedDays = 0
@@ -296,7 +273,6 @@ export const habitsRouter = router({
 
       return {
         completions,
-        streak,
         completionPercentage: Math.round(completionPercentage * 100) / 100,
         applicableDays,
         completedDays,

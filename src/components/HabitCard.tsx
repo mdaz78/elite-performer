@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import * as LucideIcons from 'lucide-react';
-import { Check, ChevronDown, ChevronUp, Edit, Flame, Pause, Play, Trash2 } from 'lucide-react';
+import { Check, ChevronDown, ChevronUp, Edit, Pause, Play, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
 interface HabitCardProps {
@@ -15,8 +15,6 @@ interface HabitCardProps {
     completion?: { completed: boolean } | null;
     subHabitCompletions?: Array<{ subHabitId: number; completed: boolean }>;
   };
-  currentStreak?: number;
-  bestStreak?: number;
   completionRate?: number;
   weeklyProgress?: number;
   onToggleComplete: () => void;
@@ -30,7 +28,6 @@ interface HabitCardProps {
 
 export function HabitCard({
   habit,
-  currentStreak = 0,
   completionRate = 0,
   onToggleComplete,
   onToggleSubHabit,
@@ -46,9 +43,6 @@ export function HabitCard({
   const totalSubHabits = habit.subHabits?.length || 0;
   const progress =
     totalSubHabits > 0 ? (completedSubHabits / totalSubHabits) * 100 : isComplete ? 100 : 0;
-
-  // Determine if streak is broken (streak is 0 but habit was previously completed)
-  const streakBroken = currentStreak === 0 && completionRate > 0;
 
   const renderIcon = () => {
     if (!habit.icon) {
@@ -131,27 +125,9 @@ export function HabitCard({
       <div className="mb-3">{renderIcon()}</div>
 
       {/* Title */}
-      <h3 className="font-bold text-h3 text-neutral-800 dark:text-neutral-800 mb-2 pr-10">
+      <h3 className="font-bold text-h3 text-neutral-800 dark:text-neutral-800 mb-4 pr-10">
         {habit.name}
       </h3>
-
-      {/* Streak Indicator */}
-      <div className="mb-3 min-h-[20px]">
-        {streakBroken ? (
-          <span className="text-error-500 dark:text-error-500 text-body-sm font-medium">
-            Streak broken
-          </span>
-        ) : currentStreak > 0 ? (
-          <div className="flex items-center gap-1 text-accent-500 dark:text-accent-500 text-body-sm font-medium">
-            <Flame className="w-4 h-4" />
-            <span>
-              {currentStreak} day streak{currentStreak >= 30 ? '!' : ''}
-            </span>
-          </div>
-        ) : (
-          <span className="invisible">placeholder</span>
-        )}
-      </div>
 
       {/* Progress Bar */}
       <div className="w-full h-2 bg-neutral-200 dark:bg-neutral-200 rounded overflow-hidden mb-4">
