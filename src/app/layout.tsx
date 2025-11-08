@@ -1,18 +1,14 @@
-import type { Metadata } from 'next'
-import { Header } from '@/src/components'
-import { Providers } from './providers'
-import '@/src/index.css'
+import { Header } from '@/src/components';
+import '@/src/index.css';
+import type { Metadata } from 'next';
+import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: 'Elite Performer',
   description: '180-Day Transformation Tracker',
-}
+};
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body>
@@ -24,5 +20,5 @@ export default function RootLayout({
         </Providers>
       </body>
     </html>
-  )
+  );
 }
