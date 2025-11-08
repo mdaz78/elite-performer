@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { db } from '../db';
 import { Card, ProgressBar, CsvImporter } from '../components';
 import { formatDisplayDate } from '../utils/date';
 import type { CodingCourse, CourseModule } from '../types';
 
 export const CodingPage = () => {
+  const navigate = useNavigate();
   const [courses, setCourses] = useState<(CodingCourse & { progress: number })[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -91,12 +92,11 @@ export const CodingPage = () => {
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {courses.map((course) => (
-            <Card key={course.id} className="hover:shadow-lg transition-all cursor-pointer group relative">
-              <Link
-                to={`/coding/${course.id}`}
-                className="absolute inset-0 z-10"
-                aria-label={`View details for ${course.name}`}
-              />
+            <Card
+              key={course.id}
+              className="hover:shadow-lg transition-all cursor-pointer group relative"
+              onClick={() => navigate(`/coding/${course.id}`)}
+            >
               <div className="mb-4 relative z-0">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-semibold text-gray-900 group-hover:text-blue-500 transition-colors">
@@ -104,14 +104,16 @@ export const CodingPage = () => {
                   </h3>
                   <button
                     onClick={(e) => {
-                      e.preventDefault();
                       e.stopPropagation();
                       handleDeleteCourse(course.id!);
                     }}
-                    className="text-red-600 hover:text-red-800 text-sm relative z-20"
+                    className="text-red-600 hover:text-red-700 relative z-20 p-1.5 hover:bg-red-100 rounded-md transition-all duration-200 hover:scale-110 hover:shadow-md cursor-pointer"
                     aria-label={`Delete ${course.name}`}
+                    title="Delete course"
                   >
-                    Delete
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
                   </button>
                 </div>
                 {course.description && (
