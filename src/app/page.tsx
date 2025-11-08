@@ -316,7 +316,7 @@ function DashboardContent() {
         <Card className="animate-fadeIn" style={{ animationDelay: '150ms' }}>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <h2 className="text-[20px] font-semibold text-neutral-900 dark:text-neutral-900">
+              <h2 className="text-[20px] font-bold text-neutral-900 dark:text-neutral-900">
                 Today's Tasks
               </h2>
               <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 rounded-xl text-[13px] font-semibold">
@@ -361,7 +361,7 @@ function DashboardContent() {
                         toggleModuleCompletion(module.id, module.completed, module.courseType)
                       }
                       disabled={isUpdating}
-                      className={`mt-[2px] w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
+                      className={`mt-[2px] w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
                         module.completed
                           ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
                           : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
@@ -432,7 +432,7 @@ function DashboardContent() {
                     <button
                       onClick={() => toggleTaskCompletion(task.id, task.completed)}
                       disabled={isUpdating}
-                      className={`mt-[2px] w-5 h-5 rounded-md border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
+                      className={`mt-[2px] w-5 h-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-[150ms] ${
                         task.completed
                           ? 'bg-primary-500 dark:bg-primary-500 border-primary-500 dark:border-primary-500 text-white'
                           : 'border-neutral-200 dark:border-neutral-200 hover:border-primary-500 dark:hover:border-primary-500'
@@ -483,7 +483,7 @@ function DashboardContent() {
         <Card className="animate-fadeIn" style={{ animationDelay: '200ms' }}>
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <h2 className="text-[20px] font-semibold text-neutral-900 dark:text-neutral-900">
+              <h2 className="text-[20px] font-bold text-neutral-900 dark:text-neutral-900">
                 Today's Habits
               </h2>
               <span className="px-3 py-1 bg-neutral-100 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 rounded-xl text-[13px] font-semibold">
