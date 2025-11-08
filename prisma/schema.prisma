@@ -7,35 +7,8 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id             String          @id @default(cuid())
-  name           String?
-  email          String          @unique
-  emailVerified  DateTime?
-  password       String?
-  image          String?
-  createdAt      DateTime        @default(now())
-  updatedAt      DateTime        @updatedAt
-  accounts       Account[]
-  codingCourses  CodingCourse[]
-  fitnessLogs    FitnessLog[]
-  Goal           Goal[]
-  habits         Habit[]
-  habitCompletions HabitCompletion[]
-  subHabitCompletions SubHabitCompletion[]
-  projects       Project[]
-  reviews        Review[]
-  sessions       Session[]
-  settings       Settings[]
-  tasks          Task[]
-  trades         Trade[]
-  tradingCourses TradingCourse[]
-
-  @@index([email])
-}
-
 model Account {
-  id                String  @id @default(cuid())
+  id                String  @id
   userId            String
   type              String
   provider          String
@@ -47,120 +20,43 @@ model Account {
   scope             String?
   id_token          String?
   session_state     String?
-  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerAccountId])
   @@index([userId])
 }
 
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
 model CodingCourse {
-  id          Int            @id @default(autoincrement())
-  userId      String
-  name        String
-  description String?
-  createdAt   DateTime       @default(now())
-  startDate   DateTime?
-  targetDate  DateTime?
-  user        User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  modules     CourseModule[]
+  id           Int            @id @default(autoincrement())
+  userId       String
+  name         String
+  description  String?
+  projectId    Int?
+  createdAt    DateTime       @default(now())
+  startDate    DateTime?
+  targetDate   DateTime?
+  User         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project      Project?       @relation(fields: [projectId], references: [id])
+  modules      CourseModule[]
 
-  @@index([userId])
   @@index([createdAt])
+  @@index([userId])
+  @@index([projectId])
 }
 
 model CourseModule {
-  id          Int          @id @default(autoincrement())
-  courseId    Int
-  name        String
-  order       Int
-  completed   Boolean      @default(false)
-  completedAt DateTime?
-  course      CodingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([courseId])
-  @@index([completed])
-}
-
-model TradingCourse {
-  id          Int                   @id @default(autoincrement())
-  userId      String
-  name        String
-  description String?
-  createdAt   DateTime              @default(now())
-  startDate   DateTime?
-  targetDate  DateTime?
-  user        User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  modules     TradingCourseModule[]
-
-  @@index([userId])
-  @@index([createdAt])
-}
-
-model TradingCourseModule {
-  id          Int           @id @default(autoincrement())
-  courseId    Int
-  name        String
-  order       Int
-  completed   Boolean       @default(false)
-  completedAt DateTime?
-  course      TradingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
-
-  @@index([courseId])
-  @@index([completed])
-}
-
-model Project {
-  id          Int           @id @default(autoincrement())
-  userId      String
-  name        String
-  description String?
-  status      ProjectStatus @default(active)
-  startDate   DateTime?
-  targetDate  DateTime?
-  createdAt   DateTime      @default(now())
-  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  tasks       Task[]
-
-  @@index([userId])
-  @@index([status])
-}
-
-model Task {
-  id            Int       @id @default(autoincrement())
-  userId        String
-  title         String
-  type          TaskType
-  projectId     Int?
-  completed     Boolean   @default(false)
-  scheduledDate DateTime
+  id            Int          @id @default(autoincrement())
+  courseId      Int
+  name          String
+  order         Int
+  completed     Boolean      @default(false)
   completedAt   DateTime?
-  createdAt     DateTime  @default(now())
-  project       Project?  @relation(fields: [projectId], references: [id])
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  scheduledDate DateTime?
+  course        CodingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
-  @@index([userId])
-  @@index([scheduledDate])
   @@index([completed])
-  @@index([type])
-  @@index([projectId])
+  @@index([courseId])
+  @@index([scheduledDate])
 }
 
 model FitnessLog {
@@ -174,100 +70,11 @@ model FitnessLog {
   workoutType String?
   notes       String?
   createdAt   DateTime @default(now())
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, date])
-  @@index([userId])
   @@index([date])
-}
-
-model Trade {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  date      DateTime
-  symbol    String
-  setup     String
-  entry     Float
-  exit      Float
-  quantity  Int
-  pnl       Float
-  emotion   String?
-  notes     String?
-  createdAt DateTime @default(now())
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
   @@index([userId])
-  @@index([date])
-  @@index([symbol])
-}
-
-model Review {
-  id            Int      @id @default(autoincrement())
-  userId        String
-  weekStartDate DateTime
-  wins          String
-  mistakes      String
-  nextWeekGoals String
-  metrics       Json?
-  createdAt     DateTime @default(now())
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, weekStartDate])
-  @@index([userId])
-  @@index([weekStartDate])
-}
-
-model Settings {
-  id        Int      @id @default(autoincrement())
-  userId    String
-  key       String
-  value     String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([userId, key])
-  @@index([userId])
-}
-
-model Habit {
-  id          Int           @id @default(autoincrement())
-  userId      String
-  name        String
-  icon        String?       // Lucide-react icon name
-  frequency   HabitFrequency @default(daily)
-  customDays  Json?         // Array of day numbers (0=Sunday, 1=Monday, etc.)
-  targetCount Int           @default(1) // Number of sub-habits that must be completed
-  startDate   DateTime?     // Optional start date for the habit
-  endDate     DateTime?     // Optional end date for the habit
-  status      HabitStatus   @default(active)
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-
-  user           User                @relation(fields: [userId], references: [id], onDelete: Cascade)
-  subHabits      SubHabit[]
-  completions    HabitCompletion[]
-  subHabitCompletions SubHabitCompletion[]
-
-  @@index([userId])
-  @@index([status])
-  @@index([createdAt])
-  @@index([startDate])
-  @@index([endDate])
-}
-
-model SubHabit {
-  id        Int      @id @default(autoincrement())
-  habitId   Int
-  name      String
-  order     Int      @default(0)
-  createdAt DateTime @default(now())
-
-  habit       Habit                @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  completions SubHabitCompletion[]
-
-  @@index([habitId])
-  @@index([order])
 }
 
 model Goal {
@@ -290,6 +97,31 @@ model Goal {
   @@index([userId])
 }
 
+model Habit {
+  id                 Int                  @id @default(autoincrement())
+  userId             String
+  name               String
+  frequency          HabitFrequency       @default(daily)
+  customDays         Json?
+  targetCount        Int                  @default(1)
+  startDate          DateTime?
+  endDate            DateTime?
+  status             HabitStatus          @default(active)
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  icon               String?
+  User               User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  HabitCompletion    HabitCompletion[]
+  subHabits          SubHabit[]
+  SubHabitCompletion SubHabitCompletion[]
+
+  @@index([createdAt])
+  @@index([endDate])
+  @@index([startDate])
+  @@index([status])
+  @@index([userId])
+}
+
 model HabitCompletion {
   id          Int       @id @default(autoincrement())
   habitId     Int
@@ -298,15 +130,99 @@ model HabitCompletion {
   completed   Boolean   @default(false)
   completedAt DateTime?
   createdAt   DateTime  @default(now())
-
-  habit Habit @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, habitId, date])
-  @@index([userId])
-  @@index([habitId])
-  @@index([date])
   @@index([completed])
+  @@index([date])
+  @@index([habitId])
+  @@index([userId])
+}
+
+model Project {
+  id             Int             @id @default(autoincrement())
+  userId         String
+  name           String
+  description    String?
+  status         ProjectStatus   @default(active)
+  startDate      DateTime?
+  targetDate     DateTime?
+  createdAt      DateTime        @default(now())
+  User            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  CodingCourse    CodingCourse[]
+  TradingCourse   TradingCourse[]
+
+  @@index([status])
+  @@index([userId])
+}
+
+model TaskProject {
+  id          Int       @id @default(autoincrement())
+  userId      String
+  name        String
+  description String?
+  status      ProjectStatus @default(active)
+  startDate   DateTime?
+  targetDate  DateTime?
+  createdAt   DateTime  @default(now())
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tasks       Task[]
+
+  @@index([status])
+  @@index([userId])
+}
+
+model Review {
+  id            Int      @id @default(autoincrement())
+  userId        String
+  weekStartDate DateTime
+  wins          String
+  mistakes      String
+  nextWeekGoals String
+  metrics       Json?
+  createdAt     DateTime @default(now())
+  User          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, weekStartDate])
+  @@index([userId])
+  @@index([weekStartDate])
+}
+
+model Session {
+  id           String   @id
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  User         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Settings {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  key       String
+  value     String
+  createdAt DateTime @default(now())
+  updatedAt DateTime
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, key])
+  @@index([userId])
+}
+
+model SubHabit {
+  id                 Int                  @id @default(autoincrement())
+  habitId            Int
+  name               String
+  order              Int                  @default(0)
+  createdAt          DateTime             @default(now())
+  habit              Habit                @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  SubHabitCompletion SubHabitCompletion[]
+
+  @@index([habitId])
+  @@index([order])
 }
 
 model SubHabitCompletion {
@@ -318,17 +234,142 @@ model SubHabitCompletion {
   completed   Boolean   @default(false)
   completedAt DateTime?
   createdAt   DateTime  @default(now())
-
-  subHabit SubHabit @relation(fields: [subHabitId], references: [id], onDelete: Cascade)
-  habit    Habit    @relation(fields: [habitId], references: [id], onDelete: Cascade)
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  Habit       Habit     @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  SubHabit    SubHabit  @relation(fields: [subHabitId], references: [id], onDelete: Cascade)
+  User        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([userId, subHabitId, date])
-  @@index([userId])
-  @@index([subHabitId])
-  @@index([habitId])
-  @@index([date])
   @@index([completed])
+  @@index([date])
+  @@index([habitId])
+  @@index([subHabitId])
+  @@index([userId])
+}
+
+model Task {
+  id            Int         @id @default(autoincrement())
+  userId        String
+  title         String
+  type          TaskType
+  taskProjectId Int?
+  completed     Boolean     @default(false)
+  scheduledDate DateTime?
+  completedAt   DateTime?
+  createdAt     DateTime    @default(now())
+  taskProject   TaskProject? @relation(fields: [taskProjectId], references: [id])
+  User          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([completed])
+  @@index([taskProjectId])
+  @@index([scheduledDate])
+  @@index([type])
+  @@index([userId])
+}
+
+model Trade {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  date      DateTime
+  symbol    String
+  setup     String
+  entry     Float
+  exit      Float
+  quantity  Int
+  pnl       Float
+  emotion   String?
+  notes     String?
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([date])
+  @@index([symbol])
+  @@index([userId])
+}
+
+model TradingCourse {
+  id                  Int                   @id @default(autoincrement())
+  userId              String
+  name                String
+  description         String?
+  projectId           Int?
+  createdAt           DateTime              @default(now())
+  startDate           DateTime?
+  targetDate          DateTime?
+  User                User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  project             Project?               @relation(fields: [projectId], references: [id])
+  modules             TradingCourseModule[]
+
+  @@index([createdAt])
+  @@index([userId])
+  @@index([projectId])
+}
+
+model TradingCourseModule {
+  id            Int           @id @default(autoincrement())
+  courseId      Int
+  name          String
+  order         Int
+  completed     Boolean       @default(false)
+  completedAt   DateTime?
+  scheduledDate DateTime?
+  course         TradingCourse @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([completed])
+  @@index([courseId])
+  @@index([scheduledDate])
+}
+
+model User {
+  id                 String               @id
+  name               String?
+  email              String               @unique
+  emailVerified      DateTime?
+  password           String?
+  image              String?
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime
+  Account            Account[]
+  CodingCourse       CodingCourse[]
+  FitnessLog         FitnessLog[]
+  Goal               Goal[]
+  Habit              Habit[]
+  HabitCompletion    HabitCompletion[]
+  Project            Project[]
+  TaskProject        TaskProject[]
+  Review             Review[]
+  Session            Session[]
+  Settings           Settings[]
+  SubHabitCompletion SubHabitCompletion[]
+  Task               Task[]
+  Trade              Trade[]
+  TradingCourse      TradingCourse[]
+
+  @@index([email])
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum GoalStatus {
+  active
+  completed
+  paused
+}
+
+enum HabitFrequency {
+  daily
+  weekly
+  custom
+}
+
+enum HabitStatus {
+  active
+  paused
 }
 
 enum ProjectStatus {
@@ -344,21 +385,4 @@ enum TaskType {
   Coding
   Review
   Other
-}
-
-enum HabitFrequency {
-  daily
-  weekly
-  custom
-}
-
-enum HabitStatus {
-  active
-  paused
-}
-
-enum GoalStatus {
-  active
-  completed
-  paused
 }

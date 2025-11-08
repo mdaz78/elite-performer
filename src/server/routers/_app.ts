@@ -4,6 +4,7 @@ import { courseModulesRouter } from './course-modules'
 import { tradingCoursesRouter } from './trading-courses'
 import { tradingCourseModulesRouter } from './trading-course-modules'
 import { projectsRouter } from './projects'
+import { taskProjectsRouter } from './task-projects'
 import { tasksRouter } from './tasks'
 import { fitnessRouter } from './fitness'
 import { tradesRouter } from './trades'
@@ -17,6 +18,7 @@ export const appRouter = router({
   tradingCourses: tradingCoursesRouter,
   tradingCourseModules: tradingCourseModulesRouter,
   projects: projectsRouter,
+  taskProjects: taskProjectsRouter,
   tasks: tasksRouter,
   fitness: fitnessRouter,
   trades: tradesRouter,

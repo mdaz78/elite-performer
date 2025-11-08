@@ -24,17 +24,17 @@ const taskTypeEnum = z.enum(['DeepWork', 'Gym', 'TradingPractice', 'Coding', 'Re
 export const createTaskSchema = z.object({
   title: z.string().min(1, 'Task title is required').max(200),
   type: taskTypeEnum,
-  projectId: z.number().optional().nullable(),
-  scheduledDate: z.string().datetime(),
+  taskProjectId: z.number().optional().nullable(),
+  scheduledDate: z.string().datetime().optional().nullable(),
 })
 
 export const updateTaskSchema = z.object({
   id: z.number(),
   title: z.string().min(1, 'Task title is required').max(200).optional(),
   type: taskTypeEnum.optional(),
-  projectId: z.number().optional().nullable(),
+  taskProjectId: z.number().optional().nullable(),
   completed: z.boolean().optional(),
-  scheduledDate: z.string().datetime().optional(),
+  scheduledDate: z.string().datetime().optional().nullable(),
   completedAt: z.string().datetime().optional().nullable(),
 })
 
@@ -42,7 +42,7 @@ export const getTasksByDateSchema = z.object({
   startDate: z.string().datetime(),
   endDate: z.string().datetime(),
   type: taskTypeEnum.optional(),
-  projectId: z.number().optional(),
+  taskProjectId: z.number().optional(),
 })
 
 export type CreateProjectInput = z.infer<typeof createProjectSchema>

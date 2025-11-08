@@ -71,6 +71,11 @@ export const tradingCourseModulesRouter = router({
               ? new Date(data.completedAt)
               : null
             : undefined,
+          scheduledDate: data.scheduledDate !== undefined
+            ? data.scheduledDate
+              ? new Date(data.scheduledDate)
+              : null
+            : undefined,
         },
       })
     }),

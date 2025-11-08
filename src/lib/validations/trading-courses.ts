@@ -27,6 +27,7 @@ export const updateTradingCourseModuleSchema = z.object({
   order: z.number().int().nonnegative().optional(),
   completed: z.boolean().optional(),
   completedAt: z.string().datetime().optional().nullable(),
+  scheduledDate: z.string().datetime().optional().nullable(),
 })
 
 export const reorderTradingCourseModulesSchema = z.object({

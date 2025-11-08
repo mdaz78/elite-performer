@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { trpc } from '@/src/lib/trpc-client'
-import { Card, ProgressBar } from '@/src/components'
+import { Card } from '@/src/components'
 import { ProtectedRoute } from '@/src/components/ProtectedRoute'
 import { formatDisplayDate, getToday, addDays } from '@/src/utils/date'
 import { createVariants, staggerContainer } from '@/src/lib/animations'
@@ -26,7 +26,6 @@ function ProjectsPageContent() {
   const [editingId, setEditingId] = useState<number | null>(null)
 
   const { data: projects = [], isLoading: projectsLoading } = trpc.projects.getAll.useQuery()
-  const { data: tasks = [], isLoading: tasksLoading } = trpc.tasks.getAll.useQuery()
 
   const createMutation = trpc.projects.create.useMutation({
     onSuccess: () => {
@@ -96,22 +95,11 @@ function ProjectsPageContent() {
   }
 
   const handleDelete = async (id: number) => {
-    if (!confirm('Delete this project? Tasks linked to it will remain but lose the link.')) return
+    if (!confirm('Delete this project? Coding and Trading courses linked to it will remain but lose the link.')) return
     await deleteMutation.mutateAsync({ id })
   }
 
-  const getProjectTasks = (projectId: number) => {
-    return tasks.filter((t) => t.projectId === projectId)
-  }
-
-  const getProjectProgress = (project: typeof projects[0]): number => {
-    const projectTasks = getProjectTasks(project.id)
-    if (projectTasks.length === 0) return 0
-    const completed = projectTasks.filter((t) => t.completed).length
-    return (completed / projectTasks.length) * 100
-  }
-
-  const isLoading = projectsLoading || tasksLoading
+  const isLoading = projectsLoading
 
   if (isLoading) {
     return (
@@ -228,13 +216,14 @@ function ProjectsPageContent() {
                 className="space-y-4"
               >
                 {projects.map((project) => {
-                  const projectTasks = getProjectTasks(project.id)
-                  const progress = getProjectProgress(project)
                   const statusColors = {
                     active: 'bg-accent-blue dark:bg-accent-blue-dark',
                     completed: 'bg-accent-emerald dark:bg-accent-emerald-dark',
                     paused: 'bg-text-tertiary dark:bg-text-tertiary-dark',
                   }
+                  const codingCoursesCount = project.CodingCourse?.length || 0
+                  const tradingCoursesCount = project.TradingCourse?.length || 0
+                  const totalCourses = codingCoursesCount + tradingCoursesCount
 
                   return (
                     <motion.div
@@ -246,7 +235,7 @@ function ProjectsPageContent() {
                       layout
                       className="p-4 border border-border dark:border-border-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200"
                     >
-                      <div className="flex justify-between items-start mb-3">
+                      <div className="flex justify-between items-start">
                         <div className="flex-1">
                           <div className="flex items-center gap-2 mb-1">
                             <h3 className="text-lg font-semibold text-text-primary dark:text-text-primary-dark transition-colors duration-200">{project.name}</h3>
@@ -264,6 +253,13 @@ function ProjectsPageContent() {
                               {formatDisplayDate(project.startDate.toISOString())} - {formatDisplayDate(project.targetDate.toISOString())}
                             </p>
                           )}
+                          {totalCourses > 0 && (
+                            <p className="text-xs text-text-secondary dark:text-text-secondary-dark mt-2 transition-colors duration-200">
+                              {codingCoursesCount > 0 && `${codingCoursesCount} Coding Course${codingCoursesCount !== 1 ? 's' : ''}`}
+                              {codingCoursesCount > 0 && tradingCoursesCount > 0 && ' • '}
+                              {tradingCoursesCount > 0 && `${tradingCoursesCount} Trading Course${tradingCoursesCount !== 1 ? 's' : ''}`}
+                            </p>
+                          )}
                         </div>
                         <div className="flex gap-2">
                           <button
@@ -279,16 +275,6 @@ function ProjectsPageContent() {
                             Delete
                           </button>
                         </div>
-                      </div>
-
-                      <div className="mb-2">
-                        <div className="flex justify-between items-center mb-1">
-                          <span className="text-sm text-text-secondary dark:text-text-secondary-dark transition-colors duration-200">
-                            {projectTasks.filter((t) => t.completed).length} of {projectTasks.length} tasks completed
-                          </span>
-                          <span className="text-sm font-semibold text-accent-blue dark:text-accent-blue-dark transition-colors duration-200">{Math.round(progress)}%</span>
-                        </div>
-                        <ProgressBar progress={progress} color="career" showPercentage={false} />
                       </div>
                     </motion.div>
                   )
