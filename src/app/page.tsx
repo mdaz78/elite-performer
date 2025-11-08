@@ -38,11 +38,29 @@ function DashboardContent() {
     endDate: new Date(today).toISOString(),
   })
   const { data: todayHabits = [] } = trpc.habits.getToday.useQuery()
+  const { data: todayModules = [] } = trpc.tasks.getScheduledModules.useQuery({
+    startDate: new Date(today).toISOString(),
+    endDate: new Date(today).toISOString(),
+  })
 
   // Mutation to toggle sub-habit completion
   const markSubHabitCompleteMutation = trpc.habits.markSubHabitComplete.useMutation({
     onSuccess: () => {
       utils.habits.getToday.invalidate()
+    },
+  })
+
+  // Mutations to toggle module completion
+  const updateCodingModuleMutation = trpc.courseModules.update.useMutation({
+    onSuccess: () => {
+      utils.tasks.getScheduledModules.invalidate()
+      utils.codingCourses.getAll.invalidate()
+    },
+  })
+
+  const updateTradingModuleMutation = trpc.tradingCourseModules.update.useMutation({
+    onSuccess: () => {
+      utils.tasks.getScheduledModules.invalidate()
     },
   })
 
@@ -64,6 +82,22 @@ function DashboardContent() {
       }
       return newSet
     })
+  }
+
+  const toggleModuleCompletion = async (moduleId: number, completed: boolean, type: 'coding' | 'trading') => {
+    if (type === 'coding') {
+      await updateCodingModuleMutation.mutateAsync({
+        id: moduleId,
+        completed: !completed,
+        completedAt: !completed ? new Date().toISOString() : null,
+      })
+    } else {
+      await updateTradingModuleMutation.mutateAsync({
+        id: moduleId,
+        completed: !completed,
+        completedAt: !completed ? new Date().toISOString() : null,
+      })
+    }
   }
 
   // Calculate transformation progress
@@ -179,12 +213,60 @@ function DashboardContent() {
       {/* Today's Tasks & Weekly Summary */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <Card title="Today's Tasks">
-          {todayTasks.length === 0 ? (
-            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200">No tasks scheduled for today</p>
+          {todayTasks.length === 0 && todayModules.length === 0 ? (
+            <p className="text-text-tertiary dark:text-text-tertiary-dark text-sm transition-colors duration-200">No tasks or modules scheduled for today</p>
           ) : (
-            <ul className="space-y-2">
+            <ul className="space-y-3">
+              {/* Course Modules */}
+              {todayModules.map((module) => {
+                const isUpdating = updateCodingModuleMutation.isPending || updateTradingModuleMutation.isPending
+                return (
+                  <li key={`${module.courseType}-${module.id}`} className="p-3 bg-surface dark:bg-surface-dark rounded-lg hover:bg-background dark:hover:bg-background-dark transition-colors duration-200">
+                    <div className="flex items-start justify-between">
+                      <div className="flex items-start flex-1">
+                        <button
+                          onClick={() => toggleModuleCompletion(module.id, module.completed, module.courseType)}
+                          disabled={isUpdating}
+                          className={`mt-0.5 mr-3 h-5 w-5 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all duration-200 ${
+                            module.completed
+                              ? 'bg-accent-blue dark:bg-accent-blue-dark border-accent-blue dark:border-accent-blue-dark text-white'
+                              : 'border-border dark:border-border-dark hover:border-accent-blue dark:hover:border-accent-blue-dark'
+                          } ${isUpdating ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        >
+                          {module.completed && <Check className="w-3 h-3" />}
+                        </button>
+                        <div className="flex-1">
+                          <div className={`font-medium ${module.completed ? 'line-through text-text-tertiary dark:text-text-tertiary-dark' : 'text-text-primary dark:text-text-primary-dark'} transition-colors duration-200`}>
+                            {module.name}
+                          </div>
+                          <div className="text-xs text-text-tertiary dark:text-text-tertiary-dark mt-1 transition-colors duration-200">
+                            {module.courseName}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-2">
+                        <span className={`text-xs px-2 py-1 rounded ${
+                          module.courseType === 'coding'
+                            ? 'bg-accent-blue/10 dark:bg-accent-blue-dark/10 text-accent-blue dark:text-accent-blue-dark'
+                            : 'bg-accent-emerald/10 dark:bg-accent-emerald-dark/10 text-accent-emerald dark:text-accent-emerald-dark'
+                        } transition-colors duration-200`}>
+                          {module.courseType}
+                        </span>
+                        <Link
+                          href={`/${module.courseType}/${module.courseId}`}
+                          className="text-xs text-accent-blue dark:text-accent-blue-dark hover:underline transition-colors duration-200"
+                        >
+                          View →
+                        </Link>
+                      </div>
+                    </div>
+                  </li>
+                )
+              })}
+
+              {/* Regular Tasks */}
               {todayTasks.map((task) => (
-                <li key={task.id} className="flex items-center justify-between p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
+                <li key={`task-${task.id}`} className="flex items-center justify-between p-2 hover:bg-background dark:hover:bg-background-dark rounded transition-colors duration-200">
                   <div className="flex items-center">
                     <input
                       type="checkbox"

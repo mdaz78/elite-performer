@@ -147,6 +147,7 @@ function TasksPageContent() {
   }
 
   const [animatingTaskId, setAnimatingTaskId] = useState<number | null>(null)
+  const [animatingModuleId, setAnimatingModuleId] = useState<number | null>(null)
 
   const handleToggleComplete = async (taskId: number, completed: boolean) => {
     setAnimatingTaskId(taskId)
@@ -156,6 +157,28 @@ function TasksPageContent() {
       completedAt: !completed ? new Date().toISOString() : null,
     })
     setTimeout(() => setAnimatingTaskId(null), 200)
+  }
+
+  const handleToggleModuleComplete = async (
+    moduleId: number,
+    completed: boolean,
+    courseType: 'coding' | 'trading'
+  ) => {
+    setAnimatingModuleId(moduleId)
+    if (courseType === 'coding') {
+      await updateModuleScheduleMutation.mutateAsync({
+        id: moduleId,
+        completed: !completed,
+        completedAt: !completed ? new Date().toISOString() : null,
+      })
+    } else {
+      await updateTradingModuleScheduleMutation.mutateAsync({
+        id: moduleId,
+        completed: !completed,
+        completedAt: !completed ? new Date().toISOString() : null,
+      })
+    }
+    setTimeout(() => setAnimatingModuleId(null), 200)
   }
 
   const handleDelete = async (taskId: number) => {
@@ -506,7 +529,9 @@ function TasksPageContent() {
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                   <AnimatePresence mode="popLayout">
                       {/* Scheduled Modules */}
-                        {dayModules.map((module) => (
+                        {dayModules.map((module) => {
+                          const isAnimating = animatingModuleId === module.id
+                          return (
                           <motion.div
                             key={`module-${module.id}`}
                             variants={createVariants}
@@ -529,10 +554,25 @@ function TasksPageContent() {
                                     </span>
                                   )}
                                 </div>
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex-shrink-0">
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation()
+                                      handleToggleModuleComplete(module.id, module.completed, module.courseType)
+                                    }}
+                                    className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
+                                      module.completed
+                                        ? 'border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-100 dark:hover:bg-purple-800'
+                                        : 'border-green-300 dark:border-green-600 text-green-700 dark:text-green-400 hover:border-green-400 dark:hover:border-green-500 hover:bg-green-50 dark:hover:bg-green-900/20'
+                                    }`}
+                                    title={module.completed ? 'Mark as incomplete' : 'Mark as complete'}
+                                  >
+                                    {module.completed ? '↶ Undo' : '✓ Done'}
+                                  </button>
                                 <select
                                   value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
                                   onChange={(e) => handleRescheduleModule(module, e.target.value)}
-                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200 opacity-0 group-hover:opacity-100"
+                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/50 text-text-primary dark:text-text-primary-dark focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200"
                                   onClick={(e) => e.stopPropagation()}
                                 >
                                   {weekDays.map((d, i) => (
@@ -541,8 +581,9 @@ function TasksPageContent() {
                                     </option>
                                   ))}
                                 </select>
+                                </div>
                               </div>
-                              <div>
+                              <motion.div animate={isAnimating ? updateVariants.animate : {}}>
                               <p className="text-xs font-medium text-purple-900 dark:text-purple-100 mb-1 opacity-90">
                                   {module.courseName}
                                 </p>
@@ -555,10 +596,11 @@ function TasksPageContent() {
                                 >
                                   {module.name}
                                 </p>
-                              </div>
+                              </motion.div>
                             </div>
                           </motion.div>
-                        ))}
+                          )
+                        })}
 
                       {/* Regular Tasks */}
                         {dayTasks.map((task) => {
