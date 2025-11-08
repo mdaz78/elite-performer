@@ -3,11 +3,9 @@
 import { useTheme } from '@/src/lib/use-theme';
 import {
   Activity,
-  Bell,
   BookOpen,
   CheckSquare,
   ChevronDown,
-  Clock,
   Code,
   FolderKanban,
   LayoutDashboard,
@@ -16,7 +14,6 @@ import {
   Sun,
   Target,
   TrendingUp,
-  User,
 } from 'lucide-react';
 import { signOut, useSession } from 'next-auth/react';
 import Link from 'next/link';
@@ -176,14 +173,6 @@ export const Header = () => {
                 )}
               </button>
 
-              {/* Notifications */}
-              <button
-                className="w-10 h-10 rounded-lg text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 hover:text-neutral-800 dark:hover:text-neutral-900 transition-all duration-[150ms] flex items-center justify-center"
-                aria-label="Notifications"
-              >
-                <Bell className="w-5 h-5" />
-              </button>
-
               {/* User Avatar */}
               {session && (
                 <div className="relative" ref={dropdownRef}>
@@ -195,39 +184,28 @@ export const Header = () => {
                     {getUserInitial()}
                   </button>
                   {isDropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
-                      <div className="py-1">
-                        <div className="px-4 py-2 text-[14px] text-neutral-600 dark:text-neutral-600 border-b border-neutral-200 dark:border-neutral-200">
-                          {session.user?.name || session.user?.email}
+                    <div className="absolute right-0 mt-2 w-64 rounded-lg shadow-lg bg-neutral-0 dark:bg-neutral-100 border border-neutral-200 dark:border-neutral-200 z-50">
+                      <div className="py-2">
+                        {/* User Info Header */}
+                        <div className="px-4 py-3 border-b border-neutral-200 dark:border-neutral-200">
+                          <p className="text-[15px] font-semibold text-neutral-900 dark:text-neutral-900">
+                            {session.user?.name || 'User'}
+                          </p>
+                          <p className="text-[13px] text-neutral-500 dark:text-neutral-500 mt-0.5">
+                            {session.user?.email}
+                          </p>
                         </div>
-                        <button
-                          onClick={() => {
-                            toggleTheme();
-                            setIsDropdownOpen(false);
-                          }}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-all duration-[150ms]"
-                        >
-                          {theme === 'dark' ? (
-                            <>
-                              <Sun className="w-5 h-5" />
-                              <span>Light Mode</span>
-                            </>
-                          ) : (
-                            <>
-                              <Moon className="w-5 h-5" />
-                              <span>Dark Mode</span>
-                            </>
-                          )}
-                        </button>
+
+                        {/* Sign Out */}
                         <button
                           onClick={() => {
                             signOut({ callbackUrl: '/auth/login' });
                             setIsDropdownOpen(false);
                           }}
-                          className="w-full flex items-center gap-3 px-4 py-2 text-[14px] text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100 transition-all duration-[150ms]"
+                          className="w-full flex items-center gap-3 px-4 py-2.5 text-[14px] text-error-600 dark:text-error-500 hover:bg-error-50 dark:hover:bg-error-500/10 transition-all duration-[150ms] mt-1"
                         >
                           <LogOut className="w-5 h-5" />
-                          <span>Sign out</span>
+                          <span>Sign Out</span>
                         </button>
                       </div>
                     </div>
