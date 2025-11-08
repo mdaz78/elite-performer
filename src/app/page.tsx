@@ -329,9 +329,12 @@ function DashboardContent() {
       </div>
 
       {/* Today's Tasks & Habits */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="columns-1 lg:columns-2 gap-6 space-y-6 lg:space-y-0">
         {/* Today's Tasks Card */}
-        <Card className="animate-fadeIn" style={{ animationDelay: '150ms' }}>
+        <Card
+          className="animate-fadeIn break-inside-avoid mb-6"
+          style={{ animationDelay: '150ms' }}
+        >
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <h2 className="text-[20px] font-bold text-neutral-900 dark:text-neutral-900">
@@ -498,7 +501,10 @@ function DashboardContent() {
         </Card>
 
         {/* Today's Habits Card */}
-        <Card className="animate-fadeIn" style={{ animationDelay: '200ms' }}>
+        <Card
+          className="animate-fadeIn break-inside-avoid mb-6"
+          style={{ animationDelay: '200ms' }}
+        >
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
               <h2 className="text-[20px] font-bold text-neutral-900 dark:text-neutral-900">
