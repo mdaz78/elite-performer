@@ -69,3 +69,46 @@ export const staggerContainer: Variants = {
     },
   },
 }
+
+// Habit completion animation
+export const habitCompleteVariants: Variants = {
+  initial: {
+    scale: 1,
+  },
+  animate: {
+    scale: [1, 1.1, 1],
+    transition: {
+      duration: 0.4,
+      ease: 'easeOut',
+    },
+  },
+}
+
+// Confetti-like celebration animation
+export const celebrationVariants: Variants = {
+  initial: {
+    opacity: 0,
+    scale: 0,
+  },
+  animate: {
+    opacity: [0, 1, 0],
+    scale: [0, 1.2, 0],
+    y: [0, -20],
+    transition: {
+      duration: 0.6,
+      ease: 'easeOut',
+    },
+  },
+}
+
+// Pulse animation for interactive elements
+export const pulseVariants: Variants = {
+  animate: {
+    scale: [1, 1.05, 1],
+    transition: {
+      duration: 1.5,
+      repeat: Infinity,
+      ease: 'easeInOut',
+    },
+  },
+}

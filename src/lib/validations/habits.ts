@@ -5,6 +5,7 @@ const habitStatusEnum = z.enum(['active', 'paused'])
 
 export const createHabitSchema = z.object({
   name: z.string().min(1, 'Habit name is required').max(200),
+  icon: z.string().optional().nullable(), // Lucide-react icon name
   frequency: habitFrequencyEnum.default('daily'),
   customDays: z.array(z.number().min(0).max(6)).optional().nullable(), // 0=Sunday, 1=Monday, etc.
   targetCount: z.number().int().min(1).default(1),
@@ -15,6 +16,7 @@ export const createHabitSchema = z.object({
 export const updateHabitSchema = z.object({
   id: z.number(),
   name: z.string().min(1, 'Habit name is required').max(200).optional(),
+  icon: z.string().optional().nullable(), // Lucide-react icon name
   frequency: habitFrequencyEnum.optional(),
   customDays: z.array(z.number().min(0).max(6)).optional().nullable(),
   targetCount: z.number().int().min(1).optional(),

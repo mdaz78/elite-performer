@@ -312,6 +312,7 @@ export const habitsRouter = router({
         data: {
           ...input,
           userId,
+          icon: input.icon || null,
           customDays: input.customDays ? input.customDays : Prisma.JsonNull,
           startDate: input.startDate ? new Date(input.startDate) : null,
           endDate: input.endDate ? new Date(input.endDate) : null,
@@ -343,6 +344,7 @@ export const habitsRouter = router({
         where: { id },
         data: {
           ...data,
+          icon: data.icon !== undefined ? data.icon : undefined,
           customDays: data.customDays !== undefined
             ? (data.customDays ? data.customDays : Prisma.JsonNull)
             : undefined,

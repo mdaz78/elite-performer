@@ -234,6 +234,7 @@ model Habit {
   id          Int           @id @default(autoincrement())
   userId      String
   name        String
+  icon        String?       // Lucide-react icon name
   frequency   HabitFrequency @default(daily)
   customDays  Json?         // Array of day numbers (0=Sunday, 1=Monday, etc.)
   targetCount Int           @default(1) // Number of sub-habits that must be completed
