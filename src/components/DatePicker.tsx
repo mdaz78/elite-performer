@@ -9,6 +9,7 @@ interface DatePickerProps {
   onChange: (date: string) => void
   placeholder?: string
   className?: string
+  triggerClassName?: string
   minDate?: string
   maxDate?: string
   variant?: 'default' | 'icon'
@@ -19,6 +20,7 @@ export const DatePicker = ({
   onChange,
   placeholder = 'Select date',
   className = '',
+  triggerClassName = '',
   minDate,
   maxDate,
   variant = 'default',
@@ -83,11 +85,15 @@ export const DatePicker = ({
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           title={value ? `Assigned: ${displayText}` : placeholder}
-          className={`px-2 py-1 text-xs rounded transition-colors ${
-            value
-              ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/50'
-              : 'bg-neutral-50 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100'
-          }`}
+          className={
+            triggerClassName
+              ? triggerClassName
+              : `px-2 py-1 text-xs rounded transition-colors ${
+                  value
+                    ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 hover:bg-primary-100 dark:hover:bg-primary-900/50'
+                    : 'bg-neutral-50 dark:bg-neutral-50 text-neutral-600 dark:text-neutral-600 hover:bg-neutral-100 dark:hover:bg-neutral-100'
+                }`
+          }
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path

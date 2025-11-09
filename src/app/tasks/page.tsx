@@ -855,18 +855,6 @@ function TasksPageContent() {
                                   >
                                     {module.completed ? '↶ Undo' : '✓ Done'}
                                   </button>
-                                <select
-                                  value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : ''}
-                                  onChange={(e) => handleRescheduleModule(module, e.target.value)}
-                                  className="text-xs border border-purple-300 dark:border-purple-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-purple-900/30 text-neutral-900 dark:text-neutral-900 focus:ring-purple-500 focus:border-purple-500 cursor-pointer transition-all duration-200"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  {weekDays.map((d, i) => (
-                                    <option key={d} value={d}>
-                                      {dayNames[i]}
-                                    </option>
-                                  ))}
-                                </select>
                                 </div>
                               </div>
                               <motion.div animate={isAnimating ? updateVariants.animate : {}}>
@@ -883,6 +871,18 @@ function TasksPageContent() {
                                   {module.name}
                                 </p>
                               </motion.div>
+                              {/* Bottom-right action bar */}
+                              <div className="flex justify-end mt-1">
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+                                  <DatePicker
+                                    value={module.scheduledDate ? new Date(module.scheduledDate).toISOString().split('T')[0] : undefined}
+                                    onChange={(date) => handleRescheduleModule(module, date)}
+                                    placeholder="Schedule"
+                                    variant="icon"
+                                    triggerClassName="p-1.5 rounded-md border border-purple-300 dark:border-purple-600 text-purple-600 dark:text-purple-400 hover:border-purple-400 dark:hover:border-purple-500 hover:bg-purple-100 dark:hover:bg-purple-800/50 transition-all duration-200"
+                                  />
+                                </div>
+                              </div>
                             </div>
                           </motion.div>
                           )
@@ -923,16 +923,6 @@ function TasksPageContent() {
                                   <button
                                     onClick={(e) => {
                                       e.stopPropagation()
-                                      handleEditTask(task)
-                                    }}
-                                    className="text-xs px-2 py-0.5 rounded-md border border-primary-300 dark:border-primary-600 text-primary-600 dark:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-all duration-200 font-medium"
-                                    title="Edit task"
-                                  >
-                                    Edit
-                                  </button>
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation()
                                       handleToggleComplete(task.id, task.completed)
                                     }}
                                     className={`text-xs px-2 py-0.5 rounded-md border transition-all duration-200 font-medium ${
@@ -943,25 +933,6 @@ function TasksPageContent() {
                                     title={task.completed ? 'Mark as incomplete' : 'Mark as complete'}
                                   >
                                     {task.completed ? '↶ Undo' : '✓ Done'}
-                                  </button>
-                                  <select
-                                    value={new Date(task.scheduledDate).toISOString().split('T')[0]}
-                                    onChange={(e) => handleAssignTask(task, e.target.value)}
-                                    className="text-xs border border-primary-300 dark:border-primary-600 rounded-md px-1.5 py-0.5 bg-white dark:bg-primary-900/30 text-neutral-900 dark:text-neutral-900 focus:ring-primary-500 focus:border-primary-500 cursor-pointer transition-all duration-200"
-                                    onClick={(e) => e.stopPropagation()}
-                                  >
-                                    {weekDays.map((d, i) => (
-                                      <option key={d} value={d}>
-                                        {dayNames[i]}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  <button
-                                    onClick={() => handleDelete(task.id)}
-                                    className="text-xs px-2 py-0.5 rounded-md border border-error-500 dark:border-error-500 text-error-600 dark:text-error-500 hover:border-error-600 dark:hover:border-error-600 hover:bg-error-50 dark:hover:bg-error-500/10 transition-all duration-200 font-medium"
-                                    title="Delete task"
-                                  >
-                                    Delete
                                   </button>
                                 </div>
                               </div>
@@ -981,6 +952,34 @@ function TasksPageContent() {
                                   {task.title}
                                 </p>
                               </motion.div>
+                              {/* Bottom-right action bar */}
+                              <div className="flex justify-end mt-1">
+                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200" onClick={(e) => e.stopPropagation()}>
+                                  <button
+                                    onClick={() => handleEditTask(task)}
+                                    className="p-1.5 rounded-md border border-primary-300 dark:border-primary-600 text-primary-600 dark:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-all duration-200"
+                                    title="Edit task"
+                                    aria-label="Edit task"
+                                  >
+                                    <Pencil className="w-4 h-4" />
+                                  </button>
+                                  <DatePicker
+                                    value={new Date(task.scheduledDate).toISOString().split('T')[0]}
+                                    onChange={(date) => handleAssignTask(task, date)}
+                                    placeholder="Assign date"
+                                    variant="icon"
+                                    triggerClassName="p-1.5 rounded-md border border-primary-300 dark:border-primary-600 text-primary-600 dark:text-primary-400 hover:border-primary-400 dark:hover:border-primary-500 hover:bg-primary-100 dark:hover:bg-primary-800/50 transition-all duration-200"
+                                  />
+                                  <button
+                                    onClick={() => handleDelete(task.id)}
+                                    className="p-1.5 rounded-md border border-error-500 dark:border-error-500 text-error-600 dark:text-error-500 hover:border-error-600 dark:hover:border-error-600 hover:bg-error-50 dark:hover:bg-error-500/10 transition-all duration-200"
+                                    title="Delete task"
+                                    aria-label="Delete task"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              </div>
                             </div>
                             </motion.div>
                           )
