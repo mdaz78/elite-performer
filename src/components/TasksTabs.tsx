@@ -13,16 +13,16 @@ export function TasksTabs({ activeTab, onTabChange }: TasksTabsProps) {
   ]
 
   return (
-    <div className="border-b border-border dark:border-border-dark mb-6 overflow-x-auto">
+    <div className="border-b border-neutral-200 dark:border-neutral-200 mb-8 overflow-x-auto">
       <nav className="flex gap-1 -mb-px min-w-max">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`px-4 py-3 text-sm font-medium transition-colors duration-200 border-b-2 whitespace-nowrap ${
+            className={`px-5 py-3 text-sm font-medium transition-all duration-150 border-b-2 whitespace-nowrap ${
               activeTab === tab.id
-                ? 'border-accent-blue dark:border-accent-blue-dark text-accent-blue dark:text-accent-blue-dark'
-                : 'border-transparent text-text-secondary dark:text-text-secondary-dark hover:text-text-primary dark:hover:text-text-primary-dark hover:border-border dark:hover:border-border-dark'
+                ? 'border-primary-500 dark:border-primary-500 text-primary-600 dark:text-primary-500'
+                : 'border-transparent text-neutral-500 dark:text-neutral-500 hover:text-neutral-900 dark:hover:text-neutral-900'
             }`}
           >
             {tab.label}
